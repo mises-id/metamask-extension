@@ -79,8 +79,8 @@ export default class MessageManager extends EventEmitter {
    *
    */
   addUnapprovedMessageAsync(msgParams, req) {
+    const msgId = this.addUnapprovedMessage(msgParams, req);
     return new Promise((resolve, reject) => {
-      const msgId = this.addUnapprovedMessage(msgParams, req);
       // await finished
       this.once(`${msgId}:finished`, (data) => {
         switch (data.status) {
@@ -292,7 +292,7 @@ export default class MessageManager extends EventEmitter {
  * @returns {string} A hex string conversion of the buffer data
  *
  */
-function normalizeMsgData(data) {
+export function normalizeMsgData(data) {
   if (data.slice(0, 2) === '0x') {
     // data is already hex
     return data;
