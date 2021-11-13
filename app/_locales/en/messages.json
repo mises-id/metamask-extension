@@ -1302,8 +1302,14 @@
   "layer1Fees": {
     "message": "Layer 1 fees"
   },
+  "learmMore": {
+    "message": "learn more"
+  },
+  "learmMoreAboutGas": {
+    "message": "Want to $1 about gas?"
+  },
   "learnMore": {
-    "message": "Learn more"
+    "message": "learn more"
   },
   "learnScamRisk": {
     "message": "scams and security risks."
@@ -1568,6 +1574,9 @@
   },
   "networkSettingsDescription": {
     "message": "Add and edit custom RPC networks"
+  },
+  "networkStatus": {
+    "message": "Network status"
   },
   "networkURL": {
     "message": "Network URL"
