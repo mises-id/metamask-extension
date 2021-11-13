@@ -1,11 +1,12 @@
 import React from 'react';
+import { screen } from '@testing-library/react';
 
 import { renderWithProvider } from '../../../../test/jest';
 import { ETH } from '../../../helpers/constants/common';
 import { GasFeeContextProvider } from '../../../contexts/gasFee';
 import configureStore from '../../../store/store';
 
-import LowPriorityMessage from './low-priority-message';
+import TransactionErrorMessage from './transaction-error-message';
 
 jest.mock('../../../store/actions', () => ({
   disconnectGasFeeEstimatePoller: jest.fn(),
@@ -27,7 +28,7 @@ const render = (props) => {
       accounts: {
         '0xAddress': {
           address: '0xAddress',
-          balance: '0x176e5b6f173ebe66',
+          balance: '0x1F4',
         },
       },
       selectedAddress: '0xAddress',
@@ -36,13 +37,13 @@ const render = (props) => {
 
   return renderWithProvider(
     <GasFeeContextProvider {...props}>
-      <LowPriorityMessage />
+      <TransactionErrorMessage />
     </GasFeeContextProvider>,
     store,
   );
 };
 
-describe('LowPriorityMessage', () => {
+describe('TransactionErrorMessage', () => {
   it('should returning warning message for low gas estimate', () => {
     render({ transaction: { userFeeLevel: 'low' } });
     expect(
@@ -55,5 +56,19 @@ describe('LowPriorityMessage', () => {
     expect(
       document.getElementsByClassName('actionable-message--warning'),
     ).toHaveLength(0);
+  });
+
+  it('should not show insufficient balance message if transaction value is less than balance', () => {
+    render({
+      transaction: { userFeeLevel: 'high', txParams: { value: '0x64' } },
+    });
+    expect(screen.queryByText('Insufficient funds.')).not.toBeInTheDocument();
+  });
+
+  it('should show insufficient balance message if transaction value is more than balance', () => {
+    render({
+      transaction: { userFeeLevel: 'high', txParams: { value: '0x5208' } },
+    });
+    expect(screen.queryByText('Insufficient funds.')).toBeInTheDocument();
   });
 });
