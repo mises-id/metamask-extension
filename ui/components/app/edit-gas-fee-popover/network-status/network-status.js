@@ -24,7 +24,8 @@ const NetworkStatus = () => {
       <div className="network-status__info">
         <div className="network-status__info-field">
           <span className="network-status__info-field-data">
-            {gasFeeEstimates?.estimatedBaseFee} GWEI
+            {gasFeeEstimates?.estimatedBaseFee &&
+              `${gasFeeEstimates?.estimatedBaseFee} GWEI`}
           </span>
           <span className="network-status__info-field-label">Base fee</span>
         </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const GradientColors = [
+const GRADIENT_COLORS = [
   '#037DD6',
   '#1876C8',
   '#2D70BA',
@@ -21,14 +21,14 @@ const StatusSlider = () => {
       <div
         className="status-slider__arrow"
         style={{
-          borderTopColor: GradientColors[sliderValueNumeric],
+          borderTopColor: GRADIENT_COLORS[sliderValueNumeric],
           marginLeft: `${sliderValueNumeric * 10 - 10}%`,
         }}
       />
       <div className="status-slider__line" />
       <div
         className="status-slider__label"
-        style={{ color: GradientColors[sliderValueNumeric] }}
+        style={{ color: GRADIENT_COLORS[sliderValueNumeric] }}
       >
         {statusValue <= 0.5 ? 'Stable' : 'Unstable'}
       </div>
