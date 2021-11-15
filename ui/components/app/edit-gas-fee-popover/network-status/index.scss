@@ -1,5 +1,5 @@
 .network-status {
-  margin: 24px 0px 12px;
+  margin: 24px 0 12px;
 
   &__info {
     border-top: 1px solid $ui-2;
@@ -29,7 +29,7 @@
         font-size: 12px;
         text-align: center;
       }
-  
+
       &-label {
         color: $Black-100;
         font-size: 10px;
