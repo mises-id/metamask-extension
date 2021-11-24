@@ -374,9 +374,9 @@ export default class Home extends PureComponent {
         }
       >
         <main className="home__connect-status-text">
-          <div>{t('metaMaskConnectStatusParagraphOne')}</div>
-          <div>{t('metaMaskConnectStatusParagraphTwo')}</div>
-          <div>{t('metaMaskConnectStatusParagraphThree')}</div>
+          <div>{t('MisesWalletConnectStatusParagraphOne')}</div>
+          <div>{t('MisesWalletConnectStatusParagraphTwo')}</div>
+          <div>{t('MisesWalletConnectStatusParagraphThree')}</div>
         </main>
       </Popover>
     );

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Carousel } from 'react-responsive-carousel';
-import Mascot from '../../../components/ui/mascot';
+// import Mascot from '../../../components/ui/mascot';
 import Button from '../../../components/ui/button';
 import Typography from '../../../components/ui/typography/typography';
 import {
@@ -40,18 +40,18 @@ export default function OnboardingWelcome() {
             align={TEXT_ALIGN.CENTER}
             fontWeight={FONT_WEIGHT.BOLD}
           >
-            {t('welcomeToMetaMask')}
+            {t('welcomeToMisesWallet')}
           </Typography>
           <Typography align={TEXT_ALIGN.CENTER}>
-            {t('welcomeToMetaMaskIntro')}
+            {t('welcomeToMisesWalletIntro')}
           </Typography>
-          <div className="onboarding-welcome__mascot">
+          {/* <div className="onboarding-welcome__mascot">
             <Mascot
               animationEventEmitter={eventEmitter}
               width="250"
               height="250"
             />
-          </div>
+          </div> */}
         </div>
         <div>
           <Typography

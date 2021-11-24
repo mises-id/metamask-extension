@@ -27,7 +27,7 @@ import {
   prepareForRetryGetQuotes,
   prepareToLeaveSwaps,
 } from '../../../ducks/swaps/swaps';
-import Mascot from '../../../components/ui/mascot';
+// import Mascot from '../../../components/ui/mascot';
 import Box from '../../../components/ui/box';
 import {
   QUOTES_EXPIRED_ERROR,
@@ -144,7 +144,7 @@ export default function AwaitingSwap({
 
   if (errorKey === OFFLINE_FOR_MAINTENANCE) {
     headerText = t('offlineForMaintenance');
-    descriptionText = t('metamaskSwapsOfflineDescription');
+    descriptionText = t('MisesWalletSwapsOfflineDescription');
     submitText = t('close');
     statusImage = <SwapFailureIcon />;
   } else if (errorKey === SWAP_FAILED_ERROR) {
@@ -260,13 +260,13 @@ export default function AwaitingSwap({
   return (
     <div className="awaiting-swap">
       <div className="awaiting-swap__content">
-        {!(swapComplete || errorKey) && (
+        {/* {!(swapComplete || errorKey) && (
           <Mascot
             animationEventEmitter={animationEventEmitter.current}
             width="90"
             height="90"
           />
-        )}
+        )} */}
         <div className="awaiting-swap__status-image">{statusImage}</div>
         <div className="awaiting-swap__header">{headerText}</div>
         <div className="awaiting-swap__main-descrption">{descriptionText}</div>
