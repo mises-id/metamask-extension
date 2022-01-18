@@ -931,6 +931,9 @@
   "mainnet": {
     "message": "以太坊 Ethereum 主网络"
   },
+  "MisesTestNet": {
+    "message": "Mises 主网络"
+  },
   "max": {
     "message": "最大"
   },

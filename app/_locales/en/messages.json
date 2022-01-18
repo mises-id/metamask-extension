@@ -377,6 +377,9 @@
   "buy": {
     "message": "Buy"
   },
+  "receive": {
+    "message": "Receive"
+  },
   "buyWithTransak": {
     "message": "Buy ETH with Transak"
   },
@@ -1473,6 +1476,9 @@
   },
   "mainnet": {
     "message": "Ethereum Mainnet"
+  },
+  "MisesTestNet": {
+    "message": "Mises Network"
   },
   "makeAnotherSwap": {
     "message": "Create a new swap"

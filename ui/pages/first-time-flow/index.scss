@@ -10,7 +10,7 @@
   background-color: $white;
   display: flex;
   justify-content: center;
-
+  padding: 20px;
   &__wrapper {
     @media screen and (min-width: $break-large) {
       max-width: 742px;

@@ -2,7 +2,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
-import { isValidDomainName } from '../../../../helpers/utils/util';
+import {
+  isValidDomainName,
+  isValidMisesId,
+} from '../../../../helpers/utils/util';
 import {
   isBurnAddress,
   isValidHexAddress,
@@ -28,6 +31,7 @@ export default class EnsInput extends Component {
     lookupEnsName: PropTypes.func.isRequired,
     initializeEnsSlice: PropTypes.func.isRequired,
     resetEnsResolution: PropTypes.func.isRequired,
+    misesOpt: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
@@ -56,16 +60,22 @@ export default class EnsInput extends Component {
       onChange,
       lookupEnsName,
       resetEnsResolution,
+      misesOpt,
     } = this.props;
     const input = value.trim();
-
+    const { isMises } = misesOpt;
     onChange(input);
     if (internalSearch) {
       return null;
     }
     // Empty ENS state if input is empty
     // maybe scan ENS
-    if (isValidDomainName(input)) {
+    if (isMises) {
+      resetEnsResolution();
+      if (onValidAddressTyped && isValidMisesId(input)) {
+        onValidAddressTyped(input);
+      }
+    } else if (isValidDomainName(input)) {
       lookupEnsName(input);
     } else {
       resetEnsResolution();

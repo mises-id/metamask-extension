@@ -9,15 +9,15 @@ import {
   createEventEmitterProxy,
 } from 'swappable-obj-proxy';
 import EthQuery from 'eth-query';
+import SafeEventEmitter from 'safe-event-emitter';
 import {
-  RINKEBY,
-  MAINNET,
   INFURA_PROVIDER_TYPES,
   NETWORK_TYPE_RPC,
   NETWORK_TYPE_TO_ID_MAP,
-  MAINNET_CHAIN_ID,
-  RINKEBY_CHAIN_ID,
   INFURA_BLOCKED_KEY,
+  MISESNETWORK,
+  MISES_CHAIN_ID,
+  MISES_SYMBOL,
 } from '../../../../shared/constants/network';
 import { SECOND } from '../../../../shared/constants/time';
 import {
@@ -41,13 +41,13 @@ if (process.env.IN_TEST === 'true') {
     nickname: 'Localhost 8545',
   };
 } else if (process.env.METAMASK_DEBUG || env === 'test') {
-  defaultProviderConfigOpts = { type: RINKEBY, chainId: RINKEBY_CHAIN_ID };
+  defaultProviderConfigOpts = { type: MISESNETWORK, chainId: MISES_CHAIN_ID };
 } else {
-  defaultProviderConfigOpts = { type: MAINNET, chainId: MAINNET_CHAIN_ID };
+  defaultProviderConfigOpts = { type: MISESNETWORK, chainId: MISES_CHAIN_ID };
 }
 
 const defaultProviderConfig = {
-  ticker: 'ETH',
+  ticker: MISES_SYMBOL,
   ...defaultProviderConfigOpts,
 };
 
@@ -65,11 +65,55 @@ export const NETWORK_EVENTS = {
   // Fired when not using an Infura network or when Infura returns no error, indicating support
   INFURA_IS_UNBLOCKED: 'infuraIsUnblocked',
 };
+class DummyEmitter extends SafeEventEmitter {
+  sendAsync(req, callback) {
+    console.log('DummyEmitter', 'sendAsync', req);
+    callback(
+      null,
+      req.method === 'net_version'
+        ? { id: req.id, jsonrpc: req.jsonrpc, result: '0x4' }
+        : {},
+    );
+  }
 
+  send(req, callback) {
+    console.log('DummyEmitter', 'send', req);
+    callback(
+      null,
+      req.method === 'net_version'
+        ? { id: req.id, jsonrpc: req.jsonrpc, result: '0x4' }
+        : {},
+    );
+  }
+}
+
+class DummyBlockTracker extends SafeEventEmitter {
+  isRunning() {
+    return true;
+  }
+
+  getCurrentBlock() {
+    return '';
+  }
+
+  getLatestBlock() {
+    return '';
+  }
+
+  checkForLatestBlock() {
+    return '';
+  }
+
+  removeAllListeners(eventName) {
+    console.log(eventName);
+    return this;
+  }
+}
 export default class NetworkController extends EventEmitter {
   constructor(opts = {}) {
     super();
 
+    console.log(opts.provider || { ...defaultProviderConfig });
     // create stores
     this.providerStore = new ObservableStore(
       opts.provider || { ...defaultProviderConfig },
@@ -285,21 +329,25 @@ export default class NetworkController extends EventEmitter {
   }
 
   async setProviderType(type) {
-    assert.notStrictEqual(
-      type,
-      NETWORK_TYPE_RPC,
-      `NetworkController - cannot call "setProviderType" with type "${NETWORK_TYPE_RPC}". Use "setRpcTarget"`,
-    );
-    assert.ok(
-      INFURA_PROVIDER_TYPES.includes(type),
-      `Unknown Infura provider type "${type}".`,
-    );
+    console.log(type);
+    const mises = type === 'MisesTestNet';
+    if (!mises) {
+      assert.notStrictEqual(
+        type,
+        NETWORK_TYPE_RPC,
+        `NetworkController - cannot call "setProviderType" with type "${NETWORK_TYPE_RPC}". Use "setRpcTarget"`,
+      );
+      assert.ok(
+        INFURA_PROVIDER_TYPES.includes(type),
+        `Unknown Infura provider type "${type}".`,
+      );
+    }
     const { chainId } = NETWORK_TYPE_TO_ID_MAP[type];
     this.setProviderConfig({
       type,
       rpcUrl: '',
       chainId,
-      ticker: 'ETH',
+      ticker: mises ? 'MIS' : 'ETH',
       nickname: '',
     });
   }
@@ -396,6 +444,13 @@ export default class NetworkController extends EventEmitter {
       // url-based rpc endpoints
     } else if (type === NETWORK_TYPE_RPC) {
       this._configureStandardProvider(rpcUrl, chainId);
+    } else if (type === MISESNETWORK) {
+      const blockTracker = new DummyBlockTracker();
+      const provider = new DummyEmitter();
+      // const bt = new PollingBlockTracker({ provider });
+      // this._setProviderAndBlockTracker({ provider, bt });
+      this._setProviderAndBlockTracker({ provider, blockTracker });
+      // this._configureStandardProvider(rpcUrl, chainId);
     } else {
       throw new Error(
         `NetworkController - _configureProvider - unknown type "${type}"`,

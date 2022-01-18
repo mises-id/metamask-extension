@@ -4,6 +4,7 @@ export const KOVAN = 'kovan';
 export const MAINNET = 'mainnet';
 export const GOERLI = 'goerli';
 export const LOCALHOST = 'localhost';
+export const MISESNETWORK = 'MisesTestNet';
 export const NETWORK_TYPE_RPC = 'rpc';
 
 export const MAINNET_NETWORK_ID = '1';
@@ -12,6 +13,7 @@ export const RINKEBY_NETWORK_ID = '4';
 export const GOERLI_NETWORK_ID = '5';
 export const KOVAN_NETWORK_ID = '42';
 export const LOCALHOST_NETWORK_ID = '1337';
+export const MISES_NETWORK_ID = '6';
 
 export const MAINNET_CHAIN_ID = '0x1';
 export const ROPSTEN_CHAIN_ID = '0x3';
@@ -23,6 +25,7 @@ export const BSC_CHAIN_ID = '0x38';
 export const OPTIMISM_CHAIN_ID = '0xa';
 export const OPTIMISM_TESTNET_CHAIN_ID = '0x45';
 export const POLYGON_CHAIN_ID = '0x89';
+export const MISES_CHAIN_ID = '0x89';
 
 /**
  * The largest possible chain ID we can handle.
@@ -36,6 +39,7 @@ export const KOVAN_DISPLAY_NAME = 'Kovan';
 export const MAINNET_DISPLAY_NAME = 'Ethereum Mainnet';
 export const GOERLI_DISPLAY_NAME = 'Goerli';
 export const LOCALHOST_DISPLAY_NAME = 'Localhost 8545';
+export const MISES_DISPLAY_NAME = 'Mises Network';
 
 const infuraProjectId = process.env.INFURA_PROJECT_ID;
 const getRpcUrl = (network) =>
@@ -47,12 +51,14 @@ export const KOVAN_RPC_URL = getRpcUrl('kovan');
 export const MAINNET_RPC_URL = getRpcUrl('mainnet');
 export const GOERLI_RPC_URL = getRpcUrl('goerli');
 export const LOCALHOST_RPC_URL = 'http://localhost:8545';
+export const MISES_RPC_URL = 'http://127.0.0.1:26657';
 
 export const ETH_SYMBOL = 'ETH';
 export const WETH_SYMBOL = 'WETH';
 export const TEST_ETH_SYMBOL = 'TESTETH';
 export const BNB_SYMBOL = 'BNB';
 export const MATIC_SYMBOL = 'MATIC';
+export const MISES_SYMBOL = 'MIS';
 
 export const ETH_TOKEN_IMAGE_URL = './images/eth_logo.svg';
 export const TEST_ETH_TOKEN_IMAGE_URL = './images/black-eth-logo.svg';
@@ -67,6 +73,7 @@ export const TEST_CHAINS = [
   GOERLI_CHAIN_ID,
   KOVAN_CHAIN_ID,
   LOCALHOST_CHAIN_ID,
+  MISES_CHAIN_ID,
 ];
 
 /**
@@ -79,6 +86,7 @@ export const NETWORK_TYPE_TO_ID_MAP = {
   [GOERLI]: { networkId: GOERLI_NETWORK_ID, chainId: GOERLI_CHAIN_ID },
   [MAINNET]: { networkId: MAINNET_NETWORK_ID, chainId: MAINNET_CHAIN_ID },
   [LOCALHOST]: { networkId: LOCALHOST_NETWORK_ID, chainId: LOCALHOST_CHAIN_ID },
+  [MISESNETWORK]: { networkId: MISES_NETWORK_ID, chainId: MISES_CHAIN_ID },
 };
 
 export const NETWORK_TO_NAME_MAP = {
@@ -88,6 +96,7 @@ export const NETWORK_TO_NAME_MAP = {
   [MAINNET]: MAINNET_DISPLAY_NAME,
   [GOERLI]: GOERLI_DISPLAY_NAME,
   [LOCALHOST]: LOCALHOST_DISPLAY_NAME,
+  [MISESNETWORK]: MISES_DISPLAY_NAME,
 
   [ROPSTEN_NETWORK_ID]: ROPSTEN_DISPLAY_NAME,
   [RINKEBY_NETWORK_ID]: RINKEBY_DISPLAY_NAME,
@@ -95,6 +104,7 @@ export const NETWORK_TO_NAME_MAP = {
   [GOERLI_NETWORK_ID]: GOERLI_DISPLAY_NAME,
   [MAINNET_NETWORK_ID]: MAINNET_DISPLAY_NAME,
   [LOCALHOST_NETWORK_ID]: LOCALHOST_DISPLAY_NAME,
+  [MISES_NETWORK_ID]: MISES_DISPLAY_NAME,
 
   [ROPSTEN_CHAIN_ID]: ROPSTEN_DISPLAY_NAME,
   [RINKEBY_CHAIN_ID]: RINKEBY_DISPLAY_NAME,
@@ -102,6 +112,7 @@ export const NETWORK_TO_NAME_MAP = {
   [GOERLI_CHAIN_ID]: GOERLI_DISPLAY_NAME,
   [MAINNET_CHAIN_ID]: MAINNET_DISPLAY_NAME,
   [LOCALHOST_CHAIN_ID]: LOCALHOST_DISPLAY_NAME,
+  [MISES_CHAIN_ID]: MISES_DISPLAY_NAME,
 };
 
 export const CHAIN_ID_TO_TYPE_MAP = Object.entries(
@@ -118,6 +129,7 @@ export const CHAIN_ID_TO_RPC_URL_MAP = {
   [GOERLI_CHAIN_ID]: GOERLI_RPC_URL,
   [MAINNET_CHAIN_ID]: MAINNET_RPC_URL,
   [LOCALHOST_CHAIN_ID]: LOCALHOST_RPC_URL,
+  [MISES_CHAIN_ID]: MISES_RPC_URL,
 };
 
 export const CHAIN_ID_TO_NETWORK_ID_MAP = Object.values(
@@ -132,6 +144,7 @@ export const NATIVE_CURRENCY_TOKEN_IMAGE_MAP = {
   [TEST_ETH_SYMBOL]: TEST_ETH_TOKEN_IMAGE_URL,
   [BNB_SYMBOL]: BNB_TOKEN_IMAGE_URL,
   [MATIC_SYMBOL]: MATIC_TOKEN_IMAGE_URL,
+  [MISES_SYMBOL]: MATIC_TOKEN_IMAGE_URL,
 };
 
 export const INFURA_BLOCKED_KEY = 'countryBlocked';

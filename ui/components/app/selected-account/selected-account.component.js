@@ -7,6 +7,10 @@ import Tooltip from '../../ui/tooltip';
 import CopyIcon from '../../ui/icon/copy-icon.component';
 import { toChecksumHexAddress } from '../../../../shared/modules/hexstring-utils';
 import { SECOND } from '../../../../shared/constants/time';
+import {
+  MISES_TRUNCATED_ADDRESS_START_CHARS,
+  TRUNCATED_ADDRESS_START_CHARS,
+} from '../../../../shared/constants/labels';
 
 class SelectedAccount extends Component {
   state = {
@@ -19,6 +23,7 @@ class SelectedAccount extends Component {
 
   static propTypes = {
     selectedIdentity: PropTypes.object.isRequired,
+    misesOpt: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
@@ -34,8 +39,13 @@ class SelectedAccount extends Component {
 
   render() {
     const { t } = this.context;
-    const { selectedIdentity } = this.props;
-    const checksummedAddress = toChecksumHexAddress(selectedIdentity.address);
+    const { selectedIdentity, misesOpt } = this.props;
+    const checksummedAddress = misesOpt.isMises
+      ? misesOpt.account.misesId
+      : toChecksumHexAddress(selectedIdentity.address);
+    const prefix = misesOpt.isMises
+      ? MISES_TRUNCATED_ADDRESS_START_CHARS
+      : TRUNCATED_ADDRESS_START_CHARS;
 
     return (
       <div className="selected-account">
@@ -61,7 +71,7 @@ class SelectedAccount extends Component {
               {selectedIdentity.name}
             </div>
             <div className="selected-account__address">
-              {shortenAddress(checksummedAddress)}
+              {shortenAddress(checksummedAddress, prefix)}
               <div className="selected-account__copy">
                 <CopyIcon size={11} color="#989a9b" />
               </div>

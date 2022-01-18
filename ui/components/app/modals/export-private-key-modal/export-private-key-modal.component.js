@@ -28,6 +28,7 @@ export default class ExportPrivateKeyModal extends Component {
     hideWarning: PropTypes.func.isRequired,
     clearAccountDetails: PropTypes.func.isRequired,
     previousModalState: PropTypes.string,
+    misesOpt: PropTypes.object.isRequired,
   };
 
   state = {
@@ -134,9 +135,10 @@ export default class ExportPrivateKeyModal extends Component {
       showAccountDetailModal,
       hideModal,
       previousModalState,
+      misesOpt,
     } = this.props;
     const { name, address } = selectedIdentity;
-
+    const { isMises, account } = misesOpt;
     const { privateKey, showWarning } = this.state;
 
     return (
@@ -149,7 +151,7 @@ export default class ExportPrivateKeyModal extends Component {
         <span className="export-private-key-modal__account-name">{name}</span>
         <ReadOnlyInput
           wrapperClass="ellip-address-wrapper"
-          value={toChecksumHexAddress(address)}
+          value={isMises ? account.misesId : toChecksumHexAddress(address)}
         />
         <div className="export-private-key-modal__divider" />
         <span className="export-private-key-modal__body-title">

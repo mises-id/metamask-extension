@@ -86,6 +86,7 @@ import seedPhraseVerifier from './lib/seed-phrase-verifier';
 import MetaMetricsController from './controllers/metametrics';
 import { segment } from './lib/segment';
 import createMetaRPCHandler from './lib/createMetaRPCHandler';
+import MisesController from './controllers/mises';
 
 export const METAMASK_CONTROLLER_EVENTS = {
   // Fired after state changes that impact the extension badge (unapproved msg count)
@@ -162,7 +163,6 @@ export default class MetamaskController extends EventEmitter {
     this.initializeProvider();
     this.provider = this.networkController.getProviderAndBlockTracker().provider;
     this.blockTracker = this.networkController.getProviderAndBlockTracker().blockTracker;
-
     this.preferencesController = new PreferencesController({
       initState: initState.PreferencesController,
       initLangCode: opts.initLangCode,
@@ -452,6 +452,14 @@ export default class MetamaskController extends EventEmitter {
     this.keyringController.on('unlock', () => this._onUnlock());
     this.keyringController.on('lock', () => this._onLock());
 
+    this.misesController = new MisesController({
+      exportAccount: this.keyringController.exportAccount.bind(
+        this.keyringController,
+      ),
+      getKeyringAccounts: this.keyringController.getAccounts.bind(
+        this.keyringController,
+      ),
+    });
     this.permissionsController = new PermissionsController(
       {
         approvals: this.approvalController,
@@ -466,6 +474,24 @@ export default class MetamaskController extends EventEmitter {
         notifyDomain: this.notifyConnections.bind(this),
         notifyAllDomains: this.notifyAllConnections.bind(this),
         preferences: this.preferencesController.store,
+        setInfo: this.misesController.setUserInfo.bind(this.misesController),
+        setUnFollow: this.misesController.setUnFollow.bind(
+          this.misesController,
+        ),
+        setFollow: this.misesController.setFollow.bind(this.misesController),
+        getActive: this.misesController.getActive.bind(this.misesController),
+        generateAuth: this.misesController.generateAuth.bind(
+          this.misesController,
+        ),
+        exportAccount: this.keyringController.exportAccount.bind(
+          this.keyringController,
+        ),
+        restorePage: this.restorePage.bind(this),
+        connect: this.misesController.connect.bind(this.misesController),
+        disconnect: this.misesController.disconnect.bind(this.misesController),
+        addressToMisesId: this.misesController.addressToMisesId.bind(
+          this.misesController,
+        ),
       },
       initState.PermissionsController,
       initState.PermissionsMetadata,
@@ -582,6 +608,7 @@ export default class MetamaskController extends EventEmitter {
     this.networkController.on(NETWORK_EVENTS.NETWORK_DID_CHANGE, async () => {
       const { ticker } = this.networkController.getProviderConfig();
       try {
+        console.log(ticker);
         await this.currencyRateController.setNativeCurrency(ticker);
       } catch (error) {
         // TODO: Handle failure to get conversion rate more gracefully
@@ -635,7 +662,6 @@ export default class MetamaskController extends EventEmitter {
         this.gasFeeController,
       ),
     });
-
     // ensure accountTracker updates balances after network change
     this.networkController.on(NETWORK_EVENTS.NETWORK_DID_CHANGE, () => {
       this.accountTracker._updateAccounts();
@@ -674,6 +700,7 @@ export default class MetamaskController extends EventEmitter {
       GasFeeController: this.gasFeeController,
       TokenListController: this.tokenListController,
       TokensController: this.tokensController,
+      MisesController: this.misesController.store,
       CollectiblesController: this.collectiblesController,
     });
 
@@ -703,6 +730,7 @@ export default class MetamaskController extends EventEmitter {
         PermissionsMetadata: this.permissionsController.store,
         ThreeBoxController: this.threeBoxController.store,
         SwapsController: this.swapsController.store,
+        MisesController: this.misesController.store,
         EnsController: this.ensController.store,
         ApprovalController: this.approvalController,
         NotificationController: this.notificationController,
@@ -989,10 +1017,7 @@ export default class MetamaskController extends EventEmitter {
       delCustomRpc: nodeify(this.delCustomRpc, this),
 
       // PreferencesController
-      setSelectedAddress: nodeify(
-        preferencesController.setSelectedAddress,
-        preferencesController,
-      ),
+      // setSelectedAddress: nodeify(this.setSelectedAddress, this),
       addToken: nodeify(tokensController.addToken, tokensController),
       rejectWatchAsset: nodeify(
         tokensController.rejectWatchAsset,
@@ -1102,7 +1127,15 @@ export default class MetamaskController extends EventEmitter {
         keyringController.exportAccount,
         keyringController,
       ),
-
+      // misesController
+      setSelectedAddress: nodeify(this.setSelectedAddress, this),
+      setMisesUser: nodeify(this.setMisesUser, this),
+      lockAll: nodeify(this.lockAll, this),
+      initMisesBalance: nodeify(this.initMisesBalance, this),
+      setMisesBook: nodeify(this.setMisesBook, this),
+      getMisesUser: nodeify(this.getMisesUser, this),
+      addressToMisesId: nodeify(this.addressToMisesId, this),
+      resetTranstionFlag: nodeify(this.resetTranstionFlag, this),
       // txController
       cancelTransaction: nodeify(txController.cancelTransaction, txController),
       updateTransaction: nodeify(txController.updateTransaction, txController),
@@ -1376,7 +1409,7 @@ export default class MetamaskController extends EventEmitter {
    * For example, a mnemonic phrase can generate many accounts, and is a keyring.
    *
    * @param {string} password
-   * @returns {Object} vault
+   * @returns {Object} vault  add first account
    */
   async createNewVaultAndKeychain(password) {
     const releaseLock = await this.createVaultMutex.acquire();
@@ -1393,7 +1426,8 @@ export default class MetamaskController extends EventEmitter {
         this.preferencesController.setAddresses(addresses);
         this.selectFirstIdentity();
       }
-
+      // // reset mises account and set password
+      this.lockAll();
       return vault;
     } finally {
       releaseLock();
@@ -1426,7 +1460,8 @@ export default class MetamaskController extends EventEmitter {
 
       // clear unapproved transactions
       this.txController.txStateManager.clearUnapprovedTxs();
-
+      // // reset mises account and set password
+      this.lockAll();
       // create new vault
       const vault = await keyringController.createNewVaultAndRestore(
         password,
@@ -1446,7 +1481,6 @@ export default class MetamaskController extends EventEmitter {
       if (!primaryKeyring) {
         throw new Error('MetamaskController - No HD Key Tree found');
       }
-
       // seek out the first zero balance
       while (lastBalance !== '0x0') {
         await keyringController.addNewAccount(primaryKeyring);
@@ -1667,9 +1701,18 @@ export default class MetamaskController extends EventEmitter {
   selectFirstIdentity() {
     const { identities } = this.preferencesController.store.getState();
     const address = Object.keys(identities)[0];
-    this.preferencesController.setSelectedAddress(address);
+    this.setSelectedAddress(address);
   }
 
+  /**
+   * @description: get the first address in the state to the selected address
+   * @param {*}
+   * @return {*} address
+   */
+  getFirstIdentity() {
+    const { identities } = this.preferencesController.store.getState();
+    return Object.keys(identities)[0];
+  }
   //
   // Hardware
   //
@@ -1813,7 +1856,7 @@ export default class MetamaskController extends EventEmitter {
         // Set the account label to Trezor 1 /  Ledger 1 / QR Hardware 1, etc
         this.preferencesController.setAccountLabel(address, label);
         // Select the account
-        this.preferencesController.setSelectedAddress(address);
+        this.setSelectedAddress(address);
       }
     });
 
@@ -1847,7 +1890,7 @@ export default class MetamaskController extends EventEmitter {
     this.preferencesController.setAddresses(newAccounts);
     newAccounts.forEach((address) => {
       if (!oldAccounts.includes(address)) {
-        this.preferencesController.setSelectedAddress(address);
+        this.setSelectedAddress(address);
       }
     });
 
@@ -1942,8 +1985,7 @@ export default class MetamaskController extends EventEmitter {
     // update accounts in preferences controller
     const allAccounts = await this.keyringController.getAccounts();
     this.preferencesController.setAddresses(allAccounts);
-    // set new account as selected
-    await this.preferencesController.setSelectedAddress(accounts[0]);
+    await this.setSelectedAddress(accounts[0]);
   }
 
   // ---------------------------------------------------------------------------
@@ -2251,7 +2293,7 @@ export default class MetamaskController extends EventEmitter {
    * @param {Object} msgParams - The params of the message to receive & return to the Dapp.
    * @returns {Promise<Object>} A full state update.
    */
-  async encryptionPublicKey(msgParams) {
+  async tryUnlockMetamask(msgParams) {
     log.info('MetaMaskController - encryptionPublicKey');
     const msgId = msgParams.metamaskId;
     // sets the status op the message to 'approved'
@@ -2814,7 +2856,6 @@ export default class MetamaskController extends EventEmitter {
    */
   notifyConnections(origin, payload) {
     const connections = this.connections[origin];
-
     if (connections) {
       Object.values(connections).forEach((conn) => {
         if (conn.engine) {
@@ -3325,5 +3366,76 @@ export default class MetamaskController extends EventEmitter {
    */
   setLocked() {
     return this.keyringController.setLocked();
+  }
+
+  /**
+   * import mises account
+   */
+  async importAccount(res) {
+    return this.misesController.importAccount(res);
+  }
+
+  /**
+   * @description: set Selected Address
+   * @param {string} address
+   * @return {*}
+   */
+  async setSelectedAddress(address) {
+    await this.preferencesController.setSelectedAddress(address); // set address
+    this.setMisesUser(address); // set mises userinfo
+    console.log('切换了用户');
+  }
+
+  /**
+   * @description: set mises user info
+   * @param {string} address
+   * @return {promise} any
+   */
+  async setMisesUser(address) {
+    console.log('设置用户');
+    try {
+      const key = await this.keyringController.exportAccount(address); // get priKeyHex
+      await this.misesController.activate(key); // set activity user
+      const userInfo = await this.misesController.getMisesUserInfo(address); // get activity user
+      await this.misesController.setToMisesPrivate(userInfo); // set userinfo to chrome
+      return Promise.resolve();
+    } catch (error) {
+      console.log(error, '设置用户信息失败');
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * @description: remove current active
+   */
+  lockAll() {
+    this.misesController.lockAll();
+  }
+
+  /**
+   * @description: open restore page
+   */
+  restorePage() {
+    this.opts.restoreAccount();
+  }
+
+  initMisesBalance() {
+    return this.misesController.initMisesBalance();
+  }
+
+  setMisesBook(address, amount) {
+    return this.misesController.setMisesBook(address, amount);
+  }
+
+  getMisesUser(address) {
+    return this.misesController.getMisesUser(address);
+  }
+
+  addressToMisesId(address) {
+    return this.misesController.addressToMisesId(address);
+  }
+
+  resetTranstionFlag() {
+    return this.misesController.resetTranstionFlag();
   }
 }

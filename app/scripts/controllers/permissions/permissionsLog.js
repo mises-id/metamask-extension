@@ -105,7 +105,9 @@ export default class PermissionsLogController {
           // that we can record permissions history
           requestedMethods = this.getRequestedMethods(req);
         }
-      } else if (method === 'eth_requestAccounts') {
+      } else if (
+        ['eth_requestAccounts', 'mises_requestAccounts'].includes(method)
+      ) {
         // eth_requestAccounts is a special case; we need to extract the accounts
         // from it
         activityEntry = this.logRequest(req, isInternal);
@@ -129,7 +131,7 @@ export default class PermissionsLogController {
             origin,
             res.result,
             time,
-            method === 'eth_requestAccounts',
+            ['eth_requestAccounts', 'mises_requestAccounts'].includes(method),
           );
         }
         cb();
@@ -363,5 +365,6 @@ export default class PermissionsLogController {
  * @returns {Object} A string:number map of addresses to time.
  */
 function getAccountToTimeMap(accounts, time) {
-  return accounts.reduce((acc, account) => ({ ...acc, [account]: time }), {});
+  const list = Array.isArray(accounts) ? accounts : accounts.accounts;
+  return list.reduce((acc, account) => ({ ...acc, [account]: time }), {});
 }

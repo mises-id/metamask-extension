@@ -11,12 +11,22 @@ export default function createPermissionsMethodMiddleware({
   hasPermission,
   notifyAccountsChanged,
   requestAccountsPermission,
+  setInfo,
+  setUnFollow,
+  setFollow,
+  generateAuth,
+  getKeyringAccounts,
+  getActive,
+  exportAccount,
+  restorePage,
+  connect,
+  disconnect,
+  addressToMisesId,
 }) {
   let isProcessingRequestAccounts = false;
 
   return createAsyncMiddleware(async (req, res, next) => {
     let responseHandler;
-
     switch (req.method) {
       // Intercepting eth_accounts requests for backwards compatibility:
       // The getAccounts call below wraps the rpc-cap middleware, and returns
@@ -25,7 +35,7 @@ export default function createPermissionsMethodMiddleware({
         res.result = await getAccounts();
         return;
       }
-
+      case 'mises_requestAccounts':
       case 'eth_requestAccounts': {
         if (isProcessingRequestAccounts) {
           res.error = ethErrors.rpc.resourceUnavailable(
@@ -43,7 +53,18 @@ export default function createPermissionsMethodMiddleware({
         // first, just try to get accounts
         let accounts = await getAccounts();
         if (accounts.length > 0) {
-          res.result = accounts;
+          if (req.method === 'eth_requestAccounts') {
+            res.result = accounts;
+          }
+          if (req.method === 'mises_requestAccounts') {
+            const nonce = new Date().getTime();
+            const key = await exportAccount(accounts[0]);
+            const auth = await generateAuth(nonce, key); // get mises auth
+            res.result = {
+              accounts,
+              auth,
+            };
+          }
           return;
         }
 
@@ -59,7 +80,18 @@ export default function createPermissionsMethodMiddleware({
         accounts = await getAccounts();
         /* istanbul ignore else: too hard to induce, see below comment */
         if (accounts.length > 0) {
-          res.result = accounts;
+          if (req.method === 'eth_requestAccounts') {
+            res.result = accounts;
+          }
+          if (req.method === 'mises_requestAccounts') {
+            const nonce = new Date().getTime();
+            const key = await exportAccount(accounts[0]);
+            const auth = await generateAuth(nonce, key); // get mises auth
+            res.result = {
+              accounts,
+              auth,
+            };
+          }
         } else {
           // this should never happen, because it should be caught in the
           // above catch clause
@@ -70,7 +102,6 @@ export default function createPermissionsMethodMiddleware({
 
         return;
       }
-
       // custom method for getting metadata from the requesting domain,
       // sent automatically by the inpage provider when it's initialized
       case 'metamask_sendDomainMetadata': {
@@ -80,7 +111,6 @@ export default function createPermissionsMethodMiddleware({
         res.result = true;
         return;
       }
-
       // register return handler to send accountsChanged notification
       case 'wallet_requestPermissions': {
         if ('eth_accounts' in req.params?.[0]) {
@@ -96,7 +126,88 @@ export default function createPermissionsMethodMiddleware({
         }
         break;
       }
-
+      case 'mises_setUserInfo': {
+        try {
+          await setInfo(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
+      case 'mises_userFollow': {
+        try {
+          await setFollow(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
+      case 'mises_userUnFollow': {
+        try {
+          await setUnFollow(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
+      case 'mises_getMisesAccount': {
+        try {
+          const count = await getKeyringAccounts();
+          res.result = count.length;
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
+      case 'mises_getActive': {
+        try {
+          const flag = await getActive();
+          console.log(flag, '有active');
+          res.result = Boolean(flag);
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
+      case 'mises_openRestore': {
+        try {
+          restorePage();
+          res.result = true;
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
+      case 'mises_connect': {
+        try {
+          connect(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
+      case 'mises_disconnect': {
+        try {
+          disconnect(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
+      case 'mises_getAddressToMisesId': {
+        try {
+          const misesid = await addressToMisesId(req.params[0]);
+          res.result = misesid;
+        } catch (error) {
+          res.result = false;
+        }
+        return;
+      }
       default:
         break;
     }

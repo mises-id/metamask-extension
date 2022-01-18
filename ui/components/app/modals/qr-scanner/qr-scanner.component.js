@@ -173,6 +173,9 @@ export default class QrScanner extends Component {
     } else if (content.substring(0, 2).toLowerCase() === '0x') {
       type = 'address';
       values = { address: content };
+    } else if (content.split('mises').length > 1) {
+      type = 'misesid';
+      values = { address: content };
     }
     return { type, values };
   }

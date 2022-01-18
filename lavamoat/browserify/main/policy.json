@@ -628,20 +628,6 @@
         "mersenne-twister": true
       }
     },
-    "@metamask/logo": {
-      "globals": {
-        "addEventListener": true,
-        "document.body.appendChild": true,
-        "document.createElementNS": true,
-        "innerHeight": true,
-        "innerWidth": true,
-        "requestAnimationFrame": true
-      },
-      "packages": {
-        "gl-mat4": true,
-        "gl-vec3": true
-      }
-    },
     "@metamask/obs-store": {
       "globals": {
         "localStorage": true
@@ -1136,6 +1122,16 @@
         "btoa": true
       }
     },
+    "browserify-zlib": {
+      "packages": {
+        "assert": true,
+        "buffer": true,
+        "pako": true,
+        "process": true,
+        "stream-browserify": true,
+        "util": true
+      }
+    },
     "bs58": {
       "packages": {
         "base-x": true
@@ -1170,6 +1166,11 @@
     "buffer-xor": {
       "packages": {
         "buffer": true
+      }
+    },
+    "bufferutil": {
+      "packages": {
+        "node-gyp-build": true
       }
     },
     "call-bind": {
@@ -2097,8 +2098,8 @@
     "hash-base": {
       "packages": {
         "inherits": true,
-        "safe-buffer": true,
-        "stream-browserify": true
+        "readable-stream": true,
+        "safe-buffer": true
       }
     },
     "hash.js": {
@@ -3265,6 +3266,58 @@
         "tiny-warning": true
       }
     },
+    "mises-js-sdk": {
+      "globals": {
+        "Buffer": true,
+        "FormData": true,
+        "TextDecoder": true,
+        "TextEncoder": true,
+        "URLSearchParams": true,
+        "WebAssembly": true,
+        "XMLHttpRequest": true,
+        "atob": true,
+        "btoa": true,
+        "clearInterval": true,
+        "clearTimeout": true,
+        "console": "write",
+        "crypto": true,
+        "define": true,
+        "document": true,
+        "fetch": true,
+        "importScripts": true,
+        "localStorage": true,
+        "location.href": true,
+        "msCrypto": true,
+        "navigator": true,
+        "print": true,
+        "printErr": true,
+        "process": true,
+        "read": true,
+        "readbuffer": true,
+        "scriptArgs": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "assert": true,
+        "browserify": true,
+        "browserify-zlib": true,
+        "buffer": true,
+        "bufferutil": true,
+        "crypto-browserify": true,
+        "events": true,
+        "https-browserify": true,
+        "os-browserify": true,
+        "path-browserify": true,
+        "process": true,
+        "stream-browserify": true,
+        "stream-http": true,
+        "tty-browserify": true,
+        "url": true,
+        "utf-8-validate": true,
+        "util": true
+      }
+    },
     "mortice": {
       "globals": {
         "Worker": true
@@ -3407,6 +3460,19 @@
         "browser-resolve": true,
         "process": true,
         "timers-browserify": true
+      }
+    },
+    "node-gyp-build": {
+      "globals": {
+        "__non_webpack_require__": true,
+        "__webpack_require__": true,
+        "process": true
+      },
+      "packages": {
+        "browserify": true,
+        "os-browserify": true,
+        "path-browserify": true,
+        "process": true
       }
     },
     "nodeify": {
@@ -3637,7 +3703,10 @@
     "pbkdf2": {
       "globals": {
         "crypto": true,
-        "process": true
+        "process": true,
+        "queueMicrotask": true,
+        "setImmediate": true,
+        "setTimeout": true
       },
       "packages": {
         "create-hash": true,
@@ -4722,6 +4791,11 @@
       "packages": {
         "punycode": true,
         "querystring-es3": true
+      }
+    },
+    "utf-8-validate": {
+      "packages": {
+        "node-gyp-build": true
       }
     },
     "utf8": {

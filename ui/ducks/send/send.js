@@ -86,7 +86,10 @@ import {
   isBurnAddress,
   isValidHexAddress,
 } from '../../../shared/modules/hexstring-utils';
-import { CHAIN_ID_TO_GAS_LIMIT_BUFFER_MAP } from '../../../shared/constants/network';
+import {
+  CHAIN_ID_TO_GAS_LIMIT_BUFFER_MAP,
+  MISESNETWORK,
+} from '../../../shared/constants/network';
 import { ETH, GWEI } from '../../helpers/constants/common';
 import { TRANSACTION_ENVELOPE_TYPES } from '../../../shared/constants/transaction';
 import { readAddressAsContract } from '../../../shared/modules/contract-utils';
@@ -645,6 +648,16 @@ const slice = createSlice({
       // validate send state
       slice.caseReducers.validateSendState(state);
     },
+    updateMisesSendAmount: (state, action) => {
+      const { amount, balance } = action.payload;
+      let flag = 0;
+      if (balance && amount) {
+        flag = new BigNumber(balance).comparedTo(new BigNumber(amount));
+      }
+      state.amount.error = flag === -1 ? INSUFFICIENT_FUNDS_ERROR : null;
+      state.amount.value = amount;
+      slice.caseReducers.validateSendState(state);
+    },
     /**
      * computes the maximum amount of asset that can be sent and then calls
      * the updateSendAmount action above with the computed value, which will
@@ -655,7 +668,6 @@ const slice = createSlice({
       if (state.asset.type === ASSET_TYPES.TOKEN) {
         const decimals = state.asset.details?.decimals ?? 0;
         const multiplier = Math.pow(10, Number(decimals));
-
         amount = multiplyCurrencies(state.asset.balance, multiplier, {
           toNumericBase: 'hex',
           multiplicandBase: 16,
@@ -663,7 +675,7 @@ const slice = createSlice({
         });
       } else {
         amount = subtractCurrencies(
-          addHexPrefix(state.asset.balance),
+          addHexPrefix(state.asset.balance || '0x0'),
           addHexPrefix(state.gas.gasTotal),
           {
             toNumericBase: 'hex',
@@ -676,6 +688,12 @@ const slice = createSlice({
         payload: amount,
       });
       // draftTransaction update happens in updateSendAmount
+    },
+    updateMiseAmountToMax: (state, action) => {
+      state.amount.value = action.payload;
+      slice.caseReducers.updateSendAmount(state, {
+        payload: action.payload,
+      });
     },
     /**
      * updates the draftTransaction.userInputHexData state key and then
@@ -1133,6 +1151,16 @@ const slice = createSlice({
               state.recipient.error = INVALID_RECIPIENT_ADDRESS_ERROR;
             }
           }
+          if (qrCodeData.type === 'misesid') {
+            const scannedAddress = qrCodeData.values.address.toLowerCase();
+            if (scannedAddress.indexOf('mises') === -1) {
+              state.recipient.error = INVALID_RECIPIENT_ADDRESS_ERROR;
+            } else if (state.recipient.address !== scannedAddress) {
+              slice.caseReducers.updateRecipient(state, {
+                payload: { address: scannedAddress },
+              });
+            }
+          }
         }
       })
       .addCase(SELECTED_ACCOUNT_CHANGED, (state, action) => {
@@ -1332,6 +1360,12 @@ export function updateSendAmount(amount) {
   };
 }
 
+export function updateMisesSendAmount(amount) {
+  return async (dispatch) => {
+    await dispatch(actions.updateMisesSendAmount(amount));
+  };
+}
+
 /**
  * updates the asset to send to one of NATIVE or TOKEN and ensures that the
  * asset balance is set. If sending a TOKEN also updates the asset details
@@ -1500,12 +1534,25 @@ export function updateSendHexData(hexData) {
 export function toggleSendMaxMode() {
   return async (dispatch, getState) => {
     const state = getState();
+    const {
+      metamask: { accountList, selectedAddress },
+    } = state;
     if (state.send.amount.mode === AMOUNT_MODES.MAX) {
       await dispatch(actions.updateAmountMode(AMOUNT_MODES.INPUT));
       await dispatch(actions.updateSendAmount('0x0'));
     } else {
       await dispatch(actions.updateAmountMode(AMOUNT_MODES.MAX));
-      await dispatch(actions.updateAmountToMax());
+      const account = accountList.find(
+        (val) => val.address === selectedAddress,
+      );
+      if (account) {
+        const {
+          misesBalance: { amount },
+        } = account;
+        await dispatch(actions.updateMiseAmountToMax(amount));
+      } else {
+        await dispatch(actions.updateAmountToMax());
+      }
     }
     await dispatch(computeEstimatedGasLimit());
   };
@@ -1587,7 +1634,6 @@ export function signTransaction() {
     }
   };
 }
-
 export function editTransaction(
   assetType,
   transactionId,
@@ -1760,7 +1806,18 @@ export function getRecipientUserInput(state) {
 }
 
 export function getRecipient(state) {
-  return state[name].recipient;
+  const {
+    metamask: { accountList, provider },
+  } = state;
+  const { recipient } = state[name];
+  const form = { ...recipient };
+  const account =
+    accountList.find((val) => val.address === recipient.address) || {};
+  if (account.misesId && provider.type === MISESNETWORK) {
+    form.misesId = account.misesId;
+  }
+  console.log(form);
+  return form;
 }
 
 // Overall validity and stage selectors

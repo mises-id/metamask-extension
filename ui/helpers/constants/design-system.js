@@ -34,6 +34,7 @@ export const COLORS = {
   GOERLI: 'goerli',
   TRANSPARENT: 'transparent',
   LOCALHOST: 'localhost',
+  MisesTestNet: 'MisesTestNet',
 };
 
 export const TYPOGRAPHY = {

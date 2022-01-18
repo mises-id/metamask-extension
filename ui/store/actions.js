@@ -50,7 +50,7 @@ export function goHome() {
 // async actions
 
 export function tryUnlockMetamask(password) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(showLoadingIndication());
     dispatch(unlockInProgress());
     log.debug(`background.submitPassword`);
@@ -82,7 +82,12 @@ export function tryUnlockMetamask(password) {
           });
         });
       })
-      .then(() => {
+      .then(async () => {
+        // activate to current select account
+        const state = getState();
+        const selectedAddress = getSelectedAddress(state);
+        await promisifiedBackground.initMisesBalance();
+        promisifiedBackground.setMisesUser(selectedAddress);
         dispatch(hideLoadingIndication());
       })
       .catch((err) => {
@@ -338,26 +343,46 @@ export function addNewAccount() {
   return async (dispatch, getState) => {
     const oldIdentities = getState().metamask.identities;
     dispatch(showLoadingIndication());
-
     let newIdentities;
+    let newAccountAddress;
     try {
       const { identities } = await promisifiedBackground.addNewAccount();
       newIdentities = identities;
+      newAccountAddress = Object.keys(newIdentities).find(
+        (address) => !oldIdentities[address],
+      );
     } catch (error) {
       dispatch(displayWarning(error.message));
       throw error;
     } finally {
       dispatch(hideLoadingIndication());
     }
-
-    const newAccountAddress = Object.keys(newIdentities).find(
-      (address) => !oldIdentities[address],
-    );
     await forceUpdateMetamaskState(dispatch);
     return newAccountAddress;
   };
 }
-
+// getAccount PrivateKey
+/**
+ * @description:
+ * @param {*} address
+ * @return {*}
+ */
+export function getPrivateKey(address) {
+  return new Promise((resolve, reject) => {
+    log.debug(`background.exportAccount`);
+    // get show PrivateKey
+    background.exportAccount(address, function (err2, result) {
+      if (err2) {
+        log.error(err2);
+        // dispatch(displayWarning('Had a problem exporting the account.'));
+        reject(err2);
+        return;
+      }
+      resolve(result);
+      console.log(result);
+    });
+  });
+}
 export function checkHardwareStatus(deviceName, hdPath) {
   log.debug(`background.checkHardwareStatus`, deviceName, hdPath);
   return async (dispatch) => {
@@ -1149,6 +1174,7 @@ export function lockMetamask() {
         dispatch(updateMetamaskState(newState));
         dispatch(hideLoadingIndication());
         dispatch({ type: actionConstants.LOCK_METAMASK });
+        promisifiedBackground.lockAll();
       })
       .catch(() => {
         dispatch(hideLoadingIndication());
@@ -1699,7 +1725,32 @@ export function addToAddressBook(recipient, nickname = '', memo = '') {
     }
   };
 }
+export function addToMisesBook(address) {
+  log.debug(`background.addToMisesBook`);
 
+  return async (dispatch, getState) => {
+    const {
+      send: { amount },
+    } = getState();
+    const misesId =
+      address.indexOf('mises') > -1
+        ? address
+        : await promisifiedBackground.addressToMisesId(address);
+    console.log(misesId, 'wwww');
+    let set;
+    try {
+      await promisifiedBackground.setMisesBook(misesId, amount.value);
+      set = true;
+    } catch (error) {
+      log.error(error);
+      dispatch(displayWarning('Address book failed to update'));
+      throw error;
+    }
+    if (!set) {
+      dispatch(displayWarning('Address book failed to update'));
+    }
+  };
+}
 /**
  * @description Calls the addressBookController to remove an existing address.
  * @param {string} addressToRemove - Address of the entry to remove from the address book
@@ -3017,4 +3068,7 @@ export function cancelQRHardwareSignRequest() {
     dispatch(hideLoadingIndication());
     await promisifiedBackground.cancelQRHardwareSignRequest();
   };
+}
+export async function resetTranstionFlag() {
+  promisifiedBackground.resetTranstionFlag();
 }

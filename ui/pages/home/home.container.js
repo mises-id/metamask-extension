@@ -122,6 +122,7 @@ const mapStateToProps = (state) => {
     seedPhraseBackedUp,
     newNetworkAdded: getNewNetworkAdded(state),
     isSigningQRHardwareTransaction,
+    provider: state.metamask.provider,
   };
 };
 

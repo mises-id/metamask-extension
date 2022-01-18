@@ -7,6 +7,7 @@ import UserPreferencedCurrencyDisplay from '../../../../components/app/user-pref
 import { ERC20, PRIMARY } from '../../../../helpers/constants/common';
 import { ASSET_TYPES } from '../../../../ducks/send';
 import { isEqualCaseInsensitive } from '../../../../helpers/utils/util';
+import MisesUserPreferencedCurrencyDisplay from '../../../../components/app/mises-user-preferenced-currency-display';
 
 export default class SendAssetRow extends Component {
   static propTypes = {
@@ -126,11 +127,12 @@ export default class SendAssetRow extends Component {
       nativeCurrency,
       nativeCurrencyImage,
     } = this.props;
-
-    const balanceValue = accounts[selectedAddress]
-      ? accounts[selectedAddress].balance
-      : '';
-
+    const address = accounts[selectedAddress];
+    const balanceValue = address ? address.balance : '';
+    let misesBalance = null;
+    if (address.misesBalance) {
+      misesBalance = address.misesBalance;
+    }
     return (
       <div
         className={
@@ -155,10 +157,17 @@ export default class SendAssetRow extends Component {
             <span className="send-v2__asset-dropdown__name__label">
               {`${t('balance')}:`}
             </span>
-            <UserPreferencedCurrencyDisplay
-              value={balanceValue}
-              type={PRIMARY}
-            />
+            {misesBalance ? (
+              <MisesUserPreferencedCurrencyDisplay
+                type={PRIMARY}
+                misesBalance={misesBalance}
+              />
+            ) : (
+              <UserPreferencedCurrencyDisplay
+                value={balanceValue}
+                type={PRIMARY}
+              />
+            )}
           </div>
         </div>
         {!insideDropdown && this.state.sendableTokens.length > 0 && (

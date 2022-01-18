@@ -99,12 +99,15 @@ export default function SendTransactionScreen() {
       <EnsInput
         userInput={userInput}
         className="send__to-row"
-        onChange={(address) => dispatch(updateRecipientUserInput(address))}
+        onChange={(address) => {
+          console.log(address);
+          dispatch(updateRecipientUserInput(address));
+        }}
         onValidAddressTyped={(address) =>
           dispatch(updateRecipient({ address, nickname: '' }))
         }
         internalSearch={isUsingMyAccountsForRecipientSearch}
-        selectedAddress={recipient.address}
+        selectedAddress={recipient.misesId || recipient.address}
         selectedName={recipient.nickname}
         onPaste={(text) => updateRecipient({ address: text, nickname: '' })}
         onReset={() => dispatch(resetRecipientInput())}

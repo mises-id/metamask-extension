@@ -1,3 +1,10 @@
+/*
+ * @Author: lmk
+ * @Date: 2021-11-16 23:10:59
+ * @LastEditTime: 2022-01-12 10:30:21
+ * @LastEditors: lmk
+ * @Description:
+ */
 // need to make sure we aren't affected by overlapping namespaces
 // and that we dont affect the app with our namespace
 // mostly a fix for web3's BigNumber if AMD's "define" is defined...
@@ -54,3 +61,47 @@ initializeProvider({
   logger: log,
   shouldShimWeb3: true,
 });
+const __getLargeImg = (_) => {
+  let img;
+  const nodeList = document.getElementsByTagName('img');
+  for (let i = 0; i < nodeList.length; i++) {
+    const node = nodeList[i];
+    let h = node.naturalHeight;
+    let w = node.naturalWidth;
+    if (h === 0 || w === 0) {
+      h = node.height;
+      w = node.width;
+    }
+    if (h >= 200 && w >= 300) {
+      img = nodeList[i];
+      if (img && img.src && img.src.toLowerCase().startsWith('http')) {
+        break;
+      }
+    }
+  }
+  return img && img.src;
+};
+const __getFavicon = (_) => {
+  let favicon;
+  const nodeList = document.getElementsByTagName('link');
+  for (let i = 0; i < nodeList.length; i++) {
+    const rel = nodeList[i].getAttribute('rel');
+    if (
+      rel === 'icon' ||
+      rel === 'shortcut icon' ||
+      rel === 'icon shortcut' ||
+      rel === 'apple-touch-icon'
+    ) {
+      favicon = nodeList[i];
+    }
+  }
+  return favicon && favicon.href;
+};
+window.misesModule = {
+  getWindowInformation() {
+    const url = window.location.href;
+    const icon = __getLargeImg() || __getFavicon();
+    const { title } = window.document;
+    return { url, icon, title };
+  },
+};

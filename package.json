@@ -176,6 +176,7 @@
     "lodash": "^4.17.21",
     "loglevel": "^1.4.1",
     "luxon": "^1.26.0",
+    "mises-js-sdk": "^0.1.0",
     "nanoid": "^2.1.6",
     "nonce-tracker": "^1.0.0",
     "obj-multiplex": "^1.0.0",
@@ -289,7 +290,7 @@
     "fs-extra": "^8.1.0",
     "ganache-cli": "^6.12.1",
     "ganache-core": "^2.13.1",
-    "geckodriver": "^1.21.0",
+    "geckodriver": "^3.0.1",
     "globby": "^11.0.4",
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^5.0.0",
@@ -361,7 +362,7 @@
     "allowScripts": {
       "gridplus-sdk": false,
       "chromedriver": true,
-      "geckodriver": true,
+      "geckodriver": false,
       "@sentry/cli": true,
       "electron": true,
       "core-js": false,
@@ -380,7 +381,10 @@
       "@lavamoat/preinstall-always-fail": false,
       "fsevents": false,
       "node-hid": false,
-      "usb": false
+      "usb": false,
+      "registry.npmmirror.com:/protobufjs/download/protobufjs-6.11.2.tgz": false,
+      "registry.npmmirror.com:/protobufjs/download/protobufjs-6.10.2.tgz": false,
+      "registry.npmmirror.com:/geckodriver/download/geckodriver-3.0.1.tgz": false
     }
   }
 }

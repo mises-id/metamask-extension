@@ -21,6 +21,7 @@ import {
   REJECT_NOTFICIATION_CLOSE,
   REJECT_NOTFICIATION_CLOSE_SIG,
 } from '../../shared/constants/metametrics';
+import { RESTORE_VAULT_ROUTE } from '../../ui/helpers/constants/routes';
 import migrations from './migrations';
 import Migrator from './lib/migrator';
 import ExtensionPlatform from './platforms/extension';
@@ -150,7 +151,6 @@ async function loadStateFromPersistence() {
   // first from preferred, async API:
   versionedData =
     (await localStore.get()) || migrator.generateInitialState(firstTimeState);
-
   // check if somehow state is empty
   // this should never happen but new error reporting suggests that it has
   // for a small number of users
@@ -224,6 +224,7 @@ function setupController(initState, initLangCode) {
     getOpenMetamaskTabsIds: () => {
       return openMetamaskTabsIDs;
     },
+    restoreAccount,
   });
 
   setupEnsIpfsResolver({
@@ -394,7 +395,13 @@ function setupController(initState, initLangCode) {
         const { origin } = url;
 
         remotePort.onMessage.addListener((msg) => {
-          if (msg.data && msg.data.method === 'eth_requestAccounts') {
+          console.log(msg);
+          if (
+            msg.data &&
+            ['eth_requestAccounts', 'mises_requestAccounts'].includes(
+              msg.data.method,
+            )
+          ) {
             requestAccountTabIds[origin] = tabId;
           }
         });
@@ -604,3 +611,6 @@ extension.runtime.onInstalled.addListener(({ reason }) => {
     platform.openExtensionInBrowser();
   }
 });
+function restoreAccount() {
+  notificationManager.platform.openExtensionInBrowser(RESTORE_VAULT_ROUTE);
+}

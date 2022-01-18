@@ -8,6 +8,9 @@ import {
   MAINNET,
   MAINNET_CHAIN_ID,
   MAINNET_RPC_URL,
+  MISESNETWORK,
+  MISES_CHAIN_ID,
+  MISES_RPC_URL,
   RINKEBY,
   RINKEBY_CHAIN_ID,
   RINKEBY_RPC_URL,
@@ -17,6 +20,15 @@ import {
 } from '../../../../shared/constants/network';
 
 const defaultNetworksData = [
+  {
+    labelKey: MISESNETWORK,
+    iconColor: '#5c65f6',
+    providerType: MISESNETWORK,
+    rpcUrl: MISES_RPC_URL,
+    chainId: MISES_CHAIN_ID,
+    ticker: 'MIS',
+    blockExplorerUrl: 'https://gw.mises.site',
+  },
   {
     labelKey: MAINNET,
     iconColor: '#29B6AF',

@@ -29,12 +29,12 @@ export default function NetworkDisplay({
   onClick,
 }) {
   const networkIsLoading = useSelector(isNetworkLoading);
+  // get current network
   const currentNetwork = useSelector((state) => ({
     nickname: state.metamask.provider.nickname,
     type: state.metamask.provider.type,
   }));
   const t = useI18nContext();
-
   const { nickname: networkNickname, type: networkType } =
     targetNetwork ?? currentNetwork;
 

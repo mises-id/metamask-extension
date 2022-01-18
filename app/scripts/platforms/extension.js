@@ -26,7 +26,7 @@ export default class ExtensionPlatform {
 
   openWindow(options) {
     return new Promise((resolve, reject) => {
-      extension.windows.create(options, (newWindow) => {
+      extension.tabs.create({ url: options.url }, (newWindow) => {
         const error = checkForError();
         if (error) {
           return reject(error);
@@ -73,8 +73,8 @@ export default class ExtensionPlatform {
   }
 
   closeCurrentWindow() {
-    return extension.windows.getCurrent((windowDetails) => {
-      return extension.windows.remove(windowDetails.id);
+    return extension.tabs.getCurrent((windowDetails) => {
+      return extension.tabs.remove(windowDetails.id);
     });
   }
 

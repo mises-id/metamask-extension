@@ -39,7 +39,7 @@ const DROP_DOWN_MENU_ITEM_STYLE = {
   lineHeight: '20px',
   padding: '12px 0',
 };
-
+// set network provider
 function mapStateToProps(state) {
   return {
     provider: state.metamask.provider,
@@ -224,7 +224,6 @@ class NetworkDropdown extends Component {
   getNetworkName() {
     const { provider } = this.props;
     const providerName = provider.type;
-
     let name;
 
     if (providerName === 'mainnet') {
@@ -355,6 +354,7 @@ class NetworkDropdown extends Component {
         </div>
 
         <div className="network-dropdown-list">
+          {this.renderNetworkEntry('MisesTestNet')}
           {this.renderNetworkEntry('mainnet')}
 
           {this.renderCustomRpcList(

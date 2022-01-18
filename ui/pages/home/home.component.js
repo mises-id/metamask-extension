@@ -1,3 +1,10 @@
+/*
+ * @Author: lmk
+ * @Date: 2021-12-13 16:44:36
+ * @LastEditTime: 2022-01-12 09:53:44
+ * @LastEditors: lmk
+ * @Description:
+ */
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route } from 'react-router-dom';
@@ -14,6 +21,7 @@ import ConnectedSites from '../connected-sites';
 import ConnectedAccounts from '../connected-accounts';
 import { Tabs, Tab } from '../../components/ui/tabs';
 import { EthOverview } from '../../components/app/wallet-overview';
+import { MisesEthOverview } from '../../components/app/misesWallet-overview';
 import WhatsNewPopup from '../../components/app/whats-new-popup';
 import RecoveryPhraseReminder from '../../components/app/recovery-phrase-reminder';
 import ActionableMessage from '../../components/ui/actionable-message/actionable-message';
@@ -37,6 +45,9 @@ import {
   CONFIRMATION_V_NEXT_ROUTE,
   ADD_COLLECTIBLE_ROUTE,
 } from '../../helpers/constants/routes';
+import { MISESNETWORK } from '../../helpers/constants/mises/common';
+import MisesAssetList from '../../components/app/mises-asset-list';
+import MisesCollectiblesList from '../../components/app/misesCollectibles-list';
 import BetaHomeFooter from './beta-home-footer.component';
 
 const LEARN_MORE_URL =
@@ -52,6 +63,12 @@ export default class Home extends PureComponent {
   };
 
   static propTypes = {
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
     history: PropTypes.object,
     forgottenPassword: PropTypes.bool,
     suggestedAssets: PropTypes.array,
@@ -396,8 +413,8 @@ export default class Home extends PureComponent {
       hideWhatsNewPopup,
       seedPhraseBackedUp,
       showRecoveryPhraseReminder,
+      provider,
     } = this.props;
-
     if (forgottenPassword) {
       return <Redirect to={{ pathname: RESTORE_VAULT_ROUTE }} />;
     } else if (this.state.closing || this.state.redirecting) {
@@ -405,91 +422,161 @@ export default class Home extends PureComponent {
     }
 
     const showWhatsNew = notificationsToShow && showWhatsNewPopup;
+    const isMisesNetwork = provider.type === MISESNETWORK;
 
     return (
       <div className="main-container">
-        <Route path={CONNECTED_ROUTE} component={ConnectedSites} exact />
-        <Route
-          path={CONNECTED_ACCOUNTS_ROUTE}
-          component={ConnectedAccounts}
-          exact
-        />
-        <div className="home__container">
-          {showWhatsNew ? <WhatsNewPopup onClose={hideWhatsNewPopup} /> : null}
-          {!showWhatsNew && showRecoveryPhraseReminder ? (
-            <RecoveryPhraseReminder
-              hasBackedUp={seedPhraseBackedUp}
-              onConfirm={this.onRecoveryPhraseReminderClose}
+        {isMisesNetwork && (
+          // If the current network is Mises Nework
+          <>
+            <Route path={CONNECTED_ROUTE} component={ConnectedSites} exact />
+            <Route
+              path={CONNECTED_ACCOUNTS_ROUTE}
+              component={ConnectedAccounts}
+              exact
             />
-          ) : null}
-          {isPopup && !connectedStatusPopoverHasBeenShown
-            ? this.renderPopover()
-            : null}
-          <div className="home__main-view">
-            <MenuBar />
-            <div className="home__balance-wrapper">
-              <EthOverview />
-            </div>
-            <Tabs
-              defaultActiveTabName={defaultHomeActiveTabName}
-              onTabClick={onTabClick}
-              tabsClassName="home__tabs"
-            >
-              <Tab
-                activeClassName="home__tab--active"
-                className="home__tab"
-                data-testid="home__asset-tab"
-                name={t('assets')}
-              >
-                <AssetList
-                  onClickAsset={(asset) =>
-                    history.push(`${ASSET_ROUTE}/${asset}`)
-                  }
-                />
-              </Tab>
-              {process.env.COLLECTIBLES_V1 ? (
-                <Tab
-                  activeClassName="home__tab--active"
-                  className="home__tab"
-                  data-testid="home__nfts-tab"
-                  name={t('nfts')}
-                >
-                  <CollectiblesList
-                    onAddNFT={() => {
-                      history.push(ADD_COLLECTIBLE_ROUTE);
-                    }}
-                  />
-                </Tab>
+            <div className="home__container">
+              {showWhatsNew ? (
+                <WhatsNewPopup onClose={hideWhatsNewPopup} />
               ) : null}
-              <Tab
-                activeClassName="home__tab--active"
-                className="home__tab"
-                data-testid="home__activity-tab"
-                name={t('activity')}
-              >
-                <TransactionList />
-              </Tab>
-            </Tabs>
-            <div className="home__support">
-              {isBeta() ? (
-                <BetaHomeFooter />
-              ) : (
-                t('needHelp', [
-                  <a
-                    href="https://support.metamask.io"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    key="need-help-link"
+              {!showWhatsNew && showRecoveryPhraseReminder ? (
+                <RecoveryPhraseReminder
+                  hasBackedUp={seedPhraseBackedUp}
+                  onConfirm={this.onRecoveryPhraseReminderClose}
+                />
+              ) : null}
+              {isPopup && !connectedStatusPopoverHasBeenShown
+                ? this.renderPopover()
+                : null}
+              <div className="home__main-view">
+                <MenuBar />
+                <div className="home__balance-wrapper">
+                  <MisesEthOverview />
+                </div>
+                <Tabs
+                  defaultActiveTabName={defaultHomeActiveTabName}
+                  onTabClick={onTabClick}
+                  tabsClassName="home__tabs"
+                >
+                  <Tab
+                    activeClassName="home__tab--active"
+                    className="home__tab"
+                    data-testid="home__asset-tab"
+                    name={t('assets')}
                   >
-                    {t('needHelpLinkText')}
-                  </a>,
-                ])
-              )}
-            </div>
-          </div>
+                    <MisesAssetList
+                      onClickAsset={(asset) =>
+                        history.push(`${ASSET_ROUTE}/${asset}`)
+                      }
+                    />
+                  </Tab>
+                  <Tab
+                    activeClassName="home__tab--active"
+                    className="home__tab"
+                    data-testid="home__nfts-tab"
+                    name={t('nfts')}
+                  >
+                    <MisesCollectiblesList
+                      onAddNFT={() => {
+                        history.push(ADD_COLLECTIBLE_ROUTE);
+                      }}
+                    />
+                  </Tab>
+                </Tabs>
+              </div>
 
-          {this.renderNotifications()}
-        </div>
+              {this.renderNotifications()}
+            </div>
+          </>
+        )}
+        {!isMisesNetwork && (
+          <>
+            <Route path={CONNECTED_ROUTE} component={ConnectedSites} exact />
+            <Route
+              path={CONNECTED_ACCOUNTS_ROUTE}
+              component={ConnectedAccounts}
+              exact
+            />
+            <div className="home__container">
+              {showWhatsNew ? (
+                <WhatsNewPopup onClose={hideWhatsNewPopup} />
+              ) : null}
+              {!showWhatsNew && showRecoveryPhraseReminder ? (
+                <RecoveryPhraseReminder
+                  hasBackedUp={seedPhraseBackedUp}
+                  onConfirm={this.onRecoveryPhraseReminderClose}
+                />
+              ) : null}
+              {isPopup && !connectedStatusPopoverHasBeenShown
+                ? this.renderPopover()
+                : null}
+              <div className="home__main-view">
+                <MenuBar />
+                <div className="home__balance-wrapper">
+                  <EthOverview />
+                </div>
+                <Tabs
+                  defaultActiveTabName={defaultHomeActiveTabName}
+                  onTabClick={onTabClick}
+                  tabsClassName="home__tabs"
+                >
+                  <Tab
+                    activeClassName="home__tab--active"
+                    className="home__tab"
+                    data-testid="home__asset-tab"
+                    name={t('assets')}
+                  >
+                    <AssetList
+                      onClickAsset={(asset) =>
+                        history.push(`${ASSET_ROUTE}/${asset}`)
+                      }
+                    />
+                  </Tab>
+                  {process.env.COLLECTIBLES_V1 ? (
+                    <Tab
+                      activeClassName="home__tab--active"
+                      className="home__tab"
+                      data-testid="home__nfts-tab"
+                      name={t('nfts')}
+                    >
+                      <CollectiblesList
+                        onAddNFT={() => {
+                          history.push(ADD_COLLECTIBLE_ROUTE);
+                        }}
+                      />
+                    </Tab>
+                  ) : null}
+                  <Tab
+                    activeClassName="home__tab--active"
+                    className="home__tab"
+                    data-testid="home__activity-tab"
+                    name={t('activity')}
+                  >
+                    <TransactionList />
+                  </Tab>
+                </Tabs>
+                <div className="home__support">
+                  {isBeta() ? (
+                    <BetaHomeFooter />
+                  ) : (
+                    t('needHelp', [
+                      <a
+                        href="https://support.metamask.io"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        key="need-help-link"
+                      >
+                        {t('needHelpLinkText')}
+                      </a>,
+                    ])
+                  )}
+                </div>
+              </div>
+
+              {this.renderNotifications()}
+            </div>
+          </>
+        )}
       </div>
     );
   }

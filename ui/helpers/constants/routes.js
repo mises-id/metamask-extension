@@ -39,6 +39,7 @@ const AWAITING_SWAP_ROUTE = '/swaps/awaiting-swap';
 const SWAPS_ERROR_ROUTE = '/swaps/swaps-error';
 const SWAPS_MAINTENANCE_ROUTE = '/swaps/maintenance';
 const ADD_COLLECTIBLE_ROUTE = '/add-collectible';
+const MISES_SEND_CONFIRM_ROUTE = '/mises-send-confirm';
 
 const INITIALIZE_ROUTE = '/initialize';
 const INITIALIZE_WELCOME_ROUTE = '/initialize/welcome';
@@ -113,6 +114,7 @@ const PATH_NAME_MAP = {
   [IMPORT_ACCOUNT_ROUTE]: 'Import Account Page',
   [CONNECT_HARDWARE_ROUTE]: 'Connect Hardware Wallet Page',
   [SEND_ROUTE]: 'Send Page',
+  [MISES_SEND_CONFIRM_ROUTE]: 'Mises Send Page',
   [`${CONNECT_ROUTE}/:id`]: 'Connect To Site Confirmation Page',
   [`${CONNECT_ROUTE}/:id${CONNECT_CONFIRM_PERMISSIONS_ROUTE}`]: 'Grant Connected Site Permissions Confirmation Page',
   [CONNECTED_ROUTE]: 'Sites Connected To This Account Page',
@@ -171,6 +173,7 @@ export {
   IMPORT_ACCOUNT_ROUTE,
   CONNECT_HARDWARE_ROUTE,
   SEND_ROUTE,
+  MISES_SEND_CONFIRM_ROUTE,
   INITIALIZE_ROUTE,
   INITIALIZE_WELCOME_ROUTE,
   INITIALIZE_UNLOCK_ROUTE,

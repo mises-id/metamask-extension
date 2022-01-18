@@ -17,6 +17,7 @@ export default class AccountDetailsModal extends Component {
     setAccountLabel: PropTypes.func,
     keyrings: PropTypes.array,
     rpcPrefs: PropTypes.object,
+    misesOpt: PropTypes.object.isRequired,
   };
 
   static contextTypes = {
@@ -32,9 +33,10 @@ export default class AccountDetailsModal extends Component {
       setAccountLabel,
       keyrings,
       rpcPrefs,
+      misesOpt,
     } = this.props;
     const { name, address } = selectedIdentity;
-
+    const { isMises, account = {} } = misesOpt;
     const keyring = keyrings.find((kr) => {
       return kr.accounts.includes(address);
     });
@@ -55,7 +57,7 @@ export default class AccountDetailsModal extends Component {
 
         <QrView
           Qr={{
-            data: address,
+            data: isMises ? account.misesId : address,
           }}
         />
 

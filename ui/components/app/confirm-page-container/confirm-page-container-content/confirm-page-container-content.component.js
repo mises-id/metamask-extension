@@ -98,7 +98,7 @@ export default class ConfirmPageContainerContent extends Component {
       rejectNText,
       origin,
       ethGasPriceWarning,
-      hideTitle,
+      hideTitle = false,
       onConfirmAnyways,
       hideConfirmAnyways,
     } = this.props;

@@ -23,6 +23,8 @@ import SearchIcon from '../../ui/search-icon';
 import Button from '../../ui/button';
 
 import { isBeta } from '../../../helpers/utils/build-types';
+import { MISESNETWORK } from '../../../../shared/constants/network';
+import MisesUserPreferencedCurrencyDisplay from '../mises-user-preferenced-currency-display';
 
 export function AccountMenuItem(props) {
   const { icon, children, text, subText, className, onClick } = props;
@@ -72,6 +74,12 @@ export default class AccountMenu extends Component {
     toggleAccountMenu: PropTypes.func,
     addressConnectedDomainMap: PropTypes.object,
     originOfCurrentTab: PropTypes.string,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   accountsRef;
@@ -149,7 +157,9 @@ export default class AccountMenu extends Component {
       showAccountDetail,
       addressConnectedDomainMap,
       originOfCurrentTab,
+      provider,
     } = this.props;
+    const isMisesNetwork = provider.type === MISESNETWORK;
     const { searchQuery } = this.state;
 
     let filteredIdentities = accounts;
@@ -165,7 +175,6 @@ export default class AccountMenu extends Component {
         </p>
       );
     }
-
     return filteredIdentities.map((identity) => {
       const isSelected = identity.address === selectedAddress;
 
@@ -179,7 +188,6 @@ export default class AccountMenu extends Component {
       });
       const addressDomains = addressConnectedDomainMap[identity.address] || {};
       const iconAndNameForOpenDomain = addressDomains[originOfCurrentTab];
-
       return (
         <div
           className="account-menu__account account-menu__item--clickable"
@@ -203,11 +211,19 @@ export default class AccountMenu extends Component {
           <Identicon address={identity.address} diameter={24} />
           <div className="account-menu__account-info">
             <div className="account-menu__name">{identity.name || ''}</div>
-            <UserPreferencedCurrencyDisplay
-              className="account-menu__balance"
-              value={identity.balance}
-              type={PRIMARY}
-            />
+            {isMisesNetwork && identity.misesBalance ? (
+              <MisesUserPreferencedCurrencyDisplay
+                className="account-menu__balance"
+                misesBalance={identity.misesBalance}
+                type={PRIMARY}
+              />
+            ) : (
+              <UserPreferencedCurrencyDisplay
+                className="account-menu__balance"
+                value={identity.balance}
+                type={PRIMARY}
+              />
+            )}
           </div>
           {this.renderKeyringType(keyring)}
           {iconAndNameForOpenDomain ? (

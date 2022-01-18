@@ -147,3 +147,7 @@ button {
 }
 
 /* stylelint-enable */
+*{
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}

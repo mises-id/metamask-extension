@@ -50,6 +50,7 @@ import {
   getLedgerTransportStatus,
 } from '../ducks/app/app';
 import { MESSAGE_TYPE } from '../../shared/constants/app';
+import { MISESNETWORK } from '../helpers/constants/mises/common';
 
 /**
  * One of the only remaining valid uses of selecting the network subkey of the
@@ -221,38 +222,65 @@ export function deprecatedGetCurrentNetworkId(state) {
 export const getMetaMaskAccounts = createSelector(
   getMetaMaskAccountsRaw,
   getMetaMaskCachedBalances,
-  (currentAccounts, cachedBalances) =>
+  getMisesAccountList,
+  getProvider,
+  (currentAccounts, cachedBalances, accountList, provider) =>
     Object.entries(currentAccounts).reduce(
       (selectedAccounts, [accountID, account]) => {
+        let find = {};
+        if (provider.type === MISESNETWORK) {
+          find =
+            accountList.find((val) => val.address.indexOf(accountID) > -1) ||
+            {};
+        }
         if (account.balance === null || account.balance === undefined) {
           return {
             ...selectedAccounts,
             [accountID]: {
               ...account,
               balance: cachedBalances && cachedBalances[accountID],
+              ...find,
             },
           };
         }
         return {
           ...selectedAccounts,
-          [accountID]: account,
+          [accountID]: {
+            ...account,
+            ...find,
+          },
         };
       },
       {},
     ),
 );
-
+export function getMisesAccountList(state) {
+  const { accountList } = state.metamask;
+  return accountList;
+}
 export function getSelectedAddress(state) {
   return state.metamask.selectedAddress;
 }
 
+export const getMisesOpt = createSelector(
+  getSelectedAccount,
+  getProvider,
+  (selectedAccount, provider) => {
+    const mises = provider.type === MISESNETWORK;
+    // const account = accountList.find(
+    //   (val) => val.address === selectedAddress,
+    // ) || { misesId: selectedAddress };
+    return {
+      isMises: mises,
+      account: selectedAccount,
+    };
+  },
+);
 export function getSelectedIdentity(state) {
   const selectedAddress = getSelectedAddress(state);
   const { identities } = state.metamask;
-
   return identities[selectedAddress];
 }
-
 export function getNumberOfAccounts(state) {
   return Object.keys(state.metamask.accounts).length;
 }
@@ -298,7 +326,9 @@ export const getMetaMaskAccountsOrdered = createSelector(
     keyrings
       .reduce((list, keyring) => list.concat(keyring.accounts), [])
       .filter((address) => Boolean(identities[address]))
-      .map((address) => ({ ...identities[address], ...accounts[address] })),
+      .map((address) => {
+        return { ...identities[address], ...accounts[address] };
+      }),
 );
 
 export const getMetaMaskAccountsConnected = createSelector(
@@ -325,8 +355,28 @@ export function getSelectedAccountCachedBalance(state) {
 export function getSelectedAccount(state) {
   const accounts = getMetaMaskAccounts(state);
   const selectedAddress = getSelectedAddress(state);
-
-  return accounts[selectedAddress];
+  const misesAccounts = getMisesSelectedAccount(state);
+  return {
+    ...accounts[selectedAddress],
+    ...misesAccounts[selectedAddress],
+  };
+}
+export function getMisesSelectedAccount(state) {
+  const { accountList } = state.metamask;
+  const selectedAddress = getSelectedAddress(state);
+  const findIndex = accountList.findIndex(
+    (val) => val.address === selectedAddress,
+  );
+  if (findIndex > -1) {
+    return {
+      [selectedAddress]: accountList[findIndex],
+    };
+  }
+  return {};
+}
+export function getMisesAccount(state) {
+  const { accountList = [] } = state.metamask;
+  return accountList;
 }
 
 export function getTargetAccount(state, targetAddress) {
@@ -780,4 +830,10 @@ export function getIsAdvancedGasFeeDefault(state) {
   return (
     Boolean(advancedGasFee?.maxBaseFee) && Boolean(advancedGasFee?.priorityFee)
   );
+}
+/**
+ * @param {*}
+ */
+export function getMisesTranstionFlag(state) {
+  return state.metamask.transformFlag;
 }

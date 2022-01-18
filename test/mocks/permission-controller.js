@@ -443,6 +443,13 @@ export const getters = deepFreeze({
         };
       },
     },
+    mises_requestAccounts: {
+      requestAlreadyPending: () => {
+        return {
+          message: 'Already processing mises_requestAccounts. Please wait.',
+        };
+      },
+    },
 
     notifyAccountsChanged: {
       invalidOrigin: (origin) => {
@@ -552,6 +559,19 @@ export const getters = deepFreeze({
       return {
         origin,
         method: 'eth_requestAccounts',
+        params: [],
+      };
+    },
+    /**
+     * Gets an mises_requestAccounts RPC request object.
+     *
+     * @param {string} origin - The origin of the request
+     * @returns {Object} An RPC request object
+     */
+    mises_requestAccounts: (origin) => {
+      return {
+        origin,
+        method: 'mises_requestAccounts',
         params: [],
       };
     },

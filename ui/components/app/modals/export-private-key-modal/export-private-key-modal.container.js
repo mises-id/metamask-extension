@@ -1,3 +1,10 @@
+/*
+ * @Author: lmk
+ * @Date: 2021-11-16 23:10:59
+ * @LastEditTime: 2022-01-14 01:00:47
+ * @LastEditors: lmk
+ * @Description: 
+ */
 import { connect } from 'react-redux';
 import {
   exportAccount,
@@ -6,7 +13,7 @@ import {
   hideModal,
   clearAccountDetails,
 } from '../../../../store/actions';
-import { getSelectedIdentity } from '../../../../selectors';
+import { getMisesOpt, getSelectedIdentity } from '../../../../selectors';
 import ExportPrivateKeyModal from './export-private-key-modal.component';
 
 function mapStateToPropsFactory() {
@@ -22,6 +29,7 @@ function mapStateToPropsFactory() {
       privateKey: state.appState.accountDetail.privateKey,
       selectedIdentity,
       previousModalState: state.appState.modal.previousModalState.name,
+      misesOpt: getMisesOpt(state),
     };
   };
 }

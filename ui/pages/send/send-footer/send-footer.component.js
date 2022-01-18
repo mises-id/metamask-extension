@@ -5,12 +5,14 @@ import PageContainerFooter from '../../../components/ui/page-container/page-cont
 import {
   CONFIRM_TRANSACTION_ROUTE,
   DEFAULT_ROUTE,
+  MISES_SEND_CONFIRM_ROUTE,
 } from '../../../helpers/constants/routes';
 import { SEND_STAGES } from '../../../ducks/send';
 
 export default class SendFooter extends Component {
   static propTypes = {
     addToAddressBookIfNew: PropTypes.func,
+    addToMisesBookIfNew: PropTypes.func,
     resetSendState: PropTypes.func,
     disabled: PropTypes.bool.isRequired,
     history: PropTypes.object,
@@ -23,6 +25,12 @@ export default class SendFooter extends Component {
     mostRecentOverviewPage: PropTypes.string.isRequired,
     cancelTx: PropTypes.func,
     draftTransactionID: PropTypes.string,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   static contextTypes = {
@@ -57,26 +65,41 @@ export default class SendFooter extends Component {
       toAccounts,
       history,
       gasEstimateType,
+      provider,
+      addToMisesBookIfNew,
     } = this.props;
     const { metricsEvent } = this.context;
-
-    // TODO: add nickname functionality
-    await addToAddressBookIfNew(to, toAccounts);
-    const promise = sign();
-
-    Promise.resolve(promise).then(() => {
+    // let promise = null;
+    if (provider.type === 'MisesTestNet') {
+      addToMisesBookIfNew(to);
       metricsEvent({
         eventOpts: {
           category: 'Transactions',
           action: 'Edit Screen',
           name: 'Complete',
         },
-        customVariables: {
-          gasChanged: gasEstimateType,
-        },
       });
-      history.push(CONFIRM_TRANSACTION_ROUTE);
-    });
+      setTimeout(() => {
+        history.push(MISES_SEND_CONFIRM_ROUTE);
+      }, 400);
+    } else {
+      // TODO: add nickname functionality
+      await addToAddressBookIfNew(to, toAccounts);
+      const promise = sign();
+      Promise.resolve(promise).then(() => {
+        metricsEvent({
+          eventOpts: {
+            category: 'Transactions',
+            action: 'Edit Screen',
+            name: 'Complete',
+          },
+          customVariables: {
+            gasChanged: gasEstimateType,
+          },
+        });
+        history.push(CONFIRM_TRANSACTION_ROUTE);
+      });
+    }
   }
 
   componentDidUpdate(prevProps) {

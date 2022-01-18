@@ -6,6 +6,7 @@ import IdleTimer from 'react-idle-timer';
 
 import FirstTimeFlow from '../first-time-flow';
 import SendTransactionScreen from '../send';
+import MisesSendScreen from '../misesSend';
 import Swaps from '../swaps';
 import ConfirmTransaction from '../confirm-transaction';
 import Home from '../home';
@@ -57,6 +58,7 @@ import {
   INITIALIZE_ROUTE,
   ONBOARDING_ROUTE,
   ADD_COLLECTIBLE_ROUTE,
+  MISES_SEND_CONFIRM_ROUTE,
 } from '../../helpers/constants/routes';
 
 import {
@@ -150,6 +152,11 @@ export default class Routes extends Component {
         <Authenticated
           path={SEND_ROUTE}
           component={SendTransactionScreen}
+          exact
+        />
+        <Authenticated
+          path={MISES_SEND_CONFIRM_ROUTE}
+          component={MisesSendScreen}
           exact
         />
         <Authenticated path={SWAPS_ROUTE} component={Swaps} />

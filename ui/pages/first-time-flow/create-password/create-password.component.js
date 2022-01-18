@@ -1,3 +1,10 @@
+/*
+ * @Author: lmk
+ * @Date: 2021-11-16 23:11:00
+ * @LastEditTime: 2021-12-17 11:42:38
+ * @LastEditors: lmk
+ * @Description:
+ */
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
@@ -27,12 +34,14 @@ export default class CreatePassword extends PureComponent {
   }
 
   render() {
+    // first time login
     const { onCreateNewAccount, onCreateNewAccountFromSeed } = this.props;
 
     return (
       <div className="first-time-flow__wrapper">
         <MetaFoxLogo />
         <Switch>
+          {/* import */}
           <Route
             exact
             path={INITIALIZE_IMPORT_WITH_SEED_PHRASE_ROUTE}
@@ -43,6 +52,7 @@ export default class CreatePassword extends PureComponent {
               />
             )}
           />
+          {/* add */}
           <Route
             exact
             path={INITIALIZE_CREATE_PASSWORD_ROUTE}

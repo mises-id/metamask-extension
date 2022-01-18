@@ -1,5 +1,9 @@
 import { connect } from 'react-redux';
-import { addToAddressBook, cancelTx } from '../../../store/actions';
+import {
+  addToAddressBook,
+  addToMisesBook,
+  cancelTx,
+} from '../../../store/actions';
 import {
   getRenderableEstimateDataForSmallButtonsFromGWEI,
   getDefaultActiveButtonIndex,
@@ -51,6 +55,7 @@ function mapStateToProps(state) {
     draftTransactionID: getDraftTransactionID(state),
     gasEstimateType,
     mostRecentOverviewPage: getMostRecentOverviewPage(state),
+    provider: state.metamask.provider,
   };
 }
 
@@ -65,6 +70,9 @@ function mapDispatchToProps(dispatch) {
         // TODO: nickname, i.e. addToAddressBook(recipient, nickname)
         dispatch(addToAddressBook(hexPrefixedAddress, nickname));
       }
+    },
+    addToMisesBookIfNew: (toAddress) => {
+      dispatch(addToMisesBook(toAddress));
     },
   };
 }

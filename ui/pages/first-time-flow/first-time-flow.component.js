@@ -136,6 +136,7 @@ export default class FirstTimeFlow extends PureComponent {
               />
             )}
           />
+          {/* first time login */}
           <Route
             path={INITIALIZE_CREATE_PASSWORD_ROUTE}
             render={(routeProps) => (

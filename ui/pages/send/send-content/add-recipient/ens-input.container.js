@@ -5,8 +5,14 @@ import {
   initializeEnsSlice,
   resetEnsResolution,
 } from '../../../../ducks/ens';
+import { getMisesOpt } from '../../../../selectors';
 import EnsInput from './ens-input.component';
 
+const mapStateToProps = (state) => {
+  return {
+    misesOpt: getMisesOpt(state),
+  };
+};
 function mapDispatchToProps(dispatch) {
   return {
     lookupEnsName: debounce((ensName) => dispatch(lookupEnsName(ensName)), 150),
@@ -15,4 +21,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(null, mapDispatchToProps)(EnsInput);
+export default connect(mapStateToProps, mapDispatchToProps)(EnsInput);

@@ -37,6 +37,7 @@ function mapStateToProps(state) {
     keyrings: getMetaMaskKeyrings(state),
     accounts,
     shouldShowAccountsSearch: accounts.length >= SHOW_SEARCH_ACCOUNTS_MIN_COUNT,
+    provider: state.metamask.provider,
   };
 }
 

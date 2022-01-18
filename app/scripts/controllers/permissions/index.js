@@ -36,6 +36,16 @@ export class PermissionsController {
       notifyDomain,
       notifyAllDomains,
       preferences,
+      setInfo,
+      setUnFollow,
+      setFollow,
+      generateAuth,
+      getActive,
+      exportAccount,
+      restorePage,
+      connect,
+      disconnect,
+      addressToMisesId,
     } = {},
     restoredPermissions = {},
     restoredState = {},
@@ -47,10 +57,20 @@ export class PermissionsController {
     });
 
     this.getKeyringAccounts = getKeyringAccounts;
+    this.getActive = getActive;
+    this.setInfo = setInfo;
+    this.setUnFollow = setUnFollow;
+    this.setFollow = setFollow;
+    this.generateAuth = generateAuth;
+    this.exportAccount = exportAccount;
     this._getUnlockPromise = getUnlockPromise;
     this._notifyDomain = notifyDomain;
     this._notifyAllDomains = notifyAllDomains;
     this._isUnlocked = isUnlocked;
+    this.restorePage = restorePage;
+    this.connect = connect;
+    this.disconnect = disconnect;
+    this.addressToMisesId = addressToMisesId;
 
     this._restrictedMethods = getRestrictedMethods({
       getKeyringAccounts: this.getKeyringAccounts.bind(this),
@@ -107,6 +127,17 @@ export class PermissionsController {
           { origin },
           { eth_accounts: {} },
         ),
+        setUnFollow: this.setUnFollow.bind(this),
+        setFollow: this.setFollow.bind(this),
+        setInfo: this.setInfo.bind(this),
+        generateAuth: this.generateAuth.bind(this),
+        getKeyringAccounts: this.getKeyringAccounts.bind(this),
+        getActive: this.getActive.bind(this),
+        exportAccount: this.exportAccount.bind(this),
+        restorePage: this.restorePage.bind(this),
+        connect: this.connect.bind(this),
+        disconnect: this.disconnect.bind(this),
+        addressToMisesId: this.addressToMisesId.bind(this),
       }),
     );
 
@@ -203,7 +234,6 @@ export class PermissionsController {
         params: [permissions],
       };
       const res = {};
-
       this.permissions.providerMiddlewareFunction(domain, req, res, noop, _end);
 
       function _end(_err) {
@@ -228,7 +258,7 @@ export class PermissionsController {
    */
   async approvePermissionsRequest(approved, accounts) {
     const { id } = approved.metadata;
-
+    log.debug(approved, accounts);
     if (!this.approvals.has({ id })) {
       log.debug(`Permissions request with id '${id}' not found.`);
       return;

@@ -15,6 +15,7 @@ import { showModal } from '../../../store/actions';
 import { DEFAULT_ROUTE } from '../../../helpers/constants/routes';
 import { getURLHostName } from '../../../helpers/utils/util';
 import { useNewMetricEvent } from '../../../hooks/useMetricEvent';
+import { MisesEthOverview } from '../../../components/app/misesWallet-overview';
 import AssetNavigation from './asset-navigation';
 import AssetOptions from './asset-options';
 
@@ -39,7 +40,7 @@ export default function NativeAsset({ nativeCurrency }) {
       block_explorer_domain: getURLHostName(accountLink),
     },
   });
-
+  const isMisesNetwork = nativeCurrency === 'MIS';
   return (
     <>
       <AssetNavigation
@@ -62,7 +63,12 @@ export default function NativeAsset({ nativeCurrency }) {
           />
         }
       />
-      <EthOverview className="asset__overview" />
+
+      {isMisesNetwork ? (
+        <MisesEthOverview className="asset__overview" />
+      ) : (
+        <EthOverview className="asset__overview" />
+      )}
       <TransactionList hideTokenTransactions />
     </>
   );

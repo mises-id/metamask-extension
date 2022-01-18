@@ -8,3 +8,5 @@ export const TRUNCATED_ADDRESS_START_CHARS = 5;
 // The number of characters to slice from the end of an address for truncated format:
 // `${TRUNCATED_ADDRESS_START_CHARS}...${TRUNCATED_ADDRESS_END_CHARS}`
 export const TRUNCATED_ADDRESS_END_CHARS = 4;
+
+export const MISES_TRUNCATED_ADDRESS_START_CHARS = 8;

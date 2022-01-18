@@ -109,6 +109,15 @@ export function isValidDomainName(address) {
   return match !== null;
 }
 
+export function isValidMisesId(address) {
+  // 这里有问题
+  if (address.split('mises').length > 1) {
+    const addressLast = address.split('mises')[1];
+    return addressLast.length === 39;
+  }
+  return false;
+}
+
 export function isOriginContractAddress(to, sendTokenAddress) {
   if (!to || !sendTokenAddress) {
     return false;
@@ -224,12 +233,15 @@ export function exportAsFile(filename, data, type = 'text/csv') {
  * @returns {string} The shortened address, or the original if it was no longer
  * than 10 characters.
  */
-export function shortenAddress(address = '') {
+export function shortenAddress(
+  address = '',
+  prefix = TRUNCATED_ADDRESS_START_CHARS,
+) {
   if (address.length < TRUNCATED_NAME_CHAR_LIMIT) {
     return address;
   }
 
-  return `${address.slice(0, TRUNCATED_ADDRESS_START_CHARS)}...${address.slice(
+  return `${address.slice(0, prefix)}...${address.slice(
     -TRUNCATED_ADDRESS_END_CHARS,
   )}`;
 }
