@@ -15,7 +15,7 @@ import {
 } from '../../../selectors/selectors';
 import { I18nContext } from '../../../contexts/i18n';
 import { MetaMetricsContext } from '../../../contexts/metametrics.new';
-// import Mascot from '../../../components/ui/mascot';
+import Mascot from '../../../components/ui/mascot';
 import SwapsFooter from '../swaps-footer';
 import BackgroundAnimation from './background-animation';
 
@@ -127,7 +127,7 @@ export default function LoadingSwapsQuotes({
         </>
         <div className="loading-swaps-quotes__animation">
           <BackgroundAnimation />
-          {/* <div
+          <div
             className="loading-swaps-quotes__mascot-container"
             ref={mascotContainer}
           >
@@ -138,7 +138,7 @@ export default function LoadingSwapsQuotes({
               followMouse={false}
               lookAtTarget={midPointTarget}
             />
-          </div> */}
+          </div>
         </div>
       </div>
       <SwapsFooter

@@ -8,14 +8,14 @@ const BetaWelcomeFooter = () => {
     <>
       <div className="welcome-page__header">{t('betaWelcome')}</div>
       <div className="welcome-page__description">
-        <p>{t('betaMisesWalletDescription')}</p>
+        <p>{t('betaMetamaskDescription')}</p>
         <p>
-          {t('betaMisesWalletDescriptionExplanation', [
+          {t('betaMetamaskDescriptionExplanation', [
             <a href="https://metamask.io/terms.html" key="terms-link">
-              {t('betaMisesWalletDescriptionExplanationTermsLinkText')}
+              {t('betaMetamaskDescriptionExplanationTermsLinkText')}
             </a>,
             <a href="https://metamask.io/beta-terms.html" key="beta-terms-link">
-              {t('betaMisesWalletDescriptionExplanationBetaTermsLinkText')}
+              {t('betaMetamaskDescriptionExplanationBetaTermsLinkText')}
             </a>,
           ])}
         </p>

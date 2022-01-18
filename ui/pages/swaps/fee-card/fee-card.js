@@ -276,7 +276,7 @@ export default function FeeCard({
             </div>
             <InfoTooltip
               position="top"
-              contentText={t('swapMisesWalletFeeDescription', [metaMaskFee])}
+              contentText={t('swapMetaMaskFeeDescription', [metaMaskFee])}
               wrapperClassName="fee-card__info-tooltip-container"
             />
           </div>

@@ -28,7 +28,7 @@ export default class MetaFoxLogo extends PureComponent {
       >
         <img
           height="30"
-          src="./images/mises/logo/logo-horizontal.png"
+          src="./images/logo/metamask-logo-horizontal.svg"
           className={classnames({
             'app-header__metafox-logo--horizontal': !isOnboarding,
             'onboarding-app-header__metafox-logo--horizontal': isOnboarding,
@@ -37,7 +37,7 @@ export default class MetaFoxLogo extends PureComponent {
         />
         <img
           {...iconProps}
-          src="./images/mises/icon.png"
+          src="./images/logo/metamask-fox.svg"
           className={classnames({
             'app-header__metafox-logo--icon': !isOnboarding,
             'onboarding-app-header__metafox-logo--icon': isOnboarding,

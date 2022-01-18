@@ -27,7 +27,7 @@ export default class MetaMetricsOptInModal extends Component {
               <img src="images/metrics-chart.svg" alt="" />
             </div>
             <div className="metametrics-opt-in__title">
-              {t('metametricsHelpImproveMisesWallet')}
+              {t('metametricsHelpImproveMetaMask')}
             </div>
             <div className="metametrics-opt-in__body">
               <div className="metametrics-opt-in__description">

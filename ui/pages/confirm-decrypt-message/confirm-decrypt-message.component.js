@@ -209,7 +209,7 @@ export default class ConfirmDecryptMessage extends Component {
           >
             <img src="images/lock.svg" alt="" />
             <div className="request-decrypt-message__message-lock-text">
-              {t('decryptMisesWallet')}
+              {t('decryptMetamask')}
             </div>
           </div>
         </div>

@@ -1,27 +1,4 @@
 {
   "author": "https://mises.site",
-  "browser_action": {
-    "default_icon": {
-      "16": "images/mises/icon-16.png",
-      "19": "images/mises/icon-19.png",
-      "32": "images/mises/icon-32.png",
-      "38": "images/mises/icon-38.png",
-      "64": "images/mises/icon-64.png",
-      "128": "images/mises/icon-128.png",
-      "512": "images/mises/icon-512.png"
-    },
-    "default_title": "MisesWallet",
-    "default_popup": "popup.html"
-  },
-  "icons": {
-    "16": "images/mises/icon-16.png",
-    "19": "images/mises/icon-19.png",
-    "32": "images/mises/icon-32.png",
-    "38": "images/mises/icon-38.png",
-    "48": "images/mises/icon-48.png",
-    "64": "images/mises/icon-64.png",
-    "128": "images/mises/icon-128.png",
-    "512": "images/mises/icon-512.png"
-  },
   "content_security_policy": "script-src 'self' 'wasm-eval'; object-src 'self'"
 }
