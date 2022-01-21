@@ -41,7 +41,7 @@ export default class ConfirmAddSuggestedToken extends Component {
       return;
     }
     if (getEnvironmentType() === ENVIRONMENT_TYPE_NOTIFICATION) {
-      global.platform.closeCurrentWindow();
+      global.METAMASK_NOTIFIER.closePopup();
     } else {
       history.push(mostRecentOverviewPage);
     }

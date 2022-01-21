@@ -51,10 +51,15 @@ export default class NotificationManager extends EventEmitter {
         left = Math.max(screenX + (outerWidth - NOTIFICATION_WIDTH), 0);
       }
 
+      const active_tabs = await this.platform.getActiveTabs();
+      this._openerTab = active_tabs.length > 0 ? active_tabs[0]: undefined
+      console.log("openerTab", this._openerTab);
       // create new notification popup
       const popupWindow = await this.platform.openWindow({
         url: 'notification.html',
         type: 'popup',
+        openerTabId: this._openerTab && this._openerTab.id,
+        index: this._openerTab && this._openerTab.index,
         width: NOTIFICATION_WIDTH,
         height: NOTIFICATION_HEIGHT,
         left,
@@ -67,6 +72,16 @@ export default class NotificationManager extends EventEmitter {
       }
       this._popupId = popupWindow.id;
     }
+  }
+
+  async closePopup() {
+
+    await this.platform.closeCurrentWindow();
+    if (this._openerTab) {
+      await this.platform.switchToTab(this._openerTab.id)
+      this._openerTab = undefined;
+    }
+    
   }
 
   _onWindowClosed(windowId) {

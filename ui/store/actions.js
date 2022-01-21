@@ -993,7 +993,7 @@ export function cancelTxs(txDataList) {
       });
     } finally {
       if (getEnvironmentType() === ENVIRONMENT_TYPE_NOTIFICATION) {
-        global.platform.closeCurrentWindow();
+        global.METAMASK_NOTIFIER.closePopup();
       } else {
         dispatch(hideLoadingIndication());
       }
@@ -1805,7 +1805,7 @@ export function closeCurrentNotificationWindow() {
       getEnvironmentType() === ENVIRONMENT_TYPE_NOTIFICATION &&
       !hasUnconfirmedTransactions(getState())
     ) {
-      global.platform.closeCurrentWindow();
+      global.METAMASK_NOTIFIER.closePopup();
     }
   };
 }

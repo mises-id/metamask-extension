@@ -26,9 +26,13 @@ export default class ExtensionPlatform {
   }
 
   openWindow(options) {
+    console.log("openWindow", options)
     return new Promise((resolve, reject) => {
       if (isMobile()) {
-        extension.tabs.create({ url: options.url }, (newWindow) => {
+        const {url, openerTabId, index} = options
+        extension.tabs.create({ 
+          url, openerTabId, index
+        }, (newWindow) => {
           const error = checkForError();
           if (error) {
             return reject(error);
@@ -36,7 +40,10 @@ export default class ExtensionPlatform {
           return resolve(newWindow);
         });
       } else {
-        extension.windows.create(options, (newWindow) => {
+        const {url, type, width, height, left, top} = options
+        extension.windows.create({
+          url, type, width, height, left, top
+        }, (newWindow) => {
           const error = checkForError();
           if (error) {
             return reject(error);
@@ -49,6 +56,9 @@ export default class ExtensionPlatform {
 
   focusWindow(windowId) {
     return new Promise((resolve, reject) => {
+      if (isMobile()) {
+        return resolve();
+      }
       extension.windows.update(windowId, { focused: true }, () => {
         const error = checkForError();
         if (error) {
@@ -61,6 +71,9 @@ export default class ExtensionPlatform {
 
   updateWindowPosition(windowId, left, top) {
     return new Promise((resolve, reject) => {
+      if (isMobile()) {
+        return resolve();
+      }
       extension.windows.update(windowId, { left, top }, () => {
         const error = checkForError();
         if (error) {
@@ -180,7 +193,12 @@ export default class ExtensionPlatform {
   }
 
   addOnRemovedListener(listener) {
-    extension.windows.onRemoved.addListener(listener);
+    if (isMobile()) {
+      extension.tabs.onRemoved.addListener(listener);
+    } else {
+      extension.windows.onRemoved.addListener(listener);
+    }
+    
   }
 
   getAllWindows() {
