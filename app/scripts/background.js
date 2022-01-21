@@ -22,6 +22,7 @@ import {
   REJECT_NOTFICIATION_CLOSE_SIG,
 } from '../../shared/constants/metametrics';
 import { RESTORE_VAULT_ROUTE } from '../../ui/helpers/constants/routes';
+import { isMobile } from '../../ui/helpers/utils/is-mobile-view';
 import migrations from './migrations';
 import Migrator from './lib/migrator';
 import ExtensionPlatform from './platforms/extension';
@@ -42,7 +43,6 @@ import setupEnsIpfsResolver from './lib/ens-ipfs/setup';
 
 const { sentry } = global;
 const firstTimeState = { ...rawFirstTimeState };
-
 log.setDefaultLevel(process.env.METAMASK_DEBUG ? 'debug' : 'info');
 
 const platform = new ExtensionPlatform();
@@ -604,10 +604,8 @@ async function openPopup() {
 
 // On first install, open a new tab with MetaMask
 extension.runtime.onInstalled.addListener(({ reason }) => {
-  if (
-    reason === 'install' &&
-    !(process.env.METAMASK_DEBUG || process.env.IN_TEST)
-  ) {
+  const isMobileFlag = isMobile();
+  if (reason === 'install' && !isMobileFlag) {
     platform.openExtensionInBrowser();
   }
 });

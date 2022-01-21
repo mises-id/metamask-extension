@@ -10,7 +10,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-01-18 13:39:44
+ * @LastEditTime: 2022-01-20 17:01:00
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -173,8 +173,8 @@ export default class MisesController {
    * @return {*}
    */
   lockAll() {
-    console.log('清除了mises数据');
-    this.misesUser.lockAll();
+    // console.log('清除了mises数据');
+    // this.misesUser.lockAll();
   }
 
   async setUserInfo(data) {

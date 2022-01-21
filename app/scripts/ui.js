@@ -16,6 +16,7 @@ import {
   ENVIRONMENT_TYPE_FULLSCREEN,
   ENVIRONMENT_TYPE_POPUP,
 } from '../../shared/constants/app';
+import { isMobile } from '../../ui/helpers/utils/is-mobile-view';
 import ExtensionPlatform from './platforms/extension';
 import { setupMultiplex } from './lib/stream-utils';
 import { getEnvironmentType } from './lib/util';
@@ -56,7 +57,11 @@ async function start() {
       const state = store.getState();
       const { metamask: { completedOnboarding } = {} } = state;
 
-      if (!completedOnboarding && windowType !== ENVIRONMENT_TYPE_FULLSCREEN) {
+      if (
+        !completedOnboarding &&
+        windowType !== ENVIRONMENT_TYPE_FULLSCREEN &&
+        !isMobile()
+      ) {
         global.platform.openExtensionInBrowser();
       }
     });

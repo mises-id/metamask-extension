@@ -13,6 +13,7 @@ import { decGWEIToHexWEI } from '../../helpers/utils/conversions.util';
 import { isEqualCaseInsensitive } from '../../helpers/utils/util';
 import { GAS_ESTIMATE_TYPES } from '../../../shared/constants/gas';
 import { KEYRING_TYPES } from '../../../shared/constants/hardware-wallets';
+import { MIS } from '../../helpers/constants/common';
 
 export default function reduceMetamask(state = {}, action) {
   const metamaskState = {
@@ -43,7 +44,7 @@ export default function reduceMetamask(state = {}, action) {
     participateInMetaMetrics: null,
     nextNonce: null,
     conversionRate: null,
-    nativeCurrency: 'ETH',
+    nativeCurrency: MIS,
     ...state,
   };
 

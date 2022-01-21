@@ -1139,6 +1139,13 @@ export function updateMetamaskState(newState) {
         payload: newProvider.chainId,
       });
     }
+    // 这里判断还有点问题
+    if (
+      newState.provider &&
+      newState.provider &&
+      newState.provider.ticker !== newState.nativeCurrency
+    )
+      newState.nativeCurrency = newState.provider.ticker;
     dispatch({
       type: actionConstants.UPDATE_METAMASK_STATE,
       value: newState,

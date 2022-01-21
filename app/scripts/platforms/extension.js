@@ -3,6 +3,7 @@ import { getBlockExplorerLink } from '@metamask/etherscan-link';
 import { getEnvironmentType, checkForError } from '../lib/util';
 import { ENVIRONMENT_TYPE_BACKGROUND } from '../../../shared/constants/app';
 import { TRANSACTION_STATUSES } from '../../../shared/constants/transaction';
+import { isMobile } from '../../../ui/helpers/utils/is-mobile-view';
 
 export default class ExtensionPlatform {
   //
@@ -26,13 +27,23 @@ export default class ExtensionPlatform {
 
   openWindow(options) {
     return new Promise((resolve, reject) => {
-      extension.tabs.create({ url: options.url }, (newWindow) => {
-        const error = checkForError();
-        if (error) {
-          return reject(error);
-        }
-        return resolve(newWindow);
-      });
+      if (isMobile()) {
+        extension.tabs.create({ url: options.url }, (newWindow) => {
+          const error = checkForError();
+          if (error) {
+            return reject(error);
+          }
+          return resolve(newWindow);
+        });
+      } else {
+        extension.windows.create(options, (newWindow) => {
+          const error = checkForError();
+          if (error) {
+            return reject(error);
+          }
+          return resolve(newWindow);
+        });
+      }
     });
   }
 
@@ -73,8 +84,13 @@ export default class ExtensionPlatform {
   }
 
   closeCurrentWindow() {
-    return extension.tabs.getCurrent((windowDetails) => {
-      return extension.tabs.remove(windowDetails.id);
+    if (isMobile()) {
+      return extension.tabs.getCurrent((windowDetails) => {
+        return extension.tabs.remove(windowDetails.id);
+      });
+    }
+    return extension.windows.getCurrent((windowDetails) => {
+      return extension.windows.remove(windowDetails.id);
     });
   }
 

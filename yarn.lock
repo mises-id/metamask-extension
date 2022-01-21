@@ -19510,10 +19510,10 @@ minizlib@^2.1.1:
     minipass "^3.0.0"
     yallist "^4.0.0"
 
-mises-js-sdk@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.npmmirror.com/mises-js-sdk/download/mises-js-sdk-0.1.0.tgz#fc79a5c0a2a2378dae62a2b85276277ed0fc0c64"
-  integrity sha512-vaojc/tva2Nb7UbCTITElyOAo/VI/fQKiogFsTfclhwLR+KGsuvy56fx4VkcjDFHppTokwcPQ5JgzAkbSSnPGw==
+mises-js-sdk@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.npmmirror.com/mises-js-sdk/download/mises-js-sdk-0.1.1.tgz#c114cfc188337dd06090c321e35875db87beef71"
+  integrity sha512-CsDEnQm0n0n2wHGZFHD+PJ/fUSkTt1K3PqmAFcUQc715MbweB6sFOeh2o9dYHljQogkDMZljdK9aGAFjaFEiBQ==
   dependencies:
     "@cosmjs/proto-signing" "0.26.5"
     "@cosmjs/stargate" "0.26.5"
@@ -26650,8 +26650,8 @@ tar@6.1.11:
 
 tar@^4, tar@^4.0.2:
   version "4.4.19"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.19.tgz#2e4d7263df26f2b914dee10c825ab132123742f3"
-  integrity sha512-a20gEsvHnWe0ygBY8JbxoM4w3SJdhc7ZAuxkLqh+nvNQN2IOt0B5lLgM490X5Hl8FF0dl0tOf2ewFYAlIFgzVA==
+  resolved "https://registry.npmmirror.com/tar/download/tar-4.4.19.tgz?cache=0&sync_timestamp=1632753458369&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Ftar%2Fdownload%2Ftar-4.4.19.tgz#2e4d7263df26f2b914dee10c825ab132123742f3"
+  integrity sha1-Lk1yY98m8rkU3uEMglqxMhI3QvM=
   dependencies:
     chownr "^1.1.4"
     fs-minipass "^1.2.7"
