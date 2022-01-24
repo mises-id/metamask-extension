@@ -1,11 +1,11 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
   nonceSortedCompletedTransactionsSelector,
   nonceSortedPendingTransactionsSelector,
 } from '../../../selectors/transactions';
-import { getCurrentChainId } from '../../../selectors';
+import { getCurrentChainId, getProvider } from '../../../selectors';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import TransactionListItem from '../transaction-list-item';
 import Button from '../../ui/button';
@@ -13,6 +13,8 @@ import { TOKEN_CATEGORY_HASH } from '../../../helpers/constants/transactions';
 import { SWAPS_CHAINID_CONTRACT_ADDRESS_MAP } from '../../../../shared/constants/swaps';
 import { TRANSACTION_TYPES } from '../../../../shared/constants/transaction';
 import { isEqualCaseInsensitive } from '../../../helpers/utils/util';
+import { recentTransactions } from '../../../store/actions';
+import { MISESNETWORK } from '../../../../shared/constants/network';
 
 const PAGE_INCREMENT = 10;
 
@@ -77,7 +79,7 @@ export default function TransactionList({
     nonceSortedCompletedTransactionsSelector,
   );
   const chainId = useSelector(getCurrentChainId);
-
+  const provider = useSelector(getProvider);
   const pendingTransactions = useMemo(
     () =>
       getFilteredTransactionGroups(
@@ -93,28 +95,45 @@ export default function TransactionList({
       chainId,
     ],
   );
-  const completedTransactions = useMemo(
-    () =>
-      getFilteredTransactionGroups(
-        unfilteredCompletedTransactions,
-        hideTokenTransactions,
-        tokenAddress,
-        chainId,
-      ),
-    [
+  let completedTransactions = useMemo(() => {
+    return getFilteredTransactionGroups(
+      unfilteredCompletedTransactions,
       hideTokenTransactions,
       tokenAddress,
-      unfilteredCompletedTransactions,
       chainId,
-    ],
-  );
+    );
+  }, [
+    hideTokenTransactions,
+    tokenAddress,
+    unfilteredCompletedTransactions,
+    chainId,
+  ]);
 
   const viewMore = useCallback(
     () => setLimit((prev) => prev + PAGE_INCREMENT),
     [],
   );
-
+  const [misesCompletedTransactions, setmisesCompletedTransactions] = useState(
+    [],
+  );
+  if (misesCompletedTransactions.length) {
+    completedTransactions = misesCompletedTransactions;
+    console.log(completedTransactions);
+  }
   const pendingLength = pendingTransactions.length;
+  useEffect(() => {
+    if (provider.type === MISESNETWORK) {
+      recentTransactions()
+        .then((res) => {
+          setmisesCompletedTransactions([...res]);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      setmisesCompletedTransactions([]);
+    }
+  }, [provider.type]);
 
   return (
     <div className="transaction-list">

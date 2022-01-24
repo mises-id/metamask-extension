@@ -1134,6 +1134,7 @@ export default class MetamaskController extends EventEmitter {
       lockAll: nodeify(this.lockAll, this),
       initMisesBalance: nodeify(this.initMisesBalance, this),
       setMisesBook: nodeify(this.setMisesBook, this),
+      recentTransactions: nodeify(this.recentTransactions, this),
       getMisesUser: nodeify(this.getMisesUser, this),
       addressToMisesId: nodeify(this.addressToMisesId, this),
       resetTranstionFlag: nodeify(this.resetTranstionFlag, this),
@@ -3438,5 +3439,9 @@ export default class MetamaskController extends EventEmitter {
 
   resetTranstionFlag() {
     return this.misesController.resetTranstionFlag();
+  }
+
+  recentTransactions() {
+    return this.misesController.recentTransactions();
   }
 }

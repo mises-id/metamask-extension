@@ -20,6 +20,8 @@ import EditGasPopover from '../edit-gas-popover';
 import { useMetricEvent } from '../../../hooks/useMetricEvent';
 import Button from '../../ui/button';
 import CancelButton from '../cancel-button';
+import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../../shared/constants/labels';
+import { shortenAddress } from '../../../helpers/utils/util';
 
 export default function TransactionListItem({
   transactionGroup,
@@ -38,7 +40,6 @@ export default function TransactionListItem({
     initialTransaction: { id },
     primaryTransaction: { err, status },
   } = transactionGroup;
-
   const speedUpMetricsEvent = useMetricEvent({
     eventOpts: {
       category: 'Navigation',
@@ -73,11 +74,22 @@ export default function TransactionListItem({
     [cancelMetricsEvent],
   );
 
-  const shouldShowSpeedUp = useShouldShowSpeedUp(
-    transactionGroup,
-    isEarliestNonce,
-  );
-
+  const shouldShow = useShouldShowSpeedUp(transactionGroup, isEarliestNonce);
+  const mises = transactionGroup.transactionGroupType === 'mises';
+  const shouldShowSpeedUp = mises ? false : shouldShow;
+  const group = useTransactionDisplayData(transactionGroup);
+  if (mises) {
+    transactionGroup.title = t(transactionGroup.category);
+    transactionGroup.subtitle = t(
+      transactionGroup.category === 'receive' ? 'fromAddress' : 'toAddress',
+      [
+        shortenAddress(
+          transactionGroup.recipientAddress,
+          MISES_TRUNCATED_ADDRESS_START_CHARS,
+        ),
+      ],
+    );
+  }
   const {
     title,
     subtitle,
@@ -90,8 +102,7 @@ export default function TransactionListItem({
     displayedStatusKey,
     isPending,
     senderAddress,
-  } = useTransactionDisplayData(transactionGroup);
-
+  } = mises ? transactionGroup : group;
   const isSignatureReq =
     category === TRANSACTION_GROUP_CATEGORIES.SIGNATURE_REQUEST;
   const isApproval = category === TRANSACTION_GROUP_CATEGORIES.APPROVAL;

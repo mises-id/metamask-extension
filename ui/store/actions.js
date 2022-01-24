@@ -3079,3 +3079,7 @@ export function cancelQRHardwareSignRequest() {
 export async function resetTranstionFlag() {
   promisifiedBackground.resetTranstionFlag();
 }
+
+export function recentTransactions() {
+  return promisifiedBackground.recentTransactions();
+}

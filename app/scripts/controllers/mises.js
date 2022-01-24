@@ -10,7 +10,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-01-20 17:01:00
+ * @LastEditTime: 2022-01-24 19:58:46
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -325,5 +325,51 @@ export default class MisesController {
     this.store.updateState({
       transformFlag: 'loading',
     });
+  }
+
+  async recentTransactions() {
+    try {
+      const activeUser = this.misesUser.activeUser();
+      let list = await activeUser.recentTransactions();
+      list = list.map((val) => {
+        val.rawLog = JSON.parse(val.rawLog);
+        val.raw = val.rawLog[0].events;
+        console.log(val);
+        const transfers = val.raw[3].attributes;
+        const amount = transfers[2].value.replace('umis', '|').split('|');
+        const currency = this.coinDefine.fromCoin({
+          amount: amount[0],
+          denom: 'umis',
+        });
+        const balanceObj = this.coinDefine.toCoinMIS(currency);
+        balanceObj.denom = balanceObj.denom.toUpperCase();
+        const transactionGroup = {
+          category:
+            transfers[0].value === activeUser.address() ? 'receive' : 'send',
+          date: `${val.height}`,
+          displayedStatusKey: 'confirmed',
+          isPending: false,
+          primaryCurrency: `${balanceObj.amount} ${balanceObj.denom}`,
+          recipientAddress: transfers[0].value,
+          secondaryCurrency: `${balanceObj.amount} ${balanceObj.denom}`,
+          senderAddress: transfers[1].value,
+          subtitle: '',
+          subtitleContainsOrigin: false,
+          title: '',
+          nonce: '0x0',
+          transactionGroupType: 'mises',
+          hasCancelled: false,
+          hasRetried: false,
+          initialTransaction: { id: '0x0' },
+          primaryTransaction: { err: {}, status: '' },
+        };
+        return transactionGroup;
+      });
+      console.log(list);
+      return list;
+    } catch (error) {
+      console.log(error);
+      return Promise.reject(error);
+    }
   }
 }

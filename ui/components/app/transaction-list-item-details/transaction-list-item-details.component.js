@@ -244,7 +244,10 @@ export default class TransactionListItemDetails extends PureComponent {
             </div>
             <div className="transaction-list-item-details__cards-container">
               <TransactionBreakdown
-                nonce={transactionGroup.initialTransaction.txParams.nonce}
+                nonce={
+                  transactionGroup.initialTransaction.txParams &&
+                  transactionGroup.initialTransaction.txParams.nonce
+                }
                 isTokenApprove={type === TRANSACTION_TYPES.TOKEN_METHOD_APPROVE}
                 transaction={transaction}
                 primaryCurrency={primaryCurrency}
