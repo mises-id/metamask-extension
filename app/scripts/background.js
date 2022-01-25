@@ -395,7 +395,7 @@ function setupController(initState, initLangCode) {
         const { origin } = url;
 
         remotePort.onMessage.addListener((msg) => {
-          console.log(msg);
+          console.log("remotePort", msg);
           if (
             msg.data &&
             ['eth_requestAccounts', 'mises_requestAccounts'].includes(
@@ -544,9 +544,9 @@ function setupController(initState, initLangCode) {
     // Error support during rejection
     Object.keys(
       controller.permissionsController.approvals.state.pendingApprovals,
-    ).forEach((approvalId) =>
-      controller.permissionsController.rejectPermissionsRequest(approvalId),
-    );
+    ).forEach((approvalId) => {
+      controller.permissionsController.rejectPermissionsRequest(approvalId);
+    });
 
     updateBadge();
   }
@@ -572,6 +572,8 @@ async function triggerUi() {
     tabs.length > 0 &&
     tabs[0].extData &&
     tabs[0].extData.indexOf('vivaldi_tab') > -1;
+
+  console.log("triggerUi", uiIsTriggering, isVivaldi, popupIsOpen, currentlyActiveMetamaskTab);
   if (
     !uiIsTriggering &&
     (isVivaldi || !popupIsOpen) &&
@@ -602,13 +604,38 @@ async function openPopup() {
   });
 }
 
+
+async function injectDynamic() {
+  console.log("injectDynamic")
+  // in manifest v2, it affects only the active tab
+  for (const tab of await platform.getTabs({url: "https://*/*"})) {
+    for (const cs of extension.runtime.getManifest().content_scripts) {
+      console.log("executeScript", cs)
+      for (const csjs of cs.js) {
+        extension.tabs.executeScript({
+          file: csjs,
+        });
+      }
+
+    }
+  }
+}
+
 // On first install, open a new tab with MetaMask
 extension.runtime.onInstalled.addListener(({ reason }) => {
+  console.log("extension.runtime.onInstalled");
   const isMobileFlag = isMobile();
   if (reason === 'install' && !isMobileFlag) {
     platform.openExtensionInBrowser();
   }
+  injectDynamic();
 });
+
+extension.runtime.onStartup.addListener(() => {
+  console.log("extension.runtime.onStartup");
+  injectDynamic();
+});
+
 function restoreAccount() {
   notificationManager.platform.openExtensionInBrowser(RESTORE_VAULT_ROUTE);
 }
