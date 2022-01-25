@@ -15,7 +15,7 @@ export default function createPermissionsMethodMiddleware({
   setUnFollow,
   setFollow,
   generateAuth,
-  getKeyringAccounts,
+  getAccountFlag,
   getActive,
   exportAccount,
   restorePage,
@@ -155,8 +155,8 @@ export default function createPermissionsMethodMiddleware({
       }
       case 'mises_getMisesAccount': {
         try {
-          const count = await getKeyringAccounts();
-          res.result = count.length;
+          const flag = await getAccountFlag();
+          res.result = flag;
         } catch (error) {
           res.result = false;
         }

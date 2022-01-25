@@ -493,6 +493,9 @@ export default class MetamaskController extends EventEmitter {
         addressToMisesId: this.misesController.addressToMisesId.bind(
           this.misesController,
         ),
+        getAccountFlag: this.misesController.getAccountFlag.bind(
+          this.misesController,
+        ),
       },
       initState.PermissionsController,
       initState.PermissionsMetadata,

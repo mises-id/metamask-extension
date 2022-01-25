@@ -234,10 +234,12 @@ export default class ImportWithSeedPhrase extends PureComponent {
             {`< ${t('back')}`}
           </a>
         </div>
-        <div className="first-time-flow__header">
+        {/* <div className="first-time-flow__header">
           {t('importAccountSeedPhrase')}
+        </div> */}
+        <div className="first-time-flow__text-block">
+          Import Misesid & Metamask account
         </div>
-        <div className="first-time-flow__text-block">{t('secretPhrase')}</div>
         <div className="first-time-flow__textarea-wrapper">
           <label>{t('secretRecoveryPhrase')}</label>
           {showSeedPhrase ? (
@@ -324,17 +326,7 @@ export default class ImportWithSeedPhrase extends PureComponent {
             {termsChecked ? <i className="fa fa-check fa-2x" /> : null}
           </div>
           <span id="ftf-chk1-label" className="first-time-flow__checkbox-label">
-            {t('acceptTermsOfUse', [
-              <a
-                onClick={(e) => e.stopPropagation()}
-                key="first-time-flow__link-text"
-                href="https://metamask.io/terms.html"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="first-time-flow__link-text">{t('terms')}</span>
-              </a>,
-            ])}
+            {t('acceptTermsOfUse')}
           </span>
         </div>
         <Button

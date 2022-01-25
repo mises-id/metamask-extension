@@ -3,7 +3,9 @@
   font-style: normal;
 
   .app-header__logo-container {
-    width: 742px;
+    // min-width: 742px;
+    max-width: 100%;
+    justify-content: center;
     margin-top: 3%;
 
     @media screen and (max-width: $break-small) {

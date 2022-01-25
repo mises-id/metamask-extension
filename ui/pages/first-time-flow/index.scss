@@ -13,7 +13,7 @@
   padding: 20px;
   &__wrapper {
     @media screen and (min-width: $break-large) {
-      max-width: 742px;
+      // max-width: 742px;
       display: flex;
       flex-direction: column;
       width: 100%;

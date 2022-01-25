@@ -46,6 +46,7 @@ export class PermissionsController {
       connect,
       disconnect,
       addressToMisesId,
+      getAccountFlag,
     } = {},
     restoredPermissions = {},
     restoredState = {},
@@ -57,6 +58,7 @@ export class PermissionsController {
     });
 
     this.getKeyringAccounts = getKeyringAccounts;
+    this.getAccountFlag = getAccountFlag;
     this.getActive = getActive;
     this.setInfo = setInfo;
     this.setUnFollow = setUnFollow;
@@ -132,6 +134,7 @@ export class PermissionsController {
         setInfo: this.setInfo.bind(this),
         generateAuth: this.generateAuth.bind(this),
         getKeyringAccounts: this.getKeyringAccounts.bind(this),
+        getAccountFlag: this.getAccountFlag.bind(this),
         getActive: this.getActive.bind(this),
         exportAccount: this.exportAccount.bind(this),
         restorePage: this.restorePage.bind(this),
@@ -376,6 +379,7 @@ export class PermissionsController {
     );
 
     if (newPermittedAccounts.length === 0) {
+      console.log(newPermittedAccounts);
       this.removePermissionsFor({ [origin]: ['eth_accounts'] });
     } else {
       this.permissions.updateCaveatFor(
@@ -502,6 +506,7 @@ export class PermissionsController {
         method: NOTIFICATION_NAMES.accountsChanged,
         params: newAccounts,
       });
+      // console.log(newAccounts, 'newAccounts');
       this.permissionsLog.updateAccountsHistory(origin, newAccounts);
     }
 

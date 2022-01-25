@@ -7,6 +7,7 @@ import {
   INITIALIZE_END_OF_FLOW_ROUTE,
   INITIALIZE_WELCOME_ROUTE,
   INITIALIZE_UNLOCK_ROUTE,
+  INITIALIZE_SELECT_ACTION_ROUTE,
 } from '../../../helpers/constants/routes';
 
 export default class FirstTimeFlowSwitch extends PureComponent {
@@ -38,7 +39,7 @@ export default class FirstTimeFlowSwitch extends PureComponent {
     }
 
     if (!isInitialized) {
-      return <Redirect to={{ pathname: INITIALIZE_WELCOME_ROUTE }} />;
+      return <Redirect to={{ pathname: INITIALIZE_SELECT_ACTION_ROUTE }} />;
     }
 
     return <Redirect to={{ pathname: INITIALIZE_UNLOCK_ROUTE }} />;

@@ -69,14 +69,18 @@ export default class EndOfFlowScreen extends PureComponent {
       <div className="end-of-flow">
         <MetaFoxLogo />
         <div className="end-of-flow__emoji">🎉</div>
-        <div className="first-time-flow__header">{t('congratulations')}</div>
+        <div className="first-time-flow__header">Congradulations!</div>
         <div className="first-time-flow__text-block end-of-flow__text-1">
-          {t('endOfFlowMessage1')}
+          you have successfully created your misesid & metamask account.
         </div>
         <div className="first-time-flow__text-block end-of-flow__text-2">
-          {t('endOfFlowMessage2')}
+          keep your secret recovery phrase safe, you do not want to lose your
+          assets & data
         </div>
-        <div className="end-of-flow__text-3">
+        <div className="first-time-flow__text-block end-of-flow__text-2">
+          connect mises chain to edit your personal info
+        </div>
+        {/* <div className="end-of-flow__text-3">
           {`• ${t('endOfFlowMessage3')}`}
         </div>
         <div className="end-of-flow__text-3">
@@ -114,7 +118,7 @@ export default class EndOfFlowScreen extends PureComponent {
               {t('endOfFlowMessage9')}
             </span>
           </a>
-        </div>
+        </div> */}
         <Button
           type="primary"
           className="first-time-flow__button"

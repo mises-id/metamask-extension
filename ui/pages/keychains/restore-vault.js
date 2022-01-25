@@ -157,15 +157,15 @@ class RestoreVaultPage extends Component {
             >
               {`< ${t('back')}`}
             </a>
-            <div className="import-account__title">
+            {/* <div className="import-account__title">
               {this.context.t('restoreAccountWithSeed')}
-            </div>
+            </div> */}
             <div className="import-account__selector-label">
-              {this.context.t('secretPhrase')}
+              Import Misesid & Metamask account
             </div>
-            <div className="import-account__selector-typography">
+            {/* <div className="import-account__selector-typography">
               {this.context.t('secretPhraseWarning')}
-            </div>
+            </div> */}
             <div className="import-account__input-wrapper">
               <label className="import-account__input-label">
                 {this.context.t('walletSeedRestore')}

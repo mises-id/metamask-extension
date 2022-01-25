@@ -8,7 +8,7 @@ import Snackbar from '../../../../components/ui/snackbar';
 import {
   INITIALIZE_CONFIRM_SEED_PHRASE_ROUTE,
   DEFAULT_ROUTE,
-  INITIALIZE_SEED_PHRASE_INTRO_ROUTE,
+  // INITIALIZE_SEED_PHRASE_INTRO_ROUTE,
 } from '../../../../helpers/constants/routes';
 import { exportAsFile } from '../../../../helpers/utils/util';
 import { returnToOnboardingInitiator } from '../../onboarding-initiator-util';
@@ -136,13 +136,14 @@ export default class RevealSeedPhrase extends PureComponent {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  history.push(INITIALIZE_SEED_PHRASE_INTRO_ROUTE);
+                  // 这里我不知道返回到哪里
+                  // history.push(INITIALIZE_SEED_PHRASE_INTRO_ROUTE);
                 }}
               >
                 {`< ${t('back')}`}
               </a>
             </Box>
-            <div className="first-time-flow__header">
+            {/* <div className="first-time-flow__header">
               {t('secretRecoveryPhrase')}
             </div>
             <div className="first-time-flow__text-block">
@@ -150,38 +151,48 @@ export default class RevealSeedPhrase extends PureComponent {
             </div>
             <div className="first-time-flow__text-block">
               {t('secretBackupPhraseWarning')}
+            </div> */}
+            <div className="first-time-flow__text-block">
+              Your Secret Recovery Phrase is a 12-word phrase,it makes easy to
+              back up and restore your account.
             </div>
             {this.renderSecretWordsContainer()}
           </div>
           <div className="seed-phrase__side">
-            <div className="first-time-flow__text-block">{`${t('tips')}:`}</div>
+            <div className="first-time-flow__text-block">WARNING:</div>
             <div className="first-time-flow__text-block">
-              {t('storePhrase')}
+              {`Never disclose your Secret Recovery 
+              Phrase. Anyone with this phrase  can take your 
+              Ether forever. `}
             </div>
             <div className="first-time-flow__text-block">
+              {`Please keep your Secret Recovery Phrase safety, 
+              NO ONE can  recover your Secret  Recovery Phrase.`}
+            </div>
+            {/* <div className="first-time-flow__text-block">
               {t('writePhrase')}
             </div>
             <div className="first-time-flow__text-block">
               {t('memorizePhrase')}
-            </div>
-            <div className="first-time-flow__text-block">
+            </div> */}
+            {/* <div className="first-time-flow__text-block">
               <a
                 className="reveal-seed-phrase__export-text"
                 onClick={this.handleExport}
               >
                 {t('downloadSecretBackup')}
               </a>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="reveal-seed-phrase__buttons">
-          <Button
+          {/* <Button
             type="secondary"
             className="first-time-flow__button"
             onClick={this.handleSkip}
           >
             {t('remindMeLater')}
-          </Button>
+          </Button> */}
           <Button
             type="primary"
             className="first-time-flow__button"

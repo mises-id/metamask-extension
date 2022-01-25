@@ -148,14 +148,15 @@ export default class FirstTimeFlow extends PureComponent {
             )}
           />
           <Route
-            path={INITIALIZE_SELECT_ACTION_ROUTE}
-            component={SelectAction}
-          />
-          <Route
             path={INITIALIZE_UNLOCK_ROUTE}
             render={(routeProps) => (
               <Unlock {...routeProps} onSubmit={this.handleUnlock} />
             )}
+          />
+          <Route
+            exact
+            path={INITIALIZE_SELECT_ACTION_ROUTE}
+            component={SelectAction}
           />
           <Route
             exact
