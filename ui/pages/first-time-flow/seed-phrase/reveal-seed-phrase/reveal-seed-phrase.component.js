@@ -136,7 +136,7 @@ export default class RevealSeedPhrase extends PureComponent {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  // 这里我不知道返回到哪里
+                  history.back(); // doubt
                   // history.push(INITIALIZE_SEED_PHRASE_INTRO_ROUTE);
                 }}
               >

@@ -42,13 +42,13 @@ export default class SelectAction extends PureComponent {
 
     return (
       <div className="select-action">
-        <MetaFoxLogo />
+        {/* <MetaFoxLogo /> */}
 
         <div className="select-action__wrapper">
           <div className="select-action__body">
-            <div className="select-action__body-header">
+            {/* <div className="select-action__body-header">
               {t('newToMetaMask')}
-            </div>
+            </div> */}
             <div className="select-action__select-buttons">
               <div className="select-action__select-button">
                 <div className="select-action__button-content">
