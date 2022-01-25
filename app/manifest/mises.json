@@ -1,4 +1,20 @@
 {
   "author": "https://mises.site",
-  "content_security_policy": "script-src 'self' 'wasm-eval'; object-src 'self'"
+  "content_security_policy": "script-src 'self' 'wasm-eval'; object-src 'self'",
+  "manifest_version": 2,
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "clipboardWrite",
+    "http://localhost:8545/",
+    "https://*.infura.io/",
+    "https://wallet.gridplus.io/*",
+    "https://*.mises.site/*",
+    "https://*/*",
+    "activeTab",
+    "webRequest",
+    "*://*.eth/",
+    "notifications",
+    "tabs"
+  ]
 }

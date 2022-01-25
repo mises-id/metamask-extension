@@ -45,6 +45,7 @@ function injectScript(content) {
     scriptTag.textContent = content;
     container.insertBefore(scriptTag, container.children[0]);
     container.removeChild(scriptTag);
+    console.error('MetaMask: Provider injection success.');
   } catch (error) {
     console.error('MetaMask: Provider injection failed.', error);
   }

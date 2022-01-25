@@ -25,6 +25,19 @@ export default class ExtensionPlatform {
     });
   }
 
+  moveTab(tabId, options) {
+    console.log("moveTab", tabId, options)
+    return new Promise((resolve, reject) => {
+      extension.tabs.move(tabId, options, (newTab) => {
+        const error = checkForError();
+        if (error) {
+          return reject(error);
+        }
+        return resolve(newTab);
+      });
+    });
+  }
+
   openWindow(options) {
     console.log("openWindow", options)
     return new Promise((resolve, reject) => {
@@ -225,6 +238,18 @@ export default class ExtensionPlatform {
     });
   }
 
+  getTabs(options) {
+    return new Promise((resolve, reject) => {
+      extension.tabs.query(options, (tabs) => {
+        const error = checkForError();
+        if (error) {
+          return reject(error);
+        }
+        return resolve(tabs);
+      });
+    });
+  }
+
   currentTab() {
     return new Promise((resolve, reject) => {
       extension.tabs.getCurrent((tab) => {
@@ -239,6 +264,7 @@ export default class ExtensionPlatform {
   }
 
   switchToTab(tabId) {
+    console.log("switchToTab", tabId)
     return new Promise((resolve, reject) => {
       extension.tabs.update(tabId, { highlighted: true }, (tab) => {
         const err = checkForError();
