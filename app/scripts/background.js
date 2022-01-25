@@ -608,16 +608,15 @@ async function openPopup() {
 async function injectDynamic() {
   console.log("injectDynamic")
   // in manifest v2, it affects only the active tab
-  for (const tab of await platform.getTabs({url: "https://*/*"})) {
-    for (const cs of extension.runtime.getManifest().content_scripts) {
-      console.log("executeScript", cs)
-      for (const csjs of cs.js) {
-        extension.tabs.executeScript({
-          file: csjs,
-        });
-      }
-
+  for (const cs of extension.runtime.getManifest().content_scripts) {
+    console.log("executeScript", cs)
+    for (const csjs of cs.js) {
+      extension.tabs.executeScript({
+        file: csjs,
+      });
     }
+    break;
+
   }
 }
 
