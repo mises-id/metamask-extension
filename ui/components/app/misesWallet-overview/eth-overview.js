@@ -8,11 +8,11 @@ import Identicon from '../../ui/identicon';
 import { I18nContext } from '../../../contexts/i18n';
 import {
   SEND_ROUTE,
-  BUILD_QUOTE_ROUTE,
+  // BUILD_QUOTE_ROUTE,
 } from '../../../helpers/constants/routes';
 import {
   useMetricEvent,
-  useNewMetricEvent,
+  // useNewMetricEvent,
 } from '../../../hooks/useMetricEvent';
 import Tooltip from '../../ui/tooltip';
 import UserPreferencedCurrencyDisplay from '../mises-user-preferenced-currency-display';
@@ -24,17 +24,17 @@ import {
   getShouldShowFiat,
   // getIsMainnet,
   // getIsTestnet,
-  getCurrentKeyring,
-  getSwapsDefaultToken,
-  getIsSwapsChain,
+  // getCurrentKeyring,
+  // getSwapsDefaultToken,
+  // getIsSwapsChain,
   getNativeCurrencyImage,
 } from '../../../selectors/selectors';
-import SwapIcon from '../../ui/icon/swap-icon.component';
+// import SwapIcon from '../../ui/icon/swap-icon.component';
 import BuyIcon from '../../ui/icon/overview-buy-icon.component';
 import SendIcon from '../../ui/icon/overview-send-icon.component';
-import { setSwapsFromToken } from '../../../ducks/swaps/swaps';
+// import { setSwapsFromToken } from '../../../ducks/swaps/swaps';
 import IconButton from '../../ui/icon-button';
-import { isHardwareKeyring } from '../../../helpers/utils/hardware';
+// import { isHardwareKeyring } from '../../../helpers/utils/hardware';
 import MisesWalletOverview from './wallet-overview';
 
 const MisesEthOverview = ({ className }) => {
@@ -47,16 +47,16 @@ const MisesEthOverview = ({ className }) => {
       name: 'Clicked Send: Eth',
     },
   });
-  const depositEvent = useMetricEvent({
-    eventOpts: {
-      category: 'Navigation',
-      action: 'Home',
-      name: 'Clicked Deposit',
-    },
-  });
+  // const depositEvent = useMetricEvent({
+  //   eventOpts: {
+  //     category: 'Navigation',
+  //     action: 'Home',
+  //     name: 'Clicked Deposit',
+  //   },
+  // });
   const history = useHistory();
-  const keyring = useSelector(getCurrentKeyring);
-  const usingHardwareWallet = isHardwareKeyring(keyring.type);
+  // const keyring = useSelector(getCurrentKeyring);
+  // const usingHardwareWallet = isHardwareKeyring(keyring.type);
   const balanceIsCached = useSelector(isBalanceCached);
   const showFiat = useSelector(getShouldShowFiat);
   const selectedAccount = useSelector(getSelectedAccount);
@@ -69,15 +69,15 @@ const MisesEthOverview = ({ className }) => {
   } = selectedAccount;
   // const isMainnetChain = useSelector(getIsMainnet);
   // const isTestnetChain = useSelector(getIsTestnet);
-  const isSwapsChain = useSelector(getIsSwapsChain);
+  // const isSwapsChain = useSelector(getIsSwapsChain);
   const primaryTokenImage = useSelector(getNativeCurrencyImage);
 
-  const enteredSwapsEvent = useNewMetricEvent({
-    event: 'Swaps Opened',
-    properties: { source: 'Main View', active_currency: 'MIS' },
-    category: 'swaps',
-  });
-  const defaultSwapsToken = useSelector(getSwapsDefaultToken);
+  // const enteredSwapsEvent = useNewMetricEvent({
+  //   event: 'Swaps Opened',
+  //   properties: { source: 'Main View', active_currency: 'MIS' },
+  //   category: 'swaps',
+  // });
+  // const defaultSwapsToken = useSelector(getSwapsDefaultToken);
 
   return (
     <MisesWalletOverview
@@ -127,11 +127,12 @@ const MisesEthOverview = ({ className }) => {
             // disabled={!(isMainnetChain || isTestnetChain)}
             label={t('receive')}
             onClick={() => {
-              depositEvent();
-              dispatch(showModal({ name: 'DEPOSIT_ETHER' }));
+              // depositEvent();
+              // dispatch(showModal({ name: 'DEPOSIT_ETHER' }));
+              dispatch(showModal({ name: 'ACCOUNT_DETAILS' }));
             }}
           />
-          <IconButton
+          {/* <IconButton
             className="eth-overview__button"
             Icon={BuyIcon}
             // disabled={!(isMainnetChain || isTestnetChain)}
@@ -140,7 +141,7 @@ const MisesEthOverview = ({ className }) => {
               depositEvent();
               dispatch(showModal({ name: 'DEPOSIT_ETHER' }));
             }}
-          />
+          /> */}
           <IconButton
             className="eth-overview__button"
             data-testid="eth-overview-send"
@@ -151,7 +152,7 @@ const MisesEthOverview = ({ className }) => {
               history.push(SEND_ROUTE);
             }}
           />
-          <IconButton
+          {/* <IconButton
             className="eth-overview__button"
             disabled={!isSwapsChain}
             Icon={SwapIcon}
@@ -176,7 +177,7 @@ const MisesEthOverview = ({ className }) => {
                 {contents}
               </Tooltip>
             )}
-          />
+          /> */}
         </>
       }
       className={className}

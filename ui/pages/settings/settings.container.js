@@ -91,6 +91,7 @@ const mapStateToProps = (state, ownProps) => {
     initialBreadCrumbKey,
     mostRecentOverviewPage: getMostRecentOverviewPage(state),
     addNewNetwork,
+    provider: state.metamask.provider,
   };
 };
 

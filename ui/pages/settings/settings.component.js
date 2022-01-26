@@ -18,6 +18,7 @@ import {
   EXPERIMENTAL_ROUTE,
   ADD_NETWORK_ROUTE,
 } from '../../helpers/constants/routes';
+import { MISESNETWORK } from '../../../shared/constants/network';
 import SettingsTab from './settings-tab';
 import AlertsTab from './alerts-tab';
 import NetworksTab from './networks-tab';
@@ -41,6 +42,12 @@ class SettingsPage extends PureComponent {
     initialBreadCrumbKey: PropTypes.string,
     mostRecentOverviewPage: PropTypes.string.isRequired,
     addNewNetwork: PropTypes.bool,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   static contextTypes = {
@@ -166,53 +173,87 @@ class SettingsPage extends PureComponent {
   }
 
   renderTabs() {
-    const { history, currentPath } = this.props;
+    const { history, currentPath, provider } = this.props;
     const { t } = this.context;
-
+    const tabs =
+      provider.type === MISESNETWORK
+        ? [
+            {
+              content: t('general'),
+              description: t('generalSettingsDescription'),
+              key: GENERAL_ROUTE,
+            },
+            {
+              content: t('advanced'),
+              description: t('advancedSettingsDescription'),
+              key: ADVANCED_ROUTE,
+            },
+            {
+              content: t('securityAndPrivacy'),
+              description: t('securitySettingsDescription'),
+              key: SECURITY_ROUTE,
+            },
+            {
+              content: t('alerts'),
+              description: t('alertsSettingsDescription'),
+              key: ALERTS_ROUTE,
+            },
+            {
+              content: t('networks'),
+              description: t('networkSettingsDescription'),
+              key: NETWORKS_ROUTE,
+            },
+            {
+              content: t('about'),
+              description: t('aboutSettingsDescription'),
+              key: ABOUT_US_ROUTE,
+            },
+          ]
+        : [
+            {
+              content: t('general'),
+              description: t('generalSettingsDescription'),
+              key: GENERAL_ROUTE,
+            },
+            {
+              content: t('advanced'),
+              description: t('advancedSettingsDescription'),
+              key: ADVANCED_ROUTE,
+            },
+            {
+              content: t('contacts'),
+              description: t('contactsSettingsDescription'),
+              key: CONTACT_LIST_ROUTE,
+            },
+            {
+              content: t('securityAndPrivacy'),
+              description: t('securitySettingsDescription'),
+              key: SECURITY_ROUTE,
+            },
+            {
+              content: t('alerts'),
+              description: t('alertsSettingsDescription'),
+              key: ALERTS_ROUTE,
+            },
+            {
+              content: t('networks'),
+              description: t('networkSettingsDescription'),
+              key: NETWORKS_ROUTE,
+            },
+            {
+              content: t('experimental'),
+              description: t('experimentalSettingsDescription'),
+              key: EXPERIMENTAL_ROUTE,
+            },
+            {
+              content: t('about'),
+              description: t('aboutSettingsDescription'),
+              key: ABOUT_US_ROUTE,
+            },
+          ];
     return (
       <TabBar
-        tabs={[
-          {
-            content: t('general'),
-            description: t('generalSettingsDescription'),
-            key: GENERAL_ROUTE,
-          },
-          {
-            content: t('advanced'),
-            description: t('advancedSettingsDescription'),
-            key: ADVANCED_ROUTE,
-          },
-          {
-            content: t('contacts'),
-            description: t('contactsSettingsDescription'),
-            key: CONTACT_LIST_ROUTE,
-          },
-          {
-            content: t('securityAndPrivacy'),
-            description: t('securitySettingsDescription'),
-            key: SECURITY_ROUTE,
-          },
-          {
-            content: t('alerts'),
-            description: t('alertsSettingsDescription'),
-            key: ALERTS_ROUTE,
-          },
-          {
-            content: t('networks'),
-            description: t('networkSettingsDescription'),
-            key: NETWORKS_ROUTE,
-          },
-          {
-            content: t('experimental'),
-            description: t('experimentalSettingsDescription'),
-            key: EXPERIMENTAL_ROUTE,
-          },
-          {
-            content: t('about'),
-            description: t('aboutSettingsDescription'),
-            key: ABOUT_US_ROUTE,
-          },
-        ]}
+        tabs={tabs}
         isActive={(key) => {
           if (key === GENERAL_ROUTE && currentPath === SETTINGS_ROUTE) {
             return true;

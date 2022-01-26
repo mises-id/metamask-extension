@@ -17,6 +17,7 @@ const mapStateToProps = (state) => {
     featureFlags: { showIncomingTransactions } = {},
     participateInMetaMetrics,
     usePhishDetect,
+    provider,
   } = metamask;
 
   return {
@@ -24,6 +25,7 @@ const mapStateToProps = (state) => {
     showIncomingTransactions,
     participateInMetaMetrics,
     usePhishDetect,
+    provider,
   };
 };
 

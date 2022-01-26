@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-12-13 16:44:36
- * @LastEditTime: 2022-01-12 09:53:44
+ * @LastEditTime: 2022-01-26 21:35:10
  * @LastEditors: lmk
  * @Description:
  */
@@ -47,7 +47,7 @@ import {
 } from '../../helpers/constants/routes';
 import { MISESNETWORK } from '../../helpers/constants/mises/common';
 import MisesAssetList from '../../components/app/mises-asset-list';
-import MisesCollectiblesList from '../../components/app/misesCollectibles-list';
+// import MisesCollectiblesList from '../../components/app/misesCollectibles-list';
 import BetaHomeFooter from './beta-home-footer.component';
 
 const LEARN_MORE_URL =
@@ -473,14 +473,10 @@ export default class Home extends PureComponent {
                   <Tab
                     activeClassName="home__tab--active"
                     className="home__tab"
-                    data-testid="home__nfts-tab"
-                    name={t('nfts')}
+                    data-testid="home__activity-tab"
+                    name="Transactions"
                   >
-                    <MisesCollectiblesList
-                      onAddNFT={() => {
-                        history.push(ADD_COLLECTIBLE_ROUTE);
-                      }}
-                    />
+                    <TransactionList />
                   </Tab>
                 </Tabs>
               </div>

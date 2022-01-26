@@ -124,6 +124,9 @@ export default function TransactionListItem({
       history.push(`${CONFIRM_TRANSACTION_ROUTE}/${id}`);
       return;
     }
+    if (transactionGroup.transactionGroupType === 'mises') {
+      return;
+    }
     setShowDetails((prev) => !prev);
   }, [isUnapproved, history, id]);
 

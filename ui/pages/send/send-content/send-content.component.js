@@ -69,7 +69,7 @@ export default class SendContent extends Component {
             : null}
           {error ? this.renderError(error) : null}
           {warning ? this.renderWarning() : null}
-          {this.maybeRenderAddContact()}
+          {/* {this.maybeRenderAddContact()} */}
           <SendAssetRow />
           <SendAmountRow />
           {networkOrAccountNotSupports1559 ? <SendGasRow /> : null}

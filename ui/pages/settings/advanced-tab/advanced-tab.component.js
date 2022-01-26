@@ -17,6 +17,7 @@ import {
   LEDGER_TRANSPORT_TYPES,
   LEDGER_USB_VENDOR_ID,
 } from '../../../../shared/constants/hardware-wallets';
+import { MISESNETWORK } from '../../../../shared/constants/network';
 
 export default class AdvancedTab extends PureComponent {
   static contextTypes = {
@@ -51,6 +52,12 @@ export default class AdvancedTab extends PureComponent {
     setDismissSeedBackUpReminder: PropTypes.func.isRequired,
     dismissSeedBackUpReminder: PropTypes.bool.isRequired,
     userHasALedgerAccount: PropTypes.bool.isRequired,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   state = {
@@ -646,25 +653,30 @@ export default class AdvancedTab extends PureComponent {
   }
 
   render() {
-    const { warning } = this.props;
+    const { warning, provider } = this.props;
 
     const notUsingFirefox = getPlatform() !== PLATFORM_FIREFOX;
-
+    const isMises = provider.type === MISESNETWORK;
     return (
       <div className="settings-page__body">
         {warning ? <div className="settings-tab__error">{warning}</div> : null}
-        {this.renderStateLogs()}
-        {this.renderMobileSync()}
+        {!isMises && this.renderStateLogs()}
+        {!isMises && this.renderMobileSync()}
+
         {this.renderResetAccount()}
-        {this.renderAdvancedGasInputInline()}
-        {this.renderHexDataOptIn()}
-        {this.renderShowConversionInTestnets()}
-        {this.renderToggleTestNetworks()}
-        {this.renderUseNonceOptIn()}
+
+        {!isMises && this.renderAdvancedGasInputInline()}
+        {!isMises && this.renderHexDataOptIn()}
+        {!isMises && this.renderShowConversionInTestnets()}
+        {!isMises && this.renderToggleTestNetworks()}
+        {!isMises && this.renderUseNonceOptIn()}
+
         {this.renderAutoLockTimeLimit()}
-        {this.renderThreeBoxControl()}
-        {this.renderIpfsGatewayControl()}
-        {notUsingFirefox ? this.renderLedgerLiveControl() : null}
+
+        {!isMises && this.renderThreeBoxControl()}
+        {!isMises && this.renderIpfsGatewayControl()}
+        {!isMises && notUsingFirefox ? this.renderLedgerLiveControl() : null}
+
         {this.renderDismissSeedBackupReminderControl()}
       </div>
     );

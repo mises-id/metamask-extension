@@ -11,6 +11,7 @@ import { Menu, MenuItem } from '../../ui/menu';
 import {
   getCurrentChainId,
   getCurrentKeyring,
+  getProvider,
   getRpcPrefsForCurrentProvider,
   getSelectedIdentity,
 } from '../../../selectors';
@@ -21,6 +22,7 @@ import {
 } from '../../../hooks/useMetricEvent';
 import { getEnvironmentType } from '../../../../app/scripts/lib/util';
 import { ENVIRONMENT_TYPE_FULLSCREEN } from '../../../../shared/constants/app';
+import { MISESNETWORK } from '../../../../shared/constants/network';
 
 export default function AccountOptionsMenu({ anchorElement, onClose }) {
   const t = useI18nContext();
@@ -28,6 +30,7 @@ export default function AccountOptionsMenu({ anchorElement, onClose }) {
   const history = useHistory();
 
   const keyring = useSelector(getCurrentKeyring);
+  const provider = useSelector(getProvider);
   const chainId = useSelector(getCurrentChainId);
   const rpcPrefs = useSelector(getRpcPrefsForCurrentProvider);
   const selectedIdentity = useSelector(getSelectedIdentity);
@@ -70,34 +73,36 @@ export default function AccountOptionsMenu({ anchorElement, onClose }) {
   });
 
   const isRemovable = keyring.type !== 'HD Key Tree';
-
+  const isMises = provider.type === MISESNETWORK;
   return (
     <Menu
       anchorElement={anchorElement}
       className="account-options-menu"
       onHide={onClose}
     >
-      <MenuItem
-        onClick={() => {
-          blockExplorerLinkClickedEvent();
-          global.platform.openTab({
-            url: addressLink,
-          });
-          onClose();
-        }}
-        subtitle={
-          blockExplorerUrlSubTitle ? (
-            <span className="account-options-menu__explorer-origin">
-              {blockExplorerUrlSubTitle}
-            </span>
-          ) : null
-        }
-        iconClassName="fas fa-external-link-alt"
-      >
-        {rpcPrefs.blockExplorerUrl
-          ? t('viewinExplorer', [t('blockExplorerAccountAction')])
-          : t('viewOnEtherscan', [t('blockExplorerAccountAction')])}
-      </MenuItem>
+      {!isMises && (
+        <MenuItem
+          onClick={() => {
+            blockExplorerLinkClickedEvent();
+            global.platform.openTab({
+              url: addressLink,
+            });
+            onClose();
+          }}
+          subtitle={
+            blockExplorerUrlSubTitle ? (
+              <span className="account-options-menu__explorer-origin">
+                {blockExplorerUrlSubTitle}
+              </span>
+            ) : null
+          }
+          iconClassName="fas fa-external-link-alt"
+        >
+          {rpcPrefs.blockExplorerUrl
+            ? t('viewinExplorer', [t('blockExplorerAccountAction')])
+            : t('viewOnEtherscan', [t('blockExplorerAccountAction')])}
+        </MenuItem>
+      )}
       {getEnvironmentType() === ENVIRONMENT_TYPE_FULLSCREEN ? null : (
         <MenuItem
           onClick={() => {

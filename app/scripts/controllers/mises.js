@@ -10,7 +10,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-01-25 16:49:14
+ * @LastEditTime: 2022-01-26 21:29:55
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -250,6 +250,7 @@ export default class MisesController {
 
   async initMisesBalance() {
     const keyringList = await this.getKeyringAccounts();
+    console.log(keyringList, 'initMisesBalance');
     const accountList = keyringList.map(async (val) => {
       const misesBalance = await this.getUserBalance(val);
       const user = await this.getMisesUser(val);
@@ -368,6 +369,7 @@ export default class MisesController {
         return transactionGroup;
       });
       console.log(list);
+      list.sort((a, b) => a.height - b.height);
       return list;
     } catch (error) {
       console.log(error);

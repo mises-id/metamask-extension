@@ -328,6 +328,7 @@ export default class AccountMenu extends Component {
       toggleAccountMenu,
       lockMetamask,
       history,
+      provider,
     } = this.props;
 
     if (!isAccountMenuOpen) {
@@ -413,39 +414,43 @@ export default class AccountMenu extends Component {
           }
           text={t('importAccount')}
         />
-        <AccountMenuItem
-          onClick={() => {
-            toggleAccountMenu();
-            metricsEvent({
-              eventOpts: {
-                category: 'Navigation',
-                action: 'Main Menu',
-                name: 'Clicked Connect Hardware',
-              },
-            });
-            if (getEnvironmentType() === ENVIRONMENT_TYPE_POPUP) {
-              global.platform.openExtensionInBrowser(CONNECT_HARDWARE_ROUTE);
-            } else {
-              history.push(CONNECT_HARDWARE_ROUTE);
+        {provider.type !== MISESNETWORK && (
+          <AccountMenuItem
+            onClick={() => {
+              toggleAccountMenu();
+              metricsEvent({
+                eventOpts: {
+                  category: 'Navigation',
+                  action: 'Main Menu',
+                  name: 'Clicked Connect Hardware',
+                },
+              });
+              if (getEnvironmentType() === ENVIRONMENT_TYPE_POPUP) {
+                global.platform.openExtensionInBrowser(CONNECT_HARDWARE_ROUTE);
+              } else {
+                history.push(CONNECT_HARDWARE_ROUTE);
+              }
+            }}
+            icon={
+              <img
+                className="account-menu__item-icon"
+                src="images/connect-icon.svg"
+                alt={t('connectHardwareWallet')}
+              />
             }
-          }}
-          icon={
-            <img
-              className="account-menu__item-icon"
-              src="images/connect-icon.svg"
-              alt={t('connectHardwareWallet')}
-            />
-          }
-          text={t('connectHardwareWallet')}
-        />
+            text={t('connectHardwareWallet')}
+          />
+        )}
         <div className="account-menu__divider" />
-        <AccountMenuItem
-          onClick={() => {
-            global.platform.openTab({ url: supportLink });
-          }}
-          icon={<img src="images/support.svg" alt={supportText} />}
-          text={supportText}
-        />
+        {provider.type !== MISESNETWORK && (
+          <AccountMenuItem
+            onClick={() => {
+              global.platform.openTab({ url: supportLink });
+            }}
+            icon={<img src="images/support.svg" alt={supportText} />}
+            text={supportText}
+          />
+        )}
 
         <AccountMenuItem
           onClick={() => {

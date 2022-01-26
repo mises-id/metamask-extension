@@ -55,6 +55,7 @@ export const mapStateToProps = (state) => {
     ledgerTransportType,
     dismissSeedBackUpReminder,
     userHasALedgerAccount,
+    provider: state.metamask.provider,
   };
 };
 

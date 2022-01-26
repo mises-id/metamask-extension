@@ -4,6 +4,7 @@ import availableCurrencies from '../../../helpers/constants/available-conversion
 import Dropdown from '../../../components/ui/dropdown';
 import ToggleButton from '../../../components/ui/toggle-button';
 import locales from '../../../../app/_locales/index.json';
+import { MISESNETWORK } from '../../../../shared/constants/network';
 
 const sortedCurrencies = availableCurrencies.sort((a, b) => {
   return a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase());
@@ -43,6 +44,12 @@ export default class SettingsTab extends PureComponent {
     setUseNativeCurrencyAsPrimaryCurrencyPreference: PropTypes.func,
     hideZeroBalanceTokens: PropTypes.bool,
     setHideZeroBalanceTokens: PropTypes.func,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   renderCurrentConversion() {
@@ -208,16 +215,16 @@ export default class SettingsTab extends PureComponent {
   }
 
   render() {
-    const { warning } = this.props;
-
+    const { warning, provider } = this.props;
+    const isMises = provider.type === MISESNETWORK;
     return (
       <div className="settings-page__body">
         {warning ? <div className="settings-tab__error">{warning}</div> : null}
-        {this.renderCurrentConversion()}
-        {this.renderUsePrimaryCurrencyOptions()}
+        {!isMises && this.renderCurrentConversion()}
+        {!isMises && this.renderUsePrimaryCurrencyOptions()}
         {this.renderCurrentLocale()}
         {this.renderBlockieOptIn()}
-        {this.renderHideZeroBalanceTokensOptIn()}
+        {!isMises && this.renderHideZeroBalanceTokensOptIn()}
       </div>
     );
   }

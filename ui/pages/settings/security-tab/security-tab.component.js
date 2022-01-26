@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import ToggleButton from '../../../components/ui/toggle-button';
 import { REVEAL_SEED_ROUTE } from '../../../helpers/constants/routes';
 import Button from '../../../components/ui/button';
+import { MISESNETWORK } from '../../../../shared/constants/network';
 
 export default class SecurityTab extends PureComponent {
   static contextTypes = {
@@ -19,6 +20,12 @@ export default class SecurityTab extends PureComponent {
     setShowIncomingTransactionsFeatureFlag: PropTypes.func.isRequired,
     setUsePhishDetect: PropTypes.func.isRequired,
     usePhishDetect: PropTypes.bool.isRequired,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   renderSeedWords() {
@@ -142,15 +149,15 @@ export default class SecurityTab extends PureComponent {
   }
 
   render() {
-    const { warning } = this.props;
-
+    const { warning, provider } = this.props;
+    const isMises = provider.type === MISESNETWORK;
     return (
       <div className="settings-page__body">
         {warning ? <div className="settings-tab__error">{warning}</div> : null}
         {this.renderSeedWords()}
-        {this.renderIncomingTransactionsOptIn()}
+        {!isMises && this.renderIncomingTransactionsOptIn()}
         {this.renderPhishingDetectionToggle()}
-        {this.renderMetaMetricsOptIn()}
+        {!isMises && this.renderMetaMetricsOptIn()}
       </div>
     );
   }

@@ -36,6 +36,7 @@ const mapStateToProps = (state) => {
     useBlockie,
     useNativeCurrencyAsPrimaryCurrency,
     hideZeroBalanceTokens,
+    provider: state.metamask.provider,
   };
 };
 
