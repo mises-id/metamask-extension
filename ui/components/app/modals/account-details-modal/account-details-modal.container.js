@@ -15,6 +15,7 @@ const mapStateToProps = (state) => {
     keyrings: state.metamask.keyrings,
     rpcPrefs: getRpcPrefsForCurrentProvider(state),
     misesOpt: getMisesOpt(state),
+    provider: state.metamask.provider,
   };
 };
 

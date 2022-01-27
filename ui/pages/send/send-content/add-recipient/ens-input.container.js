@@ -11,6 +11,7 @@ import EnsInput from './ens-input.component';
 const mapStateToProps = (state) => {
   return {
     misesOpt: getMisesOpt(state),
+    provider: state.metamask.provider,
   };
 };
 function mapDispatchToProps(dispatch) {

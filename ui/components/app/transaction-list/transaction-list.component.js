@@ -5,7 +5,11 @@ import {
   nonceSortedCompletedTransactionsSelector,
   nonceSortedPendingTransactionsSelector,
 } from '../../../selectors/transactions';
-import { getCurrentChainId, getProvider } from '../../../selectors';
+import {
+  getCurrentChainId,
+  getProvider,
+  getSelectedAddress,
+} from '../../../selectors';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import TransactionListItem from '../transaction-list-item';
 import Button from '../../ui/button';
@@ -80,6 +84,7 @@ export default function TransactionList({
   );
   const chainId = useSelector(getCurrentChainId);
   const provider = useSelector(getProvider);
+  const selectedAddress = useSelector(getSelectedAddress);
   const pendingTransactions = useMemo(
     () =>
       getFilteredTransactionGroups(
@@ -122,6 +127,7 @@ export default function TransactionList({
   }
   const pendingLength = pendingTransactions.length;
   useEffect(() => {
+    setmisesCompletedTransactions([]);
     if (provider.type === MISESNETWORK) {
       recentTransactions()
         .then((res) => {
@@ -133,7 +139,7 @@ export default function TransactionList({
     } else {
       setmisesCompletedTransactions([]);
     }
-  }, [provider.type]);
+  }, [provider.type, selectedAddress]);
 
   return (
     <div className="transaction-list">

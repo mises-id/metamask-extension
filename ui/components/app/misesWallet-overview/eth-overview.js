@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import classnames from 'classnames';
@@ -17,7 +17,7 @@ import {
 import Tooltip from '../../ui/tooltip';
 import UserPreferencedCurrencyDisplay from '../mises-user-preferenced-currency-display';
 import { PRIMARY, SECONDARY } from '../../../helpers/constants/common';
-import { showModal } from '../../../store/actions';
+import { showModal, updataBalance } from '../../../store/actions';
 import {
   isBalanceCached,
   getSelectedAccount,
@@ -78,7 +78,12 @@ const MisesEthOverview = ({ className }) => {
   //   category: 'swaps',
   // });
   // const defaultSwapsToken = useSelector(getSwapsDefaultToken);
-
+  useEffect(() => {
+    updataBalance();
+    return () => {
+      updataBalance('close');
+    };
+  }, []);
   return (
     <MisesWalletOverview
       balance={

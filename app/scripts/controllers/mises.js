@@ -10,11 +10,15 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-01-26 21:29:55
+ * @LastEditTime: 2022-01-27 17:21:49
  * @LastEditors: lmk
  * @Description: mises controller
  */
 export default class MisesController {
+  timer;
+
+  intervalTime = 20000;
+
   constructor({ exportAccount, getKeyringAccounts }) {
     this.exportAccount = exportAccount;
     this.getKeyringAccounts = getKeyringAccounts;
@@ -31,6 +35,38 @@ export default class MisesController {
     this.misesUser = this.misesSdk.userMgr();
     this.misesAppMgr = this.misesSdk.appMgr();
     console.log(this.misesSdk, this.misesUser, this.misesAppMgr);
+  }
+
+  async updataBalance(type) {
+    if (type === 'close') {
+      this.clearTimer();
+      return;
+    }
+    this.timer = setTimeout(() => {
+      this.updataBalance();
+    }, this.intervalTime);
+    const balanceList = await this.getAccountMisesBalance();
+    Promise.all(balanceList).then((res) => {
+      let { accountList } = this.store.getState();
+      accountList = accountList.map((val) => {
+        const findIndex = res.findIndex((item) => item.address === val.address);
+        if (findIndex > -1) {
+          val.misesBalance = res[findIndex].misesBalance;
+        }
+        return val;
+      });
+      console.log('updataBalance', accountList);
+      this.store.updateState({
+        accountList,
+      });
+    });
+  }
+
+  clearTimer() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
   }
 
   /**
@@ -248,9 +284,8 @@ export default class MisesController {
     return this.misesSdk.disconnect(appid, userid);
   }
 
-  async initMisesBalance() {
+  async getAccountMisesBalance() {
     const keyringList = await this.getKeyringAccounts();
-    console.log(keyringList, 'initMisesBalance');
     const accountList = keyringList.map(async (val) => {
       const misesBalance = await this.getUserBalance(val);
       const user = await this.getMisesUser(val);
@@ -260,6 +295,12 @@ export default class MisesController {
         misesId: user.address(),
       };
     });
+    return accountList;
+  }
+
+  async initMisesBalance() {
+    console.log('initMisesBalance');
+    const accountList = await this.getAccountMisesBalance();
     await Promise.all(accountList).then((res) => {
       console.log(res, 'accountList');
       this.store.updateState({

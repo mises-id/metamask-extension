@@ -10,6 +10,7 @@ import {
   isBurnAddress,
   isValidHexAddress,
 } from '../../../../../shared/modules/hexstring-utils';
+import { MISESNETWORK } from '../../../../../shared/constants/network';
 
 export default class EnsInput extends Component {
   static contextTypes = {
@@ -32,6 +33,12 @@ export default class EnsInput extends Component {
     initializeEnsSlice: PropTypes.func.isRequired,
     resetEnsResolution: PropTypes.func.isRequired,
     misesOpt: PropTypes.object.isRequired,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   componentDidMount() {
@@ -93,7 +100,13 @@ export default class EnsInput extends Component {
 
   render() {
     const { t } = this.context;
-    const { className, selectedAddress, selectedName, userInput } = this.props;
+    const {
+      className,
+      selectedAddress,
+      selectedName,
+      userInput,
+      provider,
+    } = this.props;
 
     const hasSelectedAddress = Boolean(selectedAddress);
 
@@ -134,7 +147,11 @@ export default class EnsInput extends Component {
                 className="ens-input__wrapper__input"
                 type="text"
                 dir="auto"
-                placeholder={t('recipientAddressPlaceholder')}
+                placeholder={
+                  provider.type === MISESNETWORK
+                    ? 'Search Mises ID'
+                    : t('recipientAddressPlaceholder')
+                }
                 onChange={this.onChange}
                 onPaste={this.onPaste}
                 spellCheck="false"

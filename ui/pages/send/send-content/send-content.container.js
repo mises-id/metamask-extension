@@ -5,6 +5,7 @@ import {
   getIsEthGasPriceFetched,
   getNoGasPriceFetched,
   checkNetworkOrAccountNotSupports1559,
+  getProvider,
 } from '../../../selectors';
 import {
   getIsAssetSendable,
@@ -35,6 +36,7 @@ function mapStateToProps(state) {
     ),
     getIsBalanceInsufficient: getIsBalanceInsufficient(state),
     asset: getSendAsset(state),
+    provider: getProvider(state),
   };
 }
 

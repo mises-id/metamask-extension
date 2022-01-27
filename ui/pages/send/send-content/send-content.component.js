@@ -9,6 +9,7 @@ import {
   UNSENDABLE_ASSET_ERROR_KEY,
   INSUFFICIENT_FUNDS_FOR_GAS_ERROR_KEY,
 } from '../../../helpers/constants/error-keys';
+import { MISESNETWORK } from '../../../../shared/constants/network';
 import { ASSET_TYPES } from '../../../ducks/send';
 import SendAmountRow from './send-amount-row';
 import SendHexDataRow from './send-hex-data-row';
@@ -34,6 +35,12 @@ export default class SendContent extends Component {
     networkOrAccountNotSupports1559: PropTypes.bool,
     getIsBalanceInsufficient: PropTypes.bool,
     asset: PropTypes.object,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   render() {
@@ -47,13 +54,16 @@ export default class SendContent extends Component {
       networkOrAccountNotSupports1559,
       getIsBalanceInsufficient,
       asset,
+      provider,
     } = this.props;
 
     let gasError;
-    if (gasIsExcessive) gasError = GAS_PRICE_EXCESSIVE_ERROR_KEY;
-    else if (noGasPrice) gasError = GAS_PRICE_FETCH_FAILURE_ERROR_KEY;
-    else if (getIsBalanceInsufficient)
-      gasError = INSUFFICIENT_FUNDS_FOR_GAS_ERROR_KEY;
+    if (provider.type !== MISESNETWORK) {
+      if (gasIsExcessive) gasError = GAS_PRICE_EXCESSIVE_ERROR_KEY;
+      else if (noGasPrice) gasError = GAS_PRICE_FETCH_FAILURE_ERROR_KEY;
+      else if (getIsBalanceInsufficient)
+        gasError = INSUFFICIENT_FUNDS_FOR_GAS_ERROR_KEY;
+    }
     const showHexData =
       this.props.showHexData && asset.type !== ASSET_TYPES.TOKEN;
 

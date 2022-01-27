@@ -80,15 +80,15 @@ export default function TransactionListItem({
   const group = useTransactionDisplayData(transactionGroup);
   if (mises) {
     transactionGroup.title = t(transactionGroup.category);
-    transactionGroup.subtitle = t(
-      transactionGroup.category === 'receive' ? 'fromAddress' : 'toAddress',
-      [
-        shortenAddress(
-          transactionGroup.recipientAddress,
-          MISES_TRUNCATED_ADDRESS_START_CHARS,
-        ),
-      ],
-    );
+    const isreceive = transactionGroup.category === 'receive';
+    transactionGroup.subtitle = t(isreceive ? 'fromAddress' : 'toAddress', [
+      shortenAddress(
+        isreceive
+          ? transactionGroup.senderAddress
+          : transactionGroup.recipientAddress,
+        MISES_TRUNCATED_ADDRESS_START_CHARS,
+      ),
+    ]);
   }
   const {
     title,

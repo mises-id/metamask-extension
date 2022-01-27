@@ -8,6 +8,7 @@ import EditableLabel from '../../../ui/editable-label';
 import Button from '../../../ui/button';
 import { getURLHostName } from '../../../../helpers/utils/util';
 import { isHardwareKeyring } from '../../../../helpers/utils/hardware';
+import { MISESNETWORK } from '../../../../../shared/constants/network';
 
 export default class AccountDetailsModal extends Component {
   static propTypes = {
@@ -18,6 +19,12 @@ export default class AccountDetailsModal extends Component {
     keyrings: PropTypes.array,
     rpcPrefs: PropTypes.object,
     misesOpt: PropTypes.object.isRequired,
+    provider: PropTypes.shape({
+      nickname: PropTypes.string,
+      rpcUrl: PropTypes.string,
+      type: PropTypes.string,
+      ticker: PropTypes.string,
+    }).isRequired,
   };
 
   static contextTypes = {
@@ -34,6 +41,7 @@ export default class AccountDetailsModal extends Component {
       keyrings,
       rpcPrefs,
       misesOpt,
+      provider,
     } = this.props;
     const { name, address } = selectedIdentity;
     const { isMises, account = {} } = misesOpt;
@@ -63,31 +71,33 @@ export default class AccountDetailsModal extends Component {
 
         <div className="account-details-modal__divider" />
 
-        <Button
-          type="secondary"
-          className="account-details-modal__button"
-          onClick={() => {
-            const accountLink = getAccountLink(address, chainId, rpcPrefs);
-            this.context.trackEvent({
-              category: 'Navigation',
-              event: 'Clicked Block Explorer Link',
-              properties: {
-                link_type: 'Account Tracker',
-                action: 'Account Details Modal',
-                block_explorer_domain: getURLHostName(accountLink),
-              },
-            });
-            global.platform.openTab({
-              url: accountLink,
-            });
-          }}
-        >
-          {rpcPrefs.blockExplorerUrl
-            ? this.context.t('blockExplorerView', [
-                getURLHostName(rpcPrefs.blockExplorerUrl),
-              ])
-            : this.context.t('etherscanViewOn')}
-        </Button>
+        {provider.type !== MISESNETWORK && (
+          <Button
+            type="secondary"
+            className="account-details-modal__button"
+            onClick={() => {
+              const accountLink = getAccountLink(address, chainId, rpcPrefs);
+              this.context.trackEvent({
+                category: 'Navigation',
+                event: 'Clicked Block Explorer Link',
+                properties: {
+                  link_type: 'Account Tracker',
+                  action: 'Account Details Modal',
+                  block_explorer_domain: getURLHostName(accountLink),
+                },
+              });
+              global.platform.openTab({
+                url: accountLink,
+              });
+            }}
+          >
+            {rpcPrefs.blockExplorerUrl
+              ? this.context.t('blockExplorerView', [
+                  getURLHostName(rpcPrefs.blockExplorerUrl),
+                ])
+              : this.context.t('etherscanViewOn')}
+          </Button>
+        )}
 
         {exportPrivateKeyFeatureEnabled ? (
           <Button

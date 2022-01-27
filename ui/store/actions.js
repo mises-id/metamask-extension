@@ -3083,3 +3083,7 @@ export async function resetTranstionFlag() {
 export function recentTransactions() {
   return promisifiedBackground.recentTransactions();
 }
+
+export function updataBalance(type) {
+  return promisifiedBackground.updataBalance(type);
+}
