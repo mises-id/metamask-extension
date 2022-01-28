@@ -143,112 +143,127 @@ class RestoreVaultPage extends Component {
       this.hasError();
 
     return (
-      <div className="first-view-main-wrapper">
-        <div className="first-view-main">
-          <div className="import-account">
-            <a
-              className="import-account__back-button"
-              onClick={(e) => {
-                e.preventDefault();
-                this.props.leaveImportSeedScreenState();
-                this.props.history.goBack();
-              }}
-              href="#"
-            >
-              {`< ${t('back')}`}
-            </a>
-            {/* <div className="import-account__title">
-              {this.context.t('restoreAccountWithSeed')}
-            </div> */}
-            <div className="import-account__selector-label">
-              Import Misesid & Metamask account
-            </div>
-            {/* <div className="import-account__selector-typography">
+      <div>
+        <div className="first-time-flow__create-back">
+          <a
+            className="first-time-flow__back"
+            onClick={(e) => {
+              e.preventDefault();
+              this.props.leaveImportSeedScreenState();
+              this.props.history.goBack();
+            }}
+            href="#"
+          >
+            <img
+              src="./images/back.png"
+              alt=""
+              height={22}
+              style={{ display: 'block' }}
+            />
+          </a>
+        </div>
+        <div className="first-view-main-wrapper">
+          <div className="first-view-main">
+            <div className="import-account">
+              {/* <div className="import-account__title">
+                {this.context.t('restoreAccountWithSeed')} 
+              </div> */}
+              <div className="import-account__selector-label">
+                Import Misesid & Metamask account
+              </div>
+              {/* <div className="import-account__selector-typography">
               {this.context.t('secretPhraseWarning')}
             </div> */}
-            <div className="import-account__input-wrapper">
-              <label className="import-account__input-label">
-                {this.context.t('walletSeedRestore')}
-              </label>
-              {showSeedPhrase ? (
-                <textarea
-                  className="import-account__secret-phrase"
-                  onChange={(e) => this.handleSeedPhraseChange(e.target.value)}
-                  value={seedPhrase}
-                  autoFocus
-                  placeholder={this.context.t('separateEachWord')}
-                />
-              ) : (
-                <TextField
-                  className="import-account__textarea import-account__seedphrase"
-                  type="password"
-                  onChange={(e) => this.handleSeedPhraseChange(e.target.value)}
-                  value={seedPhrase}
-                  autoFocus
-                  placeholder={t('seedPhrasePlaceholderPaste')}
-                />
-              )}
-              <span className="error">{seedPhraseError}</span>
-              <div
-                className="import-account__checkbox-container"
-                onClick={this.toggleShowSeedPhrase}
-              >
-                <div
-                  className="import-account__checkbox"
-                  tabIndex="0"
-                  id="seed-checkbox"
-                  role="checkbox"
-                  onKeyPress={this.toggleShowSeedPhrase}
-                  aria-checked={showSeedPhrase}
-                  aria-labelledby="ftf-chk1-label"
-                >
-                  {showSeedPhrase ? <i className="fa fa-check fa-2x" /> : null}
-                </div>
-                <label
-                  htmlFor="seed-checkbox"
-                  id="ftf-chk1-label"
-                  className="import-account__checkbox-label"
-                >
-                  {t('showSeedPhrase')}
+              <div className="import-account__input-wrapper">
+                <label className="import-account__input-label">
+                  {this.context.t('walletSeedRestore')}
                 </label>
+                {showSeedPhrase ? (
+                  <textarea
+                    className="import-account__secret-phrase"
+                    onChange={(e) =>
+                      this.handleSeedPhraseChange(e.target.value)
+                    }
+                    value={seedPhrase}
+                    autoFocus
+                    placeholder={this.context.t('separateEachWord')}
+                  />
+                ) : (
+                  <TextField
+                    className="import-account__textarea import-account__seedphrase first-time-flow__input"
+                    type="password"
+                    onChange={(e) =>
+                      this.handleSeedPhraseChange(e.target.value)
+                    }
+                    value={seedPhrase}
+                    autoFocus
+                    placeholder={t('seedPhrasePlaceholderPaste')}
+                  />
+                )}
+                <span className="error">{seedPhraseError}</span>
+                <div
+                  className="import-account__checkbox-container"
+                  onClick={this.toggleShowSeedPhrase}
+                >
+                  <div
+                    tabIndex="0"
+                    id="seed-checkbox"
+                    role="checkbox"
+                    onKeyPress={this.toggleShowSeedPhrase}
+                    aria-checked={showSeedPhrase}
+                    className={`first-time-flow__checkbox ${
+                      showSeedPhrase ? 'first-time-flow__checked' : ''
+                    }`}
+                    aria-labelledby="ftf-chk1-label"
+                  >
+                    {showSeedPhrase ? <i className="fa fa-check " /> : null}
+                  </div>
+                  <label
+                    htmlFor="seed-checkbox"
+                    id="ftf-chk1-label"
+                    className="import-account__checkbox-label"
+                  >
+                    {t('showSeedPhrase')}
+                  </label>
+                </div>
               </div>
+              <TextField
+                id="password"
+                label={t('newPassword')}
+                type="password"
+                className="first-time-flow__input"
+                value={this.state.password}
+                onChange={(event) =>
+                  this.handlePasswordChange(event.target.value)
+                }
+                error={passwordError}
+                autoComplete="new-password"
+                margin="normal"
+                largeLabel
+              />
+              <TextField
+                id="confirm-password"
+                label={t('confirmPassword')}
+                type="password"
+                className="first-time-flow__input"
+                value={this.state.confirmPassword}
+                onChange={(event) =>
+                  this.handleConfirmPasswordChange(event.target.value)
+                }
+                error={confirmPasswordError}
+                autoComplete="confirm-password"
+                margin="normal"
+                largeLabel
+              />
+              <Button
+                type="primary"
+                className="first-time-flow__button"
+                onClick={() => !disabled && this.onClick()}
+                disabled={disabled}
+              >
+                {this.context.t('restore')}
+              </Button>
             </div>
-            <TextField
-              id="password"
-              label={t('newPassword')}
-              type="password"
-              className="first-time-flow__input"
-              value={this.state.password}
-              onChange={(event) =>
-                this.handlePasswordChange(event.target.value)
-              }
-              error={passwordError}
-              autoComplete="new-password"
-              margin="normal"
-              largeLabel
-            />
-            <TextField
-              id="confirm-password"
-              label={t('confirmPassword')}
-              type="password"
-              className="first-time-flow__input"
-              value={this.state.confirmPassword}
-              onChange={(event) =>
-                this.handleConfirmPasswordChange(event.target.value)
-              }
-              error={confirmPasswordError}
-              autoComplete="confirm-password"
-              margin="normal"
-              largeLabel
-            />
-            <Button
-              type="primary"
-              className="first-time-flow__button"
-              onClick={() => !disabled && this.onClick()}
-              disabled={disabled}
-            >
-              {this.context.t('restore')}
-            </Button>
           </div>
         </div>
       </div>

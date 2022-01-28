@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { clearKeyrings } from '../../../store/actions';
 import FirstTimeFlowSwitch from './first-time-flow-switch.component';
 
 const mapStateToProps = ({ metamask }) => {
@@ -17,4 +18,13 @@ const mapStateToProps = ({ metamask }) => {
   };
 };
 
-export default connect(mapStateToProps)(FirstTimeFlowSwitch);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    clearKeyrings: () => dispatch(clearKeyrings()),
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(FirstTimeFlowSwitch);

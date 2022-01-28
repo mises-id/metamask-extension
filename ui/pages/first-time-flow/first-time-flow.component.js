@@ -39,6 +39,7 @@ export default class FirstTimeFlow extends PureComponent {
 
   state = {
     seedPhrase: '',
+    password: '',
   };
 
   componentDidMount() {
@@ -50,7 +51,6 @@ export default class FirstTimeFlow extends PureComponent {
       showingSeedPhraseBackupAfterOnboarding,
       seedPhraseBackedUp,
     } = this.props;
-
     if (
       completedOnboarding &&
       (!showingSeedPhraseBackupAfterOnboarding || seedPhraseBackedUp)
@@ -58,8 +58,7 @@ export default class FirstTimeFlow extends PureComponent {
       history.push(DEFAULT_ROUTE);
       return;
     }
-
-    if (isInitialized && !isUnlocked) {
+    if (isInitialized && !isUnlocked && seedPhraseBackedUp) {
       history.push(INITIALIZE_UNLOCK_ROUTE);
     }
   }
@@ -69,7 +68,7 @@ export default class FirstTimeFlow extends PureComponent {
 
     try {
       const seedPhrase = await createNewAccount(password);
-      this.setState({ seedPhrase });
+      this.setState({ seedPhrase, password });
     } catch (error) {
       throw new Error(error.message);
     }
@@ -100,7 +99,7 @@ export default class FirstTimeFlow extends PureComponent {
   };
 
   render() {
-    const { seedPhrase } = this.state;
+    const { seedPhrase, password } = this.state;
     const { verifySeedPhrase } = this.props;
 
     return (
@@ -111,6 +110,7 @@ export default class FirstTimeFlow extends PureComponent {
             render={(routeProps) => (
               <SeedPhrase
                 {...routeProps}
+                password={password}
                 seedPhrase={seedPhrase}
                 verifySeedPhrase={verifySeedPhrase}
               />

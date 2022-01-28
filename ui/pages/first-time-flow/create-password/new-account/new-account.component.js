@@ -6,6 +6,7 @@ import {
   INITIALIZE_SELECT_ACTION_ROUTE,
 } from '../../../../helpers/constants/routes';
 import TextField from '../../../../components/ui/text-field';
+import MetaFoxLogo from '../../../../components/ui/metafox-logo';
 
 export default class NewAccount extends PureComponent {
   static contextTypes = {
@@ -148,6 +149,7 @@ export default class NewAccount extends PureComponent {
       <div>
         <div className="first-time-flow__create-back">
           <a
+            className="first-time-flow__back"
             onClick={(e) => {
               e.preventDefault();
               this.context.metricsEvent({
@@ -161,70 +163,84 @@ export default class NewAccount extends PureComponent {
             }}
             href="#"
           >
-            {`< ${t('back')}`}
+            <img
+              src="./images/back.png"
+              alt=""
+              height={22}
+              style={{ display: 'block' }}
+            />
+            {/* {`< ${t('back')}`} */}
+            {/* {`<`} */}
           </a>
+          <MetaFoxLogo />
         </div>
-        <div className="first-time-flow__header">{t('createPassword')}</div>
-        <form className="first-time-flow__form" onSubmit={this.handleCreate}>
-          <TextField
-            id="create-password"
-            label={t('newPassword')}
-            type="password"
-            className="first-time-flow__input"
-            value={password}
-            onChange={(event) => this.handlePasswordChange(event.target.value)}
-            error={passwordError}
-            autoFocus
-            autoComplete="new-password"
-            margin="normal"
-            fullWidth
-            largeLabel
-          />
-          <TextField
-            id="confirm-password"
-            label={t('confirmPassword')}
-            type="password"
-            className="first-time-flow__input"
-            value={confirmPassword}
-            onChange={(event) =>
-              this.handleConfirmPasswordChange(event.target.value)
-            }
-            error={confirmPasswordError}
-            autoComplete="confirm-password"
-            margin="normal"
-            fullWidth
-            largeLabel
-          />
-          <div
-            className="first-time-flow__checkbox-container"
-            onClick={this.toggleTermsCheck}
-          >
+        <div className="first-time-flow__form-box">
+          <div className="first-time-flow__header">{t('createPassword')}</div>
+          <form className="first-time-flow__form" onSubmit={this.handleCreate}>
+            <TextField
+              id="create-password"
+              label={t('newPassword')}
+              type="password"
+              className="first-time-flow__input"
+              value={password}
+              onChange={(event) =>
+                this.handlePasswordChange(event.target.value)
+              }
+              error={passwordError}
+              autoFocus
+              autoComplete="new-password"
+              margin="normal"
+              fullWidth
+              largeLabel
+            />
+            <TextField
+              id="confirm-password"
+              label={t('confirmPassword')}
+              type="password"
+              className="first-time-flow__input"
+              value={confirmPassword}
+              onChange={(event) =>
+                this.handleConfirmPasswordChange(event.target.value)
+              }
+              error={confirmPasswordError}
+              autoComplete="confirm-password"
+              margin="normal"
+              fullWidth
+              largeLabel
+            />
             <div
-              className="first-time-flow__checkbox"
-              tabIndex="0"
-              role="checkbox"
-              onKeyPress={this.onTermsKeyPress}
-              aria-checked={termsChecked}
-              aria-labelledby="ftf-chk1-label"
+              className="first-time-flow__checkbox-container"
+              onClick={this.toggleTermsCheck}
             >
-              {termsChecked ? <i className="fa fa-check fa-2x" /> : null}
+              <div
+                className={`first-time-flow__checkbox ${
+                  termsChecked ? 'first-time-flow__checked' : ''
+                }`}
+                tabIndex="0"
+                role="checkbox"
+                onKeyPress={this.onTermsKeyPress}
+                aria-checked={termsChecked}
+                aria-labelledby="ftf-chk1-label"
+              >
+                {termsChecked ? <i className="fa fa-check" /> : null}
+              </div>
+              <span
+                id="ftf-chk1-label"
+                className="first-time-flow__checkbox-label"
+              >
+                {t('acceptTermsOfUse')}
+              </span>
             </div>
-            <span
-              id="ftf-chk1-label"
-              className="first-time-flow__checkbox-label"
+            <Button
+              type="primary"
+              className="first-time-flow__button"
+              disabled={!this.isValid() || !termsChecked}
+              onClick={this.handleCreate}
             >
-              {t('acceptTermsOfUse')}
-            </span>
-          </div>
-          <Button
-            type="primary"
-            className="first-time-flow__button"
-            disabled={!this.isValid() || !termsChecked}
-            onClick={this.handleCreate}
-          >
-            {t('create')}
-          </Button>
-        </form>
+              {t('create')}
+            </Button>
+          </form>
+        </div>
       </div>
     );
   }

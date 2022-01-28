@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
-import Box from '../../../../components/ui/box';
+// import Box from '../../../../components/ui/box';
 import LockIcon from '../../../../components/ui/lock-icon';
 import Button from '../../../../components/ui/button';
 import Snackbar from '../../../../components/ui/snackbar';
@@ -12,6 +11,7 @@ import {
 } from '../../../../helpers/constants/routes';
 import { exportAsFile } from '../../../../helpers/utils/util';
 import { returnToOnboardingInitiator } from '../../onboarding-initiator-util';
+import MetafoxLogo from '../../../../components/ui/metafox-logo';
 
 export default class RevealSeedPhrase extends PureComponent {
   static contextTypes = {
@@ -31,7 +31,7 @@ export default class RevealSeedPhrase extends PureComponent {
   };
 
   state = {
-    isShowingSeedPhrase: false,
+    isShowingSeedPhrase: true,
   };
 
   handleExport = () => {
@@ -85,19 +85,16 @@ export default class RevealSeedPhrase extends PureComponent {
     const { t } = this.context;
     const { seedPhrase } = this.props;
     const { isShowingSeedPhrase } = this.state;
-
+    const seedPhraseArr = seedPhrase.split(' ');
     return (
       <div className="reveal-seed-phrase__secret">
-        <div
-          className={classnames(
-            'reveal-seed-phrase__secret-words notranslate',
-            {
-              'reveal-seed-phrase__secret-words--hidden': !isShowingSeedPhrase,
-            },
-          )}
-        >
-          {seedPhrase}
-        </div>
+        {seedPhraseArr.map((val, index) => {
+          return (
+            <div className="reveal-seed-phrase__secret_item" key={index}>
+              <div className="reveal-seed-phrase__secret_word">{val}</div>
+            </div>
+          );
+        })}
         {!isShowingSeedPhrase && (
           <div
             className="reveal-seed-phrase__secret-blocker"
@@ -129,29 +126,36 @@ export default class RevealSeedPhrase extends PureComponent {
 
     return (
       <div className="reveal-seed-phrase">
+        <div className="first-time-flow__create-back">
+          <a
+            className="first-time-flow__back"
+            onClick={(e) => {
+              e.preventDefault();
+              history.goBack(); // doubt
+            }}
+            href="#"
+          >
+            <img
+              src="./images/back.png"
+              alt=""
+              height={22}
+              style={{ display: 'block' }}
+            />
+          </a>
+          <MetafoxLogo />
+        </div>
         <div className="seed-phrase__sections">
           <div className="seed-phrase__main">
-            <Box marginBottom={4}>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  history.back(); // doubt
-                  // history.push(INITIALIZE_SEED_PHRASE_INTRO_ROUTE);
-                }}
-              >
-                {`< ${t('back')}`}
-              </a>
-            </Box>
-            {/* <div className="first-time-flow__header">
-              {t('secretRecoveryPhrase')}
-            </div>
+            {/* 
             <div className="first-time-flow__text-block">
               {t('secretBackupPhraseDescription')}
             </div>
             <div className="first-time-flow__text-block">
               {t('secretBackupPhraseWarning')}
             </div> */}
+            <div className="first-time-flow__header">
+              {t('secretRecoveryPhrase')}
+            </div>
             <div className="first-time-flow__text-block">
               Your Secret Recovery Phrase is a 12-word phrase,it makes easy to
               back up and restore your account.
@@ -159,13 +163,16 @@ export default class RevealSeedPhrase extends PureComponent {
             {this.renderSecretWordsContainer()}
           </div>
           <div className="seed-phrase__side">
-            <div className="first-time-flow__text-block">WARNING:</div>
             <div className="first-time-flow__text-block">
+              <img src="./images/warning.png" width={13} alt="" />
+              <span className="seed-phrase__warning">WARNING:</span>
+            </div>
+            <div className="first-time-flow__text-block1">
               {`Never disclose your Secret Recovery 
               Phrase. Anyone with this phrase  can take your 
               Ether forever. `}
             </div>
-            <div className="first-time-flow__text-block">
+            <div className="first-time-flow__text-block1">
               {`Please keep your Secret Recovery Phrase safety, 
               NO ONE can  recover your Secret  Recovery Phrase.`}
             </div>
@@ -184,23 +191,23 @@ export default class RevealSeedPhrase extends PureComponent {
               </a>
             </div> */}
           </div>
-        </div>
-        <div className="reveal-seed-phrase__buttons">
-          {/* <Button
-            type="secondary"
-            className="first-time-flow__button"
-            onClick={this.handleSkip}
-          >
-            {t('remindMeLater')}
-          </Button> */}
-          <Button
-            type="primary"
-            className="first-time-flow__button"
-            onClick={this.handleNext}
-            disabled={!isShowingSeedPhrase}
-          >
-            {t('next')}
-          </Button>
+          <div className="reveal-seed-phrase__buttons">
+            {/* <Button
+              type="secondary"
+              className="first-time-flow__button"
+              onClick={this.handleSkip}
+            >
+              {t('remindMeLater')}
+            </Button> */}
+            <Button
+              type="primary"
+              className="first-time-flow__button"
+              onClick={this.handleNext}
+              disabled={!isShowingSeedPhrase}
+            >
+              {t('next')}
+            </Button>
+          </div>
         </div>
         {onboardingInitiator ? (
           <Snackbar

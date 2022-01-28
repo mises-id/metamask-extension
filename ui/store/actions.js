@@ -128,6 +128,7 @@ export function createNewVaultAndRestore(password, seed) {
 }
 
 export function createNewVaultAndGetSeedPhrase(password) {
+  // password
   return async (dispatch) => {
     dispatch(showLoadingIndication());
 
@@ -278,6 +279,7 @@ export function resetAccount() {
         dispatch(showAccountsPage());
         resolve(account);
       });
+      promisifiedBackground.resetMisesAccount();
     });
   };
 }
@@ -3086,4 +3088,21 @@ export function recentTransactions() {
 
 export function updataBalance(type) {
   return promisifiedBackground.updataBalance(type);
+}
+
+export function setMisesAccountUserInfo() {
+  return async (dispatch, getState) => {
+    const state = getState();
+    console.log(state);
+    dispatch(showLoadingIndication());
+    const selectedAddress = getSelectedAddress(state);
+    await promisifiedBackground.setMisesUser(selectedAddress);
+    dispatch(hideLoadingIndication());
+  };
+}
+
+export function clearKeyrings() {
+  return () => {
+    promisifiedBackground.clearKeyrings();
+  };
 }

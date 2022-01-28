@@ -52,9 +52,9 @@ export default class SelectAction extends PureComponent {
             <div className="select-action__select-buttons">
               <div className="select-action__select-button">
                 <div className="select-action__button-content">
-                  <div className="select-action__button-symbol">
+                  {/* <div className="select-action__button-symbol">
                     <img src="./images/download-alt.svg" alt="" />
-                  </div>
+                  </div> */}
                   <div className="select-action__button-text-big">
                     {t('importWalletTitle1')}
                   </div>
@@ -78,9 +78,9 @@ export default class SelectAction extends PureComponent {
               </div>
               <div className="select-action__select-button">
                 <div className="select-action__button-content">
-                  <div className="select-action__button-symbol">
+                  {/* <div className="select-action__button-symbol">
                     <img src="./images/thin-plus.svg" alt="" />
-                  </div>
+                  </div> */}
                   <div className="select-action__button-text-big">
                     {t('letsGoSetUp1')}
                   </div>

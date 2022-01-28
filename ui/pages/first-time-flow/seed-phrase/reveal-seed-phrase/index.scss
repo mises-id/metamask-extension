@@ -2,21 +2,20 @@
   @media screen and (max-width: $break-small) {
     display: flex;
     flex-direction: column;
-    width: 96%;
-    margin-left: 2%;
-    margin-right: 2%;
+    // width: 96%;
+    // margin-left: 2%;
+    // margin-right: 2%;
   }
 
   &__secret {
     position: relative;
     display: flex;
     justify-content: center;
-    border: 1px solid #cdcdcd;
-    border-radius: 6px;
+    border: 1px solid #EEEEEE;
+    border-radius: 5px;
     background-color: $white;
-    padding: 18px;
-    margin-top: 36px;
-    max-width: 350px;
+    padding: 15px 7px;
+    flex-wrap: wrap;
   }
 
   &__secret-words {
@@ -29,7 +28,20 @@
       filter: blur(5px);
     }
   }
-
+  &__secret_item{
+    width: 33.33333%;
+    padding: 3px;
+  }
+  &__secret_word{
+    height: 50px;
+    line-height: 50px;
+    background: #F7F7FF;
+    color: #5D61FF;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+  }
   &__secret-blocker {
     position: absolute;
     top: 0;
@@ -67,10 +79,10 @@
 
   &__buttons {
     display: flex;
-    margin-top: 10px;
+    margin-top: 40px;
 
-    .first-time-flow__button:last-of-type {
-      margin-left: 10px;
-    }
+    // .first-time-flow__button:last-of-type {
+    //   margin-left: 10px;
+    // }
   }
 }

@@ -73,6 +73,7 @@ $typography-variants: (
   'h1': 2.5rem,
   'h2': 2rem,
   'h3': 1.5rem,
+  'h4-1': 1.25rem,
   'h4': 1.125rem,
   'h5': 1rem,
   'h6': 0.875rem,
@@ -86,6 +87,7 @@ $font-size-h1: map-get($typography-variants, 'h1');
 $font-size-h2: map-get($typography-variants, 'h2');
 $font-size-h3: map-get($typography-variants, 'h3');
 $font-size-h4: map-get($typography-variants, 'h4');
+$font-size-h4-1: map-get($typography-variants, 'h4-1');
 $font-size-h5: map-get($typography-variants, 'h5');
 $font-size-h6: map-get($typography-variants, 'h6');
 $font-size-paragraph: map-get($typography-variants, 'paragraph');
@@ -116,6 +118,10 @@ $font-size-h9: map-get($typography-variants, 'h9');
 
 @mixin H4 {
   @include typography('h4');
+}
+
+@mixin H4-1 {
+  @include typography('h4-1');
 }
 
 @mixin H5 {

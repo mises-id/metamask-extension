@@ -1,14 +1,14 @@
 /*
  * @Author: lmk
  * @Date: 2021-11-16 23:11:00
- * @LastEditTime: 2021-12-17 11:42:38
+ * @LastEditTime: 2022-01-28 14:29:56
  * @LastEditors: lmk
  * @Description:
  */
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import MetaFoxLogo from '../../../components/ui/metafox-logo';
+// import MetaFoxLogo from '../../../components/ui/metafox-logo';
 import {
   INITIALIZE_CREATE_PASSWORD_ROUTE,
   INITIALIZE_IMPORT_WITH_SEED_PHRASE_ROUTE,
@@ -39,7 +39,7 @@ export default class CreatePassword extends PureComponent {
 
     return (
       <div className="first-time-flow__wrapper">
-        <MetaFoxLogo />
+        {/* <MetaFoxLogo /> */}
         <Switch>
           {/* import */}
           <Route

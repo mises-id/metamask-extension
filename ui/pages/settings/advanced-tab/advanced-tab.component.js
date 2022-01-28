@@ -668,7 +668,7 @@ export default class AdvancedTab extends PureComponent {
         {!isMises && this.renderAdvancedGasInputInline()}
         {!isMises && this.renderHexDataOptIn()}
         {!isMises && this.renderShowConversionInTestnets()}
-        {!isMises && this.renderToggleTestNetworks()}
+        {this.renderToggleTestNetworks()}
         {!isMises && this.renderUseNonceOptIn()}
 
         {this.renderAutoLockTimeLimit()}

@@ -7,6 +7,7 @@ import {
   INITIALIZE_SEED_PHRASE_ROUTE,
 } from '../../../../helpers/constants/routes';
 import { exportAsFile } from '../../../../helpers/utils/util';
+import MetafoxLogo from '../../../../components/ui/metafox-logo';
 import DraggableSeed from './draggable-seed.component';
 
 const EMPTY_SEEDS = Array(12).fill(null);
@@ -26,6 +27,7 @@ export default class ConfirmSeedPhrase extends PureComponent {
     seedPhrase: PropTypes.string,
     initializeThreeBox: PropTypes.func,
     setSeedPhraseBackedUp: PropTypes.func,
+    setMisesAccountUserInfo: PropTypes.func,
   };
 
   state = {
@@ -70,7 +72,12 @@ export default class ConfirmSeedPhrase extends PureComponent {
   };
 
   handleSubmit = async () => {
-    const { history, setSeedPhraseBackedUp, initializeThreeBox } = this.props;
+    const {
+      history,
+      setSeedPhraseBackedUp,
+      initializeThreeBox,
+      setMisesAccountUserInfo,
+    } = this.props;
 
     if (!this.isValid()) {
       return;
@@ -87,6 +94,7 @@ export default class ConfirmSeedPhrase extends PureComponent {
 
       setSeedPhraseBackedUp(true).then(async () => {
         initializeThreeBox();
+        await setMisesAccountUserInfo();
         history.replace(INITIALIZE_END_OF_FLOW_ROUTE);
       });
     } catch (error) {
@@ -132,68 +140,78 @@ export default class ConfirmSeedPhrase extends PureComponent {
 
     return (
       <div className="confirm-seed-phrase">
-        <div className="confirm-seed-phrase__back-button">
+        <div className="first-time-flow__create-back">
           <a
+            className="first-time-flow__back"
             onClick={(e) => {
               e.preventDefault();
               history.push(INITIALIZE_SEED_PHRASE_ROUTE);
             }}
             href="#"
           >
-            {`< ${t('back')}`}
+            <img
+              src="./images/back.png"
+              alt=""
+              height={22}
+              style={{ display: 'block' }}
+            />
           </a>
+          <MetafoxLogo />
         </div>
-        <div className="first-time-flow__header">
-          {t('confirmSecretBackupPhrase')}
-        </div>
-        <div className="first-time-flow__text-block">
-          {t('selectEachPhrase')}
-        </div>
-        <div
-          className={classnames('confirm-seed-phrase__selected-seed-words', {
-            'confirm-seed-phrase__selected-seed-words--dragging':
-              draggingSeedIndex > -1,
-          })}
-        >
-          {this.renderPendingSeeds()}
-          {this.renderSelectedSeeds()}
-        </div>
-        <div
-          className="confirm-seed-phrase__sorted-seed-words"
-          data-testid="seed-phrase-sorted"
-        >
-          {sortedSeedWords.map((word, index) => {
-            const isSelected = selectedSeedIndices.includes(index);
+        <div className="first-time-flow__confirm__main">
+          <div className="first-time-flow__header">
+            {t('confirmSecretBackupPhrase')}
+          </div>
+          <div className="first-time-flow__text-block">
+            {t('selectEachPhrase')}
+          </div>
+          <div
+            className={classnames('confirm-seed-phrase__selected-seed-words', {
+              'confirm-seed-phrase__selected-seed-words--dragging':
+                draggingSeedIndex > -1,
+            })}
+          >
+            {this.renderPendingSeeds()}
+            {this.renderSelectedSeeds()}
+          </div>
+          <div
+            className="confirm-seed-phrase__sorted-seed-words"
+            data-testid="seed-phrase-sorted"
+          >
+            {sortedSeedWords.map((word, index) => {
+              const isSelected = selectedSeedIndices.includes(index);
 
-            return (
-              <DraggableSeed
-                key={index}
-                seedIndex={index}
-                index={index}
-                setHoveringIndex={this.setHoveringIndex}
-                onDrop={this.onDrop}
-                className="confirm-seed-phrase__seed-word--sorted"
-                selected={isSelected}
-                onClick={() => {
-                  if (isSelected) {
-                    this.handleDeselectSeedWord(index);
-                  } else {
-                    this.handleSelectSeedWord(index);
-                  }
-                }}
-                word={word}
-              />
-            );
-          })}
+              return (
+                <DraggableSeed
+                  key={index}
+                  seedIndex={index}
+                  index={index}
+                  setHoveringIndex={this.setHoveringIndex}
+                  onDrop={this.onDrop}
+                  className="confirm-seed-phrase__seed-word--sorted"
+                  selected={isSelected}
+                  onClick={() => {
+                    if (isSelected) {
+                      this.handleDeselectSeedWord(index);
+                    } else {
+                      this.handleSelectSeedWord(index);
+                    }
+                  }}
+                  word={word}
+                />
+              );
+            })}
+          </div>
+          <div className="submit-btn">
+            <Button
+              type="primary"
+              onClick={this.handleSubmit}
+              disabled={!this.isValid()}
+            >
+              {t('confirm')}
+            </Button>
+          </div>
         </div>
-        <Button
-          type="primary"
-          className="first-time-flow__button"
-          onClick={this.handleSubmit}
-          disabled={!this.isValid()}
-        >
-          {t('confirm')}
-        </Button>
       </div>
     );
   }
@@ -211,7 +229,7 @@ export default class ConfirmSeedPhrase extends PureComponent {
       return (
         <DraggableSeed
           key={`selected-${seedIndex}-${index}`}
-          className="confirm-seed-phrase__selected-seed-words__selected-seed"
+          className="confirm-seed-phrase__selected-seed-words__selected-seed selected-item"
           index={index}
           seedIndex={seedIndex}
           word={word}

@@ -67,7 +67,9 @@ export default class EndOfFlowScreen extends PureComponent {
 
     return (
       <div className="end-of-flow">
-        <MetaFoxLogo />
+        <div className="end-of-flow__header">
+          <MetaFoxLogo />
+        </div>
         <div className="end-of-flow__emoji">🎉</div>
         <div className="first-time-flow__header">Congradulations!</div>
         <div className="first-time-flow__text-block end-of-flow__text-1">

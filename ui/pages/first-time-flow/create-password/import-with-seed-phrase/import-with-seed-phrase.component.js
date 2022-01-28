@@ -7,6 +7,7 @@ import {
   INITIALIZE_SELECT_ACTION_ROUTE,
   INITIALIZE_END_OF_FLOW_ROUTE,
 } from '../../../../helpers/constants/routes';
+import MetafoxLogo from '../../../../components/ui/metafox-logo';
 
 const { isValidMnemonic } = ethers.utils;
 
@@ -214,6 +215,7 @@ export default class ImportWithSeedPhrase extends PureComponent {
       <form className="first-time-flow__form" onSubmit={this.handleImport}>
         <div className="first-time-flow__create-back">
           <a
+            className="first-time-flow__back"
             onClick={(e) => {
               e.preventDefault();
               this.context.metricsEvent({
@@ -231,112 +233,128 @@ export default class ImportWithSeedPhrase extends PureComponent {
             }}
             href="#"
           >
-            {`< ${t('back')}`}
+            <img
+              src="./images/back.png"
+              alt=""
+              height={22}
+              style={{ display: 'block' }}
+            />
           </a>
+          <MetafoxLogo />
         </div>
+
         {/* <div className="first-time-flow__header">
           {t('importAccountSeedPhrase')}
         </div> */}
-        <div className="first-time-flow__text-block">
-          Import Misesid & Metamask account
-        </div>
-        <div className="first-time-flow__textarea-wrapper">
-          <label>{t('secretRecoveryPhrase')}</label>
-          {showSeedPhrase ? (
-            <textarea
-              className="first-time-flow__textarea"
-              onChange={(e) => this.handleSeedPhraseChange(e.target.value)}
-              value={this.state.seedPhrase}
-              placeholder={t('seedPhrasePlaceholder')}
-              autoComplete="off"
-            />
-          ) : (
-            <TextField
-              className="first-time-flow__textarea first-time-flow__seedphrase"
-              type="password"
-              onChange={(e) => this.handleSeedPhraseChange(e.target.value)}
-              value={this.state.seedPhrase}
-              placeholder={t('seedPhrasePlaceholderPaste')}
-              autoComplete="off"
-            />
-          )}
-          {seedPhraseError ? (
-            <span className="error">{seedPhraseError}</span>
-          ) : null}
+        <div className="phrase-content">
+          <div className="import-account__selector-label">
+            Import Misesid & Metamask account
+          </div>
+          <div className="first-time-flow__textarea-wrapper">
+            <label>{t('secretRecoveryPhrase')}</label>
+            {showSeedPhrase ? (
+              <textarea
+                className="first-time-flow__textarea"
+                onChange={(e) => this.handleSeedPhraseChange(e.target.value)}
+                value={this.state.seedPhrase}
+                placeholder={t('seedPhrasePlaceholder')}
+                autoComplete="off"
+              />
+            ) : (
+              <TextField
+                className="first-time-flow__textarea first-time-flow__seedphrase"
+                type="password"
+                onChange={(e) => this.handleSeedPhraseChange(e.target.value)}
+                value={this.state.seedPhrase}
+                placeholder={t('seedPhrasePlaceholderPaste')}
+                autoComplete="off"
+              />
+            )}
+            {seedPhraseError ? (
+              <span className="error">{seedPhraseError}</span>
+            ) : null}
+            <div
+              className="first-time-flow__checkbox-container"
+              onClick={this.toggleShowSeedPhrase}
+            >
+              <div
+                tabIndex="0"
+                role="checkbox"
+                className={`first-time-flow__checkbox ${
+                  showSeedPhrase ? 'first-time-flow__checked' : ''
+                }`}
+                onKeyPress={this.toggleShowSeedPhrase}
+                aria-checked={showSeedPhrase}
+                aria-labelledby="ftf-chk1-label"
+              >
+                {showSeedPhrase ? <i className="fa fa-check" /> : null}
+              </div>
+              <span
+                id="ftf-chk1-label"
+                className="first-time-flow__checkbox-label"
+              >
+                {t('showSeedPhrase')}
+              </span>
+            </div>
+          </div>
+          <TextField
+            id="password"
+            label={t('newPassword')}
+            type="password"
+            className="first-time-flow__input"
+            value={this.state.password}
+            onChange={(event) => this.handlePasswordChange(event.target.value)}
+            error={passwordError}
+            autoComplete="new-password"
+            margin="normal"
+            largeLabel
+          />
+          <TextField
+            id="confirm-password"
+            label={t('confirmPassword')}
+            type="password"
+            className="first-time-flow__input"
+            value={this.state.confirmPassword}
+            onChange={(event) =>
+              this.handleConfirmPasswordChange(event.target.value)
+            }
+            error={confirmPasswordError}
+            autoComplete="new-password"
+            margin="normal"
+            largeLabel
+          />
           <div
             className="first-time-flow__checkbox-container"
-            onClick={this.toggleShowSeedPhrase}
+            onClick={this.toggleTermsCheck}
           >
             <div
-              className="first-time-flow__checkbox"
               tabIndex="0"
               role="checkbox"
-              onKeyPress={this.toggleShowSeedPhrase}
-              aria-checked={showSeedPhrase}
+              onKeyPress={this.onTermsKeyPress}
+              aria-checked={termsChecked}
+              className={`first-time-flow__checkbox first-time-flow__terms ${
+                termsChecked ? 'first-time-flow__checked' : ''
+              }`}
               aria-labelledby="ftf-chk1-label"
             >
-              {showSeedPhrase ? <i className="fa fa-check fa-2x" /> : null}
+              {termsChecked ? <i className="fa fa-check" /> : null}
             </div>
             <span
               id="ftf-chk1-label"
               className="first-time-flow__checkbox-label"
             >
-              {t('showSeedPhrase')}
+              {t('acceptTermsOfUse')}
             </span>
           </div>
-        </div>
-        <TextField
-          id="password"
-          label={t('newPassword')}
-          type="password"
-          className="first-time-flow__input"
-          value={this.state.password}
-          onChange={(event) => this.handlePasswordChange(event.target.value)}
-          error={passwordError}
-          autoComplete="new-password"
-          margin="normal"
-          largeLabel
-        />
-        <TextField
-          id="confirm-password"
-          label={t('confirmPassword')}
-          type="password"
-          className="first-time-flow__input"
-          value={this.state.confirmPassword}
-          onChange={(event) =>
-            this.handleConfirmPasswordChange(event.target.value)
-          }
-          error={confirmPasswordError}
-          autoComplete="new-password"
-          margin="normal"
-          largeLabel
-        />
-        <div
-          className="first-time-flow__checkbox-container"
-          onClick={this.toggleTermsCheck}
-        >
-          <div
-            className="first-time-flow__checkbox first-time-flow__terms"
-            tabIndex="0"
-            role="checkbox"
-            onKeyPress={this.onTermsKeyPress}
-            aria-checked={termsChecked}
-            aria-labelledby="ftf-chk1-label"
+          <Button
+            type="primary"
+            submit
+            className="first-time-flow__button"
+            disabled={!this.isValid() || !termsChecked}
           >
-            {termsChecked ? <i className="fa fa-check fa-2x" /> : null}
-          </div>
-          <span id="ftf-chk1-label" className="first-time-flow__checkbox-label">
-            {t('acceptTermsOfUse')}
-          </span>
+            {t('import')}
+          </Button>
         </div>
-        <Button
-          type="primary"
-          submit
-          className="first-time-flow__button"
-          disabled={!this.isValid() || !termsChecked}
-        >
-          {t('import')}
-        </Button>
       </form>
     );
   }

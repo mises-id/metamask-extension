@@ -10,7 +10,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-01-27 17:21:49
+ * @LastEditTime: 2022-01-28 23:19:39
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -19,9 +19,10 @@ export default class MisesController {
 
   intervalTime = 20000;
 
-  constructor({ exportAccount, getKeyringAccounts }) {
+  constructor({ exportAccount, getKeyringAccounts, getSelectedAddress }) {
     this.exportAccount = exportAccount;
     this.getKeyringAccounts = getKeyringAccounts;
+    this.getSelectedAddress = getSelectedAddress;
     this.store = new ObservableStore({
       priKeyHex: '',
       accountList: [],
@@ -47,7 +48,7 @@ export default class MisesController {
     }, this.intervalTime);
     const balanceList = await this.getAccountMisesBalance();
     Promise.all(balanceList).then((res) => {
-      let { accountList } = this.store.getState();
+      let accountList = this.getAccountList();
       accountList = accountList.map((val) => {
         const findIndex = res.findIndex((item) => item.address === val.address);
         if (findIndex > -1) {
@@ -60,6 +61,11 @@ export default class MisesController {
         accountList,
       });
     });
+  }
+
+  getAccountList() {
+    const { accountList } = this.store.getState();
+    return accountList;
   }
 
   clearTimer() {
@@ -372,18 +378,24 @@ export default class MisesController {
   }
 
   async recentTransactions() {
+    const selectedAddress = this.getSelectedAddress();
+    const accountList = this.getAccountList();
+    const index = accountList.findIndex(
+      (val) => val.address === selectedAddress,
+    );
+    const currentAddress = accountList[index] || {};
+    console.log(currentAddress);
     try {
       const activeUser = this.misesUser.activeUser();
-      let list = await activeUser.recentTransactions();
+      let list = await activeUser.recentTransactions(currentAddress.height);
       list = list.map((val) => {
         val.rawLog = JSON.parse(val.rawLog);
         val.raw = val.rawLog[0].events;
-        console.log(val);
         const transfers = val.raw[3].attributes;
-        const amount = transfers[2].value.replace('umis', '|').split('|');
+        const amount = transfers[2].value.replace('umis', '|umis').split('|');
         const currency = this.coinDefine.fromCoin({
           amount: amount[0],
-          denom: 'umis',
+          denom: amount[1],
         });
         const balanceObj = this.coinDefine.toCoinMIS(currency);
         balanceObj.denom = balanceObj.denom.toUpperCase();
@@ -391,6 +403,7 @@ export default class MisesController {
           category:
             transfers[0].value === activeUser.address() ? 'receive' : 'send',
           date: `${val.height}`,
+          height: val.height,
           displayedStatusKey: 'confirmed',
           isPending: false,
           primaryCurrency: `${balanceObj.amount} ${balanceObj.denom}`,
@@ -409,8 +422,13 @@ export default class MisesController {
         };
         return transactionGroup;
       });
-      console.log(list);
       list.sort((a, b) => a.height - b.height);
+      if (index > -1) {
+        accountList[index].transactions = list;
+        this.store.updateState({
+          accountList,
+        });
+      }
       return list;
     } catch (error) {
       console.log(error);
@@ -420,5 +438,23 @@ export default class MisesController {
 
   getAccountFlag() {
     return window.localStorage.getItem('setAccount');
+  }
+
+  async setAccountTransactionsHeight() {
+    const selectedAddress = this.getSelectedAddress();
+    const accountList = this.getAccountList();
+    const index = accountList.findIndex(
+      (val) => val.address === selectedAddress,
+    );
+    if (index > -1) {
+      const { transactions } = accountList[index];
+      const last = transactions[transactions.length - 1] || {};
+      console.log(last);
+      accountList[index].height = last.height;
+      console.log(last.height, accountList, 'setAccountTransactionsHeight');
+      this.store.updateState({
+        accountList,
+      });
+    }
   }
 }

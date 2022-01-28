@@ -5,7 +5,7 @@ import {
   DEFAULT_ROUTE,
   LOCK_ROUTE,
   INITIALIZE_END_OF_FLOW_ROUTE,
-  INITIALIZE_WELCOME_ROUTE,
+  // INITIALIZE_WELCOME_ROUTE,
   INITIALIZE_UNLOCK_ROUTE,
   INITIALIZE_SELECT_ACTION_ROUTE,
 } from '../../../helpers/constants/routes';
@@ -16,6 +16,7 @@ export default class FirstTimeFlowSwitch extends PureComponent {
     isInitialized: PropTypes.bool,
     isUnlocked: PropTypes.bool,
     seedPhraseBackedUp: PropTypes.bool,
+    clearKeyrings: PropTypes.func,
   };
 
   render() {
@@ -24,8 +25,17 @@ export default class FirstTimeFlowSwitch extends PureComponent {
       isInitialized,
       isUnlocked,
       seedPhraseBackedUp,
+      clearKeyrings,
     } = this.props;
-
+    console.log(
+      {
+        completedOnboarding,
+        isInitialized,
+        isUnlocked,
+        seedPhraseBackedUp,
+      },
+      'wewe',
+    );
     if (completedOnboarding) {
       return <Redirect to={{ pathname: DEFAULT_ROUTE }} />;
     }
@@ -37,8 +47,8 @@ export default class FirstTimeFlowSwitch extends PureComponent {
     if (isUnlocked) {
       return <Redirect to={{ pathname: LOCK_ROUTE }} />;
     }
-
-    if (!isInitialized) {
+    if (!isInitialized || (isInitialized && !seedPhraseBackedUp)) {
+      isInitialized && !seedPhraseBackedUp && clearKeyrings();
       return <Redirect to={{ pathname: INITIALIZE_SELECT_ACTION_ROUTE }} />;
     }
 

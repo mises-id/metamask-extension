@@ -5,24 +5,54 @@
 
   &__sorted-seed-words {
     max-width: $break-small;
+    display: flex;
+    flex-flow: row wrap;
+    padding: 30px 0;
   }
 
   &__seed-word {
-    display: inline-flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 18px;
-    width: 94px;
-    height: 41px;
-    margin: 4px;
+    // display: inline-flex;
+    // flex-flow: row nowrap;
+    // align-items: center;
+    // justify-content: center;
+    width: 33.3333%;
+    
+    // margin: 4px;
     text-align: center;
-    border-radius: 4px;
+    // border-radius: 4px;
+    padding: 3px;
     cursor: move;
-
+    .confirm-seed-phrase__seed-word-item{
+      height: 50px;
+      line-height: 50px;
+      font-weight: bold;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    &.selected-item{
+      &:not(.confirm-seed-phrase__seed-word--empty){
+        .confirm-seed-phrase__seed-word-item{
+          background: #F7F7FF;
+          color: #5D61FF;
+          border: 1px solid #F7F7FF;
+        }
+      }
+    }
+    &.confirm-seed-phrase__seed-word--selected{
+      .confirm-seed-phrase__seed-word-item{
+        background: #5D61FF;
+        color: #FFFFFF;
+        border: 1px solid #5D61FF;
+      }
+    }
     &--sorted {
       cursor: pointer;
-      margin: 6px;
+      // margin: 6px;
+      .confirm-seed-phrase__seed-word-item{
+        background: #fff;
+        color: #666;
+        border: 1px solid #EEEEEE;
+      }
     }
 
     &--selected {
@@ -57,11 +87,11 @@
       color: transparent;
     }
 
-    @media screen and (max-width: $break-small) {
-      @include H6;
+    // @media screen and (max-width: $break-small) {
+    //   @include H6;
 
-      padding: 6px 18px;
-    }
+    //   padding: 6px 18px;
+    // }
   }
 
   &__selected-seed-words {
@@ -74,7 +104,6 @@
     border: 1px solid #cdcdcd;
     border-radius: 6px;
     background-color: $white;
-    margin: 24px 0 36px;
     padding: 12px;
 
     &__pending-seed {
@@ -82,7 +111,7 @@
     }
 
     &__selected-seed {
-      display: inline-flex;
+      // display: inline-flex;
 
       &:hover {
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
@@ -99,4 +128,7 @@
       }
     }
   }
+}
+.submit-btn{
+  padding: 20px 0;
 }

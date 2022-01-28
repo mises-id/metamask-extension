@@ -460,6 +460,9 @@ export default class MetamaskController extends EventEmitter {
       getKeyringAccounts: this.keyringController.getAccounts.bind(
         this.keyringController,
       ),
+      getSelectedAddress: this.preferencesController.getSelectedAddress.bind(
+        this.preferencesController,
+      ),
     });
     this.permissionsController = new PermissionsController(
       {
@@ -894,7 +897,8 @@ export default class MetamaskController extends EventEmitter {
    */
   getState() {
     const { vault } = this.keyringController.store.getState();
-    const isInitialized = Boolean(vault);
+    const { seedPhraseBackedUp } = this.onboardingController.store.getState();
+    const isInitialized = Boolean(vault) && Boolean(seedPhraseBackedUp);
 
     return {
       isInitialized,
@@ -1127,6 +1131,7 @@ export default class MetamaskController extends EventEmitter {
       setLocked: nodeify(this.setLocked, this),
       createNewVaultAndKeychain: nodeify(this.createNewVaultAndKeychain, this),
       createNewVaultAndRestore: nodeify(this.createNewVaultAndRestore, this),
+      clearKeyrings: nodeify(this.clearKeyrings, this),
       exportAccount: nodeify(
         keyringController.exportAccount,
         keyringController,
@@ -1139,6 +1144,7 @@ export default class MetamaskController extends EventEmitter {
       setMisesBook: nodeify(this.setMisesBook, this),
       recentTransactions: nodeify(this.recentTransactions, this),
       updataBalance: nodeify(this.updataBalance, this),
+      resetMisesAccount: nodeify(this.resetMisesAccount, this),
       getMisesUser: nodeify(this.getMisesUser, this),
       addressToMisesId: nodeify(this.addressToMisesId, this),
       resetTranstionFlag: nodeify(this.resetTranstionFlag, this),
@@ -1430,7 +1436,7 @@ export default class MetamaskController extends EventEmitter {
         );
         const addresses = await this.keyringController.getAccounts();
         this.preferencesController.setAddresses(addresses);
-        this.selectFirstIdentity();
+        this.selectFirstIdentity('first');
       }
       // // reset mises account and set password
       this.lockAll();
@@ -1704,10 +1710,10 @@ export default class MetamaskController extends EventEmitter {
   /**
    * Sets the first address in the state to the selected address
    */
-  selectFirstIdentity() {
+  selectFirstIdentity(type) {
     const { identities } = this.preferencesController.store.getState();
     const address = Object.keys(identities)[0];
-    this.setSelectedAddress(address);
+    this.setSelectedAddress(address, type);
   }
 
   /**
@@ -3386,10 +3392,12 @@ export default class MetamaskController extends EventEmitter {
    * @param {string} address
    * @return {*}
    */
-  async setSelectedAddress(address) {
+  async setSelectedAddress(address, type) {
     await this.preferencesController.setSelectedAddress(address); // set address
-    this.setMisesUser(address); // set mises userinfo
-    console.log('切换了用户');
+    if (type !== 'first') {
+      console.log('切换了用户');
+      this.setMisesUser(address); // set mises userinfo
+    }
   }
 
   /**
@@ -3451,5 +3459,14 @@ export default class MetamaskController extends EventEmitter {
 
   updataBalance(type) {
     return this.misesController.updataBalance(type);
+  }
+
+  clearKeyrings() {
+    console.log('clearKeyrings');
+    return this.keyringController.clearKeyrings();
+  }
+
+  resetMisesAccount() {
+    return this.misesController.setAccountTransactionsHeight();
   }
 }
