@@ -243,4 +243,13 @@ export default class AppStateController extends EventEmitter {
   setShowTestnetMessageInDropdown(showTestnetMessageInDropdown) {
     this.store.updateState({ showTestnetMessageInDropdown });
   }
+
+  rejectUnlock() {
+    if (this.waitingForUnlock.length > 0) {
+      while (this.waitingForUnlock.length > 0) {
+        this.waitingForUnlock.shift().reject();
+      }
+      this.emit(METAMASK_CONTROLLER_EVENTS.UPDATE_BADGE);
+    }
+  }
 }

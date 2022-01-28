@@ -548,6 +548,9 @@ function setupController(initState, initLangCode) {
       controller.permissionsController.rejectPermissionsRequest(approvalId);
     });
 
+    //reject all pending unlock request
+    controller.appStateController.rejectUnlock();
+
     updateBadge();
   }
 
