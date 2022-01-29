@@ -68,11 +68,11 @@ export default class AppStateController extends EventEmitter {
    * unlocked, or immediately if the extension is already unlocked.
    */
   getUnlockPromise(shouldShowUnlockRequest) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (this.isUnlocked()) {
         resolve();
       } else {
-        this.waitForUnlock(resolve, shouldShowUnlockRequest);
+        this.waitForUnlock(resolve, reject, shouldShowUnlockRequest);
       }
     });
   }
@@ -86,8 +86,8 @@ export default class AppStateController extends EventEmitter {
    * @param {boolean} shouldShowUnlockRequest - Whether the extension notification
    * popup should be opened.
    */
-  waitForUnlock(resolve, shouldShowUnlockRequest) {
-    this.waitingForUnlock.push({ resolve });
+  waitForUnlock(resolve, reject, shouldShowUnlockRequest) {
+    this.waitingForUnlock.push({ resolve, reject });
     this.emit(METAMASK_CONTROLLER_EVENTS.UPDATE_BADGE);
     if (shouldShowUnlockRequest) {
       this._showUnlockRequest();
