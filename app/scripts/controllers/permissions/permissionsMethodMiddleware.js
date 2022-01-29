@@ -46,7 +46,13 @@ export default function createPermissionsMethodMiddleware({
 
         if (hasPermission('eth_accounts')) {
           isProcessingRequestAccounts = true;
-          await getUnlockPromise();
+          try {
+            await getUnlockPromise();
+          } catch (err) {
+            res.error = err;
+            isProcessingRequestAccounts = false;
+            return;
+          }
           isProcessingRequestAccounts = false;
         }
 
