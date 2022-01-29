@@ -10,7 +10,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-01-28 23:19:39
+ * @LastEditTime: 2022-01-29 15:38:13
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -35,7 +35,6 @@ export default class MisesController {
     this.misesSdk = MisesSdk.newSdk(config);
     this.misesUser = this.misesSdk.userMgr();
     this.misesAppMgr = this.misesSdk.appMgr();
-    console.log(this.misesSdk, this.misesUser, this.misesAppMgr);
   }
 
   async updataBalance(type) {
@@ -56,7 +55,7 @@ export default class MisesController {
         }
         return val;
       });
-      console.log('updataBalance', accountList);
+      // console.log('updataBalance', accountList);
       this.store.updateState({
         accountList,
       });
@@ -81,11 +80,6 @@ export default class MisesController {
    * @return {object} MUser
    */
   async activate(priKeyHex) {
-    // this.store.updateState({
-    //   priKeyHex,
-    // });
-    console.log('拿到了priKeyHex', priKeyHex);
-    // return priKeyHex;
     return this.misesUser.activateUser(priKeyHex);
   }
 
@@ -119,7 +113,7 @@ export default class MisesController {
     3.拿到token组装数据给setToMisesPrivate(userinfo)
     */
     try {
-      console.log('获取用户数据');
+      // console.log('获取用户数据');
       const nonce = new Date().getTime();
       const activeUser = this.misesUser.activeUser();
       const auth = await this.generateAuth(nonce);
@@ -144,7 +138,7 @@ export default class MisesController {
         if (findIndex > -1) {
           accountList[findIndex] = account;
         } else {
-          console.log(accountList, account, 'account');
+          // console.log(accountList, account, 'account');
           accountList.push(account);
         }
         this.store.updateState({
@@ -159,7 +153,7 @@ export default class MisesController {
       // const misesId = activeUser.misesID();
       if (isRegistered) {
         const userInfo = await activeUser.info();
-        console.log(userInfo, misesId, '用户数据');
+        // console.log(userInfo, misesId, '用户数据');
         return {
           nickname:
             userInfo.name ||
@@ -179,7 +173,7 @@ export default class MisesController {
       //   email: 'exp@qq.com',
       // };
     } catch (error) {
-      console.log(error, 'error');
+      // console.log(error, 'error');
       return Promise.reject(error);
     }
   }
@@ -197,7 +191,7 @@ export default class MisesController {
    * @param {object} params:{misesId:string,nickname:string,avatar:string,token:string}
    */
   setToMisesPrivate(params) {
-    console.log('准备i调用setMisesId', params);
+    // console.log('准备i调用setMisesId', params);
     window.localStorage.setItem('setAccount', true);
     return new Promise((resolve) => {
       /* global chrome */
@@ -205,7 +199,7 @@ export default class MisesController {
         chrome.misesPrivate.setMisesId(JSON.stringify(params));
         return resolve();
       }
-      console.log('chrome.misesPrivate对象不存在');
+      // console.log('chrome.misesPrivate对象不存在');
       return resolve('not defind setMisesId Function');
       // return reject(JSON.stringify(params));
     });
@@ -226,10 +220,10 @@ export default class MisesController {
       const activeUser = this.misesUser.activeUser();
       const userinfo = await activeUser.info();
       const version = userinfo.version.add(1);
-      console.log({
-        ...data,
-        version,
-      });
+      // console.log({
+      //   ...data,
+      //   version,
+      // });
       const info = await activeUser.setInfo({
         ...data,
         version,
@@ -238,7 +232,7 @@ export default class MisesController {
       const misesId = activeUser.address();
       const { token } =
         accountList.find((val) => val.misesId === misesId) || {};
-      console.log(token);
+      // console.log(token);
       if (token) {
         this.setToMisesPrivate({
           nickname:
@@ -249,10 +243,10 @@ export default class MisesController {
           misesId,
         });
       }
-      console.log('setinfo success', info);
+      // console.log('setinfo success', info);
       return info;
     } catch (error) {
-      console.log(error, 'error');
+      // console.log(error, 'error');
       return false;
     }
   }
@@ -268,7 +262,7 @@ export default class MisesController {
   }
 
   async connect({ domain, appid, userid, permissions }) {
-    console.log({ domain, appid, userid, permissions }, 'connect');
+    // console.log({ domain, appid, userid, permissions }, 'connect');
     try {
       await this.misesAppMgr.ensureApp(appid, domain);
       const connect = await this.misesSdk.connect(
@@ -277,16 +271,16 @@ export default class MisesController {
         userid,
         permissions,
       );
-      console.log(connect, 'connect');
+      // console.log(connect, 'connect');
       return connect;
     } catch (error) {
-      console.log(error, 'wqeeeeee');
+      // console.log(error, 'wqeeeeee');
       return false;
     }
   }
 
   disconnect({ appid, userid }) {
-    console.log({ appid, userid }, 'disconnect');
+    // console.log({ appid, userid }, 'disconnect');
     return this.misesSdk.disconnect(appid, userid);
   }
 
@@ -305,10 +299,10 @@ export default class MisesController {
   }
 
   async initMisesBalance() {
-    console.log('initMisesBalance');
+    // console.log('initMisesBalance');
     const accountList = await this.getAccountMisesBalance();
     await Promise.all(accountList).then((res) => {
-      console.log(res, 'accountList');
+      // console.log(res, 'accountList');
       this.store.updateState({
         accountList: res,
       });
@@ -341,7 +335,7 @@ export default class MisesController {
         denom: 'MIS',
       });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return Promise.resolve({
         amount: '0',
         denom: 'MIS',
@@ -363,7 +357,7 @@ export default class MisesController {
       // history.push(MISES_SEND_CONFIRM_ROUTE);
       return true;
     } catch (error) {
-      console.log(error, 'wwww');
+      // console.log(error, 'wwww');
       this.store.updateState({
         transformFlag: 'error',
       });
@@ -384,7 +378,7 @@ export default class MisesController {
       (val) => val.address === selectedAddress,
     );
     const currentAddress = accountList[index] || {};
-    console.log(currentAddress);
+    // console.log(currentAddress);
     try {
       const activeUser = this.misesUser.activeUser();
       let list = await activeUser.recentTransactions(currentAddress.height);
@@ -431,7 +425,7 @@ export default class MisesController {
       }
       return list;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return Promise.reject(error);
     }
   }
@@ -449,9 +443,9 @@ export default class MisesController {
     if (index > -1) {
       const { transactions } = accountList[index];
       const last = transactions[transactions.length - 1] || {};
-      console.log(last);
+      // console.log(last);
       accountList[index].height = last.height;
-      console.log(last.height, accountList, 'setAccountTransactionsHeight');
+      // console.log(last.height, accountList, 'setAccountTransactionsHeight');
       this.store.updateState({
         accountList,
       });

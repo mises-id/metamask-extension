@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 // import Box from '../../../../components/ui/box';
+import classNames from 'classnames';
 import LockIcon from '../../../../components/ui/lock-icon';
 import Button from '../../../../components/ui/button';
 import Snackbar from '../../../../components/ui/snackbar';
@@ -31,7 +32,7 @@ export default class RevealSeedPhrase extends PureComponent {
   };
 
   state = {
-    isShowingSeedPhrase: true,
+    isShowingSeedPhrase: false,
   };
 
   handleExport = () => {
@@ -88,13 +89,22 @@ export default class RevealSeedPhrase extends PureComponent {
     const seedPhraseArr = seedPhrase.split(' ');
     return (
       <div className="reveal-seed-phrase__secret">
-        {seedPhraseArr.map((val, index) => {
-          return (
-            <div className="reveal-seed-phrase__secret_item" key={index}>
-              <div className="reveal-seed-phrase__secret_word">{val}</div>
-            </div>
-          );
-        })}
+        <div
+          className={classNames(
+            'notranslate reveal-seed-phrase__secret-words-box',
+            {
+              'reveal-seed-phrase__secret-words--hidden': !isShowingSeedPhrase,
+            },
+          )}
+        >
+          {seedPhraseArr.map((val, index) => {
+            return (
+              <div className="reveal-seed-phrase__secret_item" key={index}>
+                <div className="reveal-seed-phrase__secret_word">{val}</div>
+              </div>
+            );
+          })}
+        </div>
         {!isShowingSeedPhrase && (
           <div
             className="reveal-seed-phrase__secret-blocker"

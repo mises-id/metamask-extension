@@ -228,7 +228,19 @@ export default class NewAccount extends PureComponent {
                 id="ftf-chk1-label"
                 className="first-time-flow__checkbox-label"
               >
-                {t('acceptTermsOfUse')}
+                {t('acceptTermsOfUse', [
+                  <a
+                    onClick={(e) => e.stopPropagation()}
+                    key="first-time-flow__link-text"
+                    href="https://metamask.io/terms.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="first-time-flow__link-text">
+                      {t('terms')}
+                    </span>
+                  </a>,
+                ])}
               </span>
             </div>
             <Button

@@ -630,12 +630,12 @@ extension.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === 'install' && !isMobileFlag) {
     platform.openExtensionInBrowser();
   }
-  injectDynamic();
+  // injectDynamic();
 });
 
 extension.runtime.onStartup.addListener(() => {
   console.log("extension.runtime.onStartup");
-  injectDynamic();
+  // injectDynamic();
 });
 
 function restoreAccount() {

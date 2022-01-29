@@ -19,7 +19,7 @@ export default class UnlockPage extends Component {
     onRestore: PropTypes.func,
     onSubmit: PropTypes.func,
     forceUpdateMetamaskState: PropTypes.func,
-    showOptInModal: PropTypes.func,
+    // showOptInModal: PropTypes.func,
   };
 
   state = {
@@ -44,7 +44,7 @@ export default class UnlockPage extends Component {
     event.stopPropagation();
 
     const { password } = this.state;
-    const { onSubmit, forceUpdateMetamaskState, showOptInModal } = this.props;
+    const { onSubmit, forceUpdateMetamaskState } = this.props;
 
     if (password === '' || this.submitting) {
       return;

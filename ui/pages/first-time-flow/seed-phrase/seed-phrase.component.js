@@ -9,6 +9,7 @@ import {
   INITIALIZE_BACKUP_SEED_PHRASE_ROUTE,
   INITIALIZE_SEED_PHRASE_INTRO_ROUTE,
   DEFAULT_ROUTE,
+  INITIALIZE_SELECT_ACTION_ROUTE,
 } from '../../../helpers/constants/routes';
 // import MetaFoxLogo from '../../../components/ui/metafox-logo';
 import ConfirmSeedPhrase from './confirm-seed-phrase';
@@ -21,6 +22,7 @@ export default class SeedPhrase extends PureComponent {
     seedPhrase: PropTypes.string,
     password: PropTypes.string,
     verifySeedPhrase: PropTypes.func,
+    clearKeyrings: PropTypes.func,
   };
 
   state = {
@@ -28,16 +30,21 @@ export default class SeedPhrase extends PureComponent {
   };
 
   componentDidMount() {
-    const { seedPhrase, history, verifySeedPhrase } = this.props;
+    const { seedPhrase, history, verifySeedPhrase, clearKeyrings } = this.props;
 
     if (!seedPhrase) {
-      verifySeedPhrase().then((verifiedSeedPhrase) => {
-        if (verifiedSeedPhrase) {
-          this.setState({ verifiedSeedPhrase });
-        } else {
-          history.push(DEFAULT_ROUTE);
-        }
-      });
+      verifySeedPhrase()
+        .then((verifiedSeedPhrase) => {
+          if (verifiedSeedPhrase) {
+            this.setState({ verifiedSeedPhrase });
+          } else {
+            history.push(DEFAULT_ROUTE);
+          }
+        })
+        .catch(() => {
+          clearKeyrings();
+          history.push(INITIALIZE_SELECT_ACTION_ROUTE);
+        });
     }
   }
 

@@ -19510,10 +19510,10 @@ minizlib@^2.1.1:
     minipass "^3.0.0"
     yallist "^4.0.0"
 
-mises-js-sdk@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.npmmirror.com/mises-js-sdk/download/mises-js-sdk-0.1.4.tgz#367673500687ed06ab3599e046547d805e3eff82"
-  integrity sha512-YmYvd0jz+W4A7DIj/u0caC4zzz1cEBL6bCE1z62PBxXCY5UdGbY2Q0QKmvkzGaMRELIivq6rzVoRyHQ4tLtpSg==
+mises-js-sdk@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.npmmirror.com/mises-js-sdk/download/mises-js-sdk-0.1.5.tgz#85fdd77a778dc4e166ac12dcc236e10db001bcea"
+  integrity sha512-Htuu6rOOrdEzL3AKFzBibqdcOvjupbXSgGdt9iqxeURoT6zo7j6UBgQLalYblQBrXsneThB7tMYPGLmqaeESBw==
   dependencies:
     "@cosmjs/proto-signing" "0.26.6"
     "@cosmjs/stargate" "0.26.6"

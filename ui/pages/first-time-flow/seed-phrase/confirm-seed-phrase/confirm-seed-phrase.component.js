@@ -28,6 +28,7 @@ export default class ConfirmSeedPhrase extends PureComponent {
     initializeThreeBox: PropTypes.func,
     setSeedPhraseBackedUp: PropTypes.func,
     setMisesAccountUserInfo: PropTypes.func,
+    setCompletedOnboarding: PropTypes.func,
   };
 
   state = {
@@ -40,8 +41,19 @@ export default class ConfirmSeedPhrase extends PureComponent {
 
   componentDidMount() {
     const { seedPhrase = '' } = this.props;
-    const sortedSeedWords = (seedPhrase.split(' ') || []).sort();
+    const sortedSeedWords = (seedPhrase.split(' ') || [])
+      .filter((val) => val)
+      .sort();
     this.setState({ sortedSeedWords });
+  }
+
+  componentDidUpdate() {
+    const { seedPhrase = '' } = this.props;
+    let { sortedSeedWords } = this.state;
+    if (sortedSeedWords.length === 0 && seedPhrase) {
+      sortedSeedWords = (seedPhrase.split(' ') || []).sort();
+      this.setState({ sortedSeedWords });
+    }
   }
 
   setDraggingSeedIndex = (draggingSeedIndex) =>
@@ -77,6 +89,7 @@ export default class ConfirmSeedPhrase extends PureComponent {
       setSeedPhraseBackedUp,
       initializeThreeBox,
       setMisesAccountUserInfo,
+      setCompletedOnboarding,
     } = this.props;
 
     if (!this.isValid()) {
@@ -95,6 +108,7 @@ export default class ConfirmSeedPhrase extends PureComponent {
       setSeedPhraseBackedUp(true).then(async () => {
         initializeThreeBox();
         await setMisesAccountUserInfo();
+        setCompletedOnboarding();
         history.replace(INITIALIZE_END_OF_FLOW_ROUTE);
       });
     } catch (error) {

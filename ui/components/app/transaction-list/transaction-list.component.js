@@ -123,7 +123,6 @@ export default function TransactionList({
   );
   if (misesCompletedTransactions.length) {
     completedTransactions = misesCompletedTransactions;
-    console.log(completedTransactions);
   }
   const pendingLength = pendingTransactions.length;
   useEffect(() => {

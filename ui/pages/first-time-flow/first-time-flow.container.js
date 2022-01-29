@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import { getFirstTimeFlowTypeRoute } from '../../selectors';
 import {
+  clearKeyrings,
   createNewVaultAndGetSeedPhrase,
   createNewVaultAndRestore,
   unlockAndGetSeedPhrase,
@@ -41,6 +42,7 @@ const mapDispatchToProps = (dispatch) => {
     },
     unlockAccount: (password) => dispatch(unlockAndGetSeedPhrase(password)),
     verifySeedPhrase: () => verifySeedPhrase(),
+    clearKeyrings: () => clearKeyrings(),
   };
 };
 

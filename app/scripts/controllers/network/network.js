@@ -67,7 +67,7 @@ export const NETWORK_EVENTS = {
 };
 class DummyEmitter extends SafeEventEmitter {
   sendAsync(req, callback) {
-    console.log('DummyEmitter', 'sendAsync', req);
+    // console.log('DummyEmitter', 'sendAsync', req);
     callback(
       null,
       req.method === 'net_version'
@@ -77,7 +77,7 @@ class DummyEmitter extends SafeEventEmitter {
   }
 
   send(req, callback) {
-    console.log('DummyEmitter', 'send', req);
+    // console.log('DummyEmitter', 'send', req);
     callback(
       null,
       req.method === 'net_version'
@@ -104,8 +104,7 @@ class DummyBlockTracker extends SafeEventEmitter {
     return '';
   }
 
-  removeAllListeners(eventName) {
-    console.log(eventName);
+  removeAllListeners(_) {
     return this;
   }
 }
@@ -113,7 +112,6 @@ export default class NetworkController extends EventEmitter {
   constructor(opts = {}) {
     super();
 
-    console.log(opts.provider || { ...defaultProviderConfig });
     // create stores
     this.providerStore = new ObservableStore(
       opts.provider || { ...defaultProviderConfig },
@@ -329,7 +327,7 @@ export default class NetworkController extends EventEmitter {
   }
 
   async setProviderType(type) {
-    console.log(type);
+    // console.log(type);
     const mises = type === 'MisesTestNet';
     if (!mises) {
       assert.notStrictEqual(

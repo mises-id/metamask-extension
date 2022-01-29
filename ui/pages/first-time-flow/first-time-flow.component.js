@@ -35,6 +35,7 @@ export default class FirstTimeFlow extends PureComponent {
     showingSeedPhraseBackupAfterOnboarding: PropTypes.bool,
     seedPhraseBackedUp: PropTypes.bool,
     verifySeedPhrase: PropTypes.func,
+    clearKeyrings: PropTypes.func,
   };
 
   state = {
@@ -100,7 +101,7 @@ export default class FirstTimeFlow extends PureComponent {
 
   render() {
     const { seedPhrase, password } = this.state;
-    const { verifySeedPhrase } = this.props;
+    const { verifySeedPhrase, clearKeyrings } = this.props;
 
     return (
       <div className="first-time-flow">
@@ -113,6 +114,7 @@ export default class FirstTimeFlow extends PureComponent {
                 password={password}
                 seedPhrase={seedPhrase}
                 verifySeedPhrase={verifySeedPhrase}
+                clearKeyrings={clearKeyrings}
               />
             )}
           />
@@ -123,6 +125,7 @@ export default class FirstTimeFlow extends PureComponent {
                 {...routeProps}
                 seedPhrase={seedPhrase}
                 verifySeedPhrase={verifySeedPhrase}
+                clearKeyrings={clearKeyrings}
               />
             )}
           />
@@ -133,6 +136,7 @@ export default class FirstTimeFlow extends PureComponent {
                 {...routeProps}
                 seedPhrase={seedPhrase}
                 verifySeedPhrase={verifySeedPhrase}
+                clearKeyrings={clearKeyrings}
               />
             )}
           />
