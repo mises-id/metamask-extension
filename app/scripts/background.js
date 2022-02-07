@@ -130,7 +130,7 @@ async function initialize() {
   const initState = await loadStateFromPersistence();
   const initLangCode = await getFirstPreferredLangCode();
   await setupController(initState, initLangCode);
-  log.info('MetaMask initialization complete.');
+  console.log('MetaMask initialization complete.');
 }
 
 //
@@ -641,6 +641,13 @@ async function checkAndInject() {
         }
     });
 }
+
+extension.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+      if (request.check == "backgroundscript") {
+        sendResponse({message: "ready"});
+      }
+});
 
 // On first install, open a new tab with MetaMask
 extension.runtime.onInstalled.addListener(({ reason }) => {

@@ -27,10 +27,7 @@ const LEGACY_INPAGE = 'inpage';
 const LEGACY_PROVIDER = 'provider';
 const LEGACY_PUBLIC_CONFIG = 'publicConfig';
 
-if (shouldInjectProvider()) {
-  injectScript(inpageBundle);
-  setupStreams();
-}
+
 
 /**
  * Injects a script tag into the current document
@@ -319,4 +316,14 @@ extension.runtime.onMessage.addListener(
           setupStreams();
         }
       }
+});
+
+extension.extension.sendMessage({check: "backgroundscript"}, function(response) {
+  //code to initialize my extension
+  if (response) {
+    if (shouldInjectProvider()) {
+      injectScript(inpageBundle);
+      setupStreams();
+    }
+  }
 });
