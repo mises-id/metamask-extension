@@ -608,7 +608,7 @@ async function openPopup() {
 }
 
 
-async function injectDynamic() {
+function injectDynamic() {
   console.log("injectDynamic")
   // in manifest v2, it affects only the active tab
   for (const cs of extension.runtime.getManifest().content_scripts) {
@@ -616,11 +616,30 @@ async function injectDynamic() {
     for (const csjs of cs.js) {
       extension.tabs.executeScript({
         file: csjs,
+        runAt: cs.run_at,
       });
     }
     break;
 
   }
+
+}
+
+async function checkAndInject() {
+    const [activeTab] = await platform.getActiveTabs();
+    console.log('activeTab', activeTab);
+    if (!activeTab) {
+      return;
+    }
+    
+    extension.tabs.sendMessage(activeTab.id, {check: "contentscript"}, function(response) {
+        if (response) {
+            console.log("contentscript already there");
+        }
+        else {
+          injectDynamic();
+        }
+    });
 }
 
 // On first install, open a new tab with MetaMask
@@ -630,12 +649,11 @@ extension.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === 'install' && !isMobileFlag) {
     platform.openExtensionInBrowser();
   }
-  // injectDynamic();
 });
 
 extension.runtime.onStartup.addListener(() => {
   console.log("extension.runtime.onStartup");
-  // injectDynamic();
+  checkAndInject();
 });
 
 function restoreAccount() {
