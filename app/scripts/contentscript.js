@@ -312,6 +312,11 @@ function redirectToPhishingWarning() {
 
 extension.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-      if (request.check == "contentscript")
-          sendResponse({message: "injected"});
+      if (request.check == "contentscript") {
+        sendResponse({message: "injected"});
+        if (shouldInjectProvider()) {
+          injectScript(inpageBundle);
+          setupStreams();
+        }
+      }
 });
