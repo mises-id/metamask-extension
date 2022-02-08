@@ -10,7 +10,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-01-29 15:38:13
+ * @LastEditTime: 2022-02-07 16:43:18
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -416,7 +416,7 @@ export default class MisesController {
         };
         return transactionGroup;
       });
-      list.sort((a, b) => a.height - b.height);
+      list.sort((a, b) => b.height - a.height);
       if (index > -1) {
         accountList[index].transactions = list;
         this.store.updateState({
