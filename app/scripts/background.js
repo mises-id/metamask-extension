@@ -123,12 +123,39 @@ initialize().catch(log.error);
  */
 
 /**
+ * @description: Set the web address of Web3 currently connected to the local store
+ */
+const setActiveUrl = async () => {
+  const [activeTab] = await platform.getActiveTabs();
+  console.log('setActiveUrl', activeTab);
+  if (!activeTab) {
+    return false;
+  }
+  if (activeTab.url && activeTab.url.indexOf('chrome-extension') === -1) {
+    const url = new URL(activeTab.url);
+    window.localStorage.setItem(
+      'siteMetadata',
+      JSON.stringify({
+        id: activeTab.id,
+        origin: url.origin,
+        protocol: url.protocol,
+        title: activeTab.title,
+        ul: activeTab.url,
+      }),
+    );
+  }
+  return true;
+};
+
+/**
  * Initializes the MetaMask controller, and sets up all platform configuration.
  * @returns {Promise} Setup complete.
  */
+
 async function initialize() {
   const initState = await loadStateFromPersistence();
   const initLangCode = await getFirstPreferredLangCode();
+  setActiveUrl();
   await setupController(initState, initLangCode);
   console.log('MetaMask initialization complete.');
 }
@@ -395,7 +422,7 @@ function setupController(initState, initLangCode) {
         const { origin } = url;
 
         remotePort.onMessage.addListener((msg) => {
-          console.log("remotePort", msg);
+          console.log('remotePort', msg);
           if (
             msg.data &&
             ['eth_requestAccounts', 'mises_requestAccounts'].includes(
@@ -548,7 +575,7 @@ function setupController(initState, initLangCode) {
       controller.permissionsController.rejectPermissionsRequest(approvalId);
     });
 
-    //reject all pending unlock request
+    // reject all pending unlock request
     controller.appStateController.rejectUnlock();
 
     updateBadge();
@@ -576,7 +603,13 @@ async function triggerUi() {
     tabs[0].extData &&
     tabs[0].extData.indexOf('vivaldi_tab') > -1;
 
-  console.log("triggerUi", uiIsTriggering, isVivaldi, popupIsOpen, currentlyActiveMetamaskTab);
+  console.log(
+    'triggerUi',
+    uiIsTriggering,
+    isVivaldi,
+    popupIsOpen,
+    currentlyActiveMetamaskTab,
+  );
   if (
     !uiIsTriggering &&
     (isVivaldi || !popupIsOpen) &&
@@ -607,12 +640,11 @@ async function openPopup() {
   });
 }
 
-
 function injectDynamic() {
-  console.log("injectDynamic")
+  console.log('injectDynamic');
   // in manifest v2, it affects only the active tab
   for (const cs of extension.runtime.getManifest().content_scripts) {
-    console.log("executeScript", cs)
+    console.log('executeScript', cs);
     for (const csjs of cs.js) {
       extension.tabs.executeScript({
         file: csjs,
@@ -620,38 +652,38 @@ function injectDynamic() {
       });
     }
     break;
-
   }
-
 }
 
 async function checkAndInject() {
-    const [activeTab] = await platform.getActiveTabs();
-    console.log('activeTab', activeTab);
-    if (!activeTab) {
-      return;
-    }
-    
-    extension.tabs.sendMessage(activeTab.id, {check: "contentscript"}, function(response) {
-        if (response) {
-            console.log("contentscript already there");
-        }
-        else {
-          injectDynamic();
-        }
-    });
+  const [activeTab] = await platform.getActiveTabs();
+  console.log('activeTab', activeTab);
+  if (!activeTab) {
+    return;
+  }
+
+  extension.tabs.sendMessage(
+    activeTab.id,
+    { check: 'contentscript' },
+    function (response) {
+      if (response) {
+        console.log('contentscript already there');
+      } else {
+        injectDynamic();
+      }
+    },
+  );
 }
 
-extension.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-      if (request.check == "backgroundscript") {
-        sendResponse({message: "ready"});
-      }
+extension.runtime.onMessage.addListener(function (request, _, sendResponse) {
+  if (request.check === 'backgroundscript') {
+    sendResponse({ message: 'ready' });
+  }
 });
 
 // On first install, open a new tab with MetaMask
 extension.runtime.onInstalled.addListener(({ reason }) => {
-  console.log("extension.runtime.onInstalled");
+  console.log('extension.runtime.onInstalled');
   const isMobileFlag = isMobile();
   if (reason === 'install' && !isMobileFlag) {
     platform.openExtensionInBrowser();
@@ -659,10 +691,10 @@ extension.runtime.onInstalled.addListener(({ reason }) => {
 });
 
 extension.runtime.onStartup.addListener(() => {
-  console.log("extension.runtime.onStartup");
+  console.log('extension.runtime.onStartup');
   checkAndInject();
 });
-
+extension.tabs.onHighlighted.addListener(setActiveUrl);
 function restoreAccount() {
   notificationManager.platform.openExtensionInBrowser(RESTORE_VAULT_ROUTE);
 }

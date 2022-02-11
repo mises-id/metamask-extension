@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import {
   getAccountToConnectToActiveTab,
   getOrderedConnectedAccountsForActiveTab,
+  getOriginOfCurrentTab,
   getPermissionsForActiveTab,
   getSelectedAddress,
 } from '../../selectors';
@@ -12,6 +13,7 @@ import {
   setSelectedAddress,
 } from '../../store/actions';
 import { getMostRecentOverviewPage } from '../../ducks/history/history';
+import { isMobile } from '../../helpers/utils/is-mobile-view';
 import ConnectedAccounts from './connected-accounts.component';
 
 const mapStateToProps = (state) => {
@@ -24,8 +26,8 @@ const mapStateToProps = (state) => {
   const isActiveTabExtension = isExtensionUrl(activeTab);
   return {
     accountToConnect,
-    isActiveTabExtension,
-    activeTabOrigin: activeTab.origin,
+    isActiveTabExtension: isMobile() ? false : isActiveTabExtension,
+    activeTabOrigin: getOriginOfCurrentTab(state),
     connectedAccounts,
     mostRecentOverviewPage: getMostRecentOverviewPage(state),
     permissions,

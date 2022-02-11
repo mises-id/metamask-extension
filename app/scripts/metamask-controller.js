@@ -1893,18 +1893,20 @@ export default class MetamaskController extends EventEmitter {
       throw new Error('MetamaskController - No HD Key Tree found');
     }
     const { keyringController } = this;
-    const oldAccounts = await keyringController.getAccounts();
+    // const oldAccounts = await keyringController.getAccounts();
     const keyState = await keyringController.addNewAccount(primaryKeyring);
     const newAccounts = await keyringController.getAccounts();
 
     await this.verifySeedPhrase();
 
     this.preferencesController.setAddresses(newAccounts);
-    newAccounts.forEach((address) => {
-      if (!oldAccounts.includes(address)) {
-        this.setSelectedAddress(address);
-      }
-    });
+    // Because the Web3 website connection list needs to be displayed after the account is created, the account switching process is not performed here. The account switching operation goes to the showaccountdetail function
+
+    // newAccounts.forEach((address) => {
+    //   if (!oldAccounts.includes(address)) {
+    //     this.setSelectedAddress(address);
+    //   }
+    // });
 
     const { identities } = this.preferencesController.store.getState();
     return { ...keyState, identities };

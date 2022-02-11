@@ -20,6 +20,8 @@ import txHelper from '../helpers/utils/tx-helper';
 import { getEnvironmentType, addHexPrefix } from '../../app/scripts/lib/util';
 import {
   getMetaMaskAccounts,
+  getOrderedConnectedAccountsForActiveTab,
+  getOriginOfCurrentTab,
   getPermittedAccountsForCurrentTab,
   getSelectedAddress,
   getTokenList,
@@ -1221,14 +1223,18 @@ export function showAccountDetail(address) {
     const unconnectedAccountAccountAlertIsEnabled = getUnconnectedAccountAlertEnabledness(
       state,
     );
-    const activeTabOrigin = state.activeTab.origin;
-    const selectedAddress = getSelectedAddress(state);
+    const activeTabOrigin = getOriginOfCurrentTab(state);
+    // const selectedAddress = getSelectedAddress(state);
     const permittedAccountsForCurrentTab = getPermittedAccountsForCurrentTab(
       state,
     );
+    // const currentTabIsConnectedToPreviousAddress =
+    //   Boolean(activeTabOrigin) &&
+    //   permittedAccountsForCurrentTab.includes(selectedAddress);
+    // 如果当前网站有连接过某一个账号currentTabIsConnectedToPreviousAddress 应该为true
+    const connectedAccounts = getOrderedConnectedAccountsForActiveTab(state);
     const currentTabIsConnectedToPreviousAddress =
-      Boolean(activeTabOrigin) &&
-      permittedAccountsForCurrentTab.includes(selectedAddress);
+      Boolean(activeTabOrigin) && connectedAccounts.length > 0;
     const currentTabIsConnectedToNextAddress =
       Boolean(activeTabOrigin) &&
       permittedAccountsForCurrentTab.includes(address);

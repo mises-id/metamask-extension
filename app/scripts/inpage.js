@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-11-16 23:10:59
- * @LastEditTime: 2022-01-12 10:30:21
+ * @LastEditTime: 2022-02-10 16:16:41
  * @LastEditors: lmk
  * @Description:
  */
@@ -102,6 +102,7 @@ window.misesModule = {
     const url = window.location.href;
     const icon = __getLargeImg() || __getFavicon();
     const { title } = window.document;
+    console.log({ url, icon, title });
     return { url, icon, title };
   },
 };

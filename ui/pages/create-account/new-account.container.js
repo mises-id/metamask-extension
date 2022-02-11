@@ -22,8 +22,7 @@ const mapDispatchToProps = (dispatch) => {
       return dispatch(actions.addNewAccount()).then((newAccountAddress) => {
         if (newAccountName) {
           dispatch(actions.setAccountLabel(newAccountAddress, newAccountName));
-          // dispatch(actions.showAccountDetail(newAccountAddress));
-          // dispatch(actions.toggleAccountMenu());
+          dispatch(actions.showAccountDetail(newAccountAddress));
         }
       });
     },

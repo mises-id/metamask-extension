@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import extensionin from 'extensionizer';
 import { addHexPrefix } from '../../app/scripts/lib/util';
 import {
   MAINNET_CHAIN_ID,
@@ -584,8 +585,22 @@ export function getFeatureFlags(state) {
 }
 
 export function getOriginOfCurrentTab(state) {
-  return state.activeTab.origin;
+  let siteMetadata = window.localStorage.getItem('siteMetadata');
+  if (state.activeTab.origin) {
+    siteMetadata = siteMetadata ? JSON.parse(siteMetadata) : { origin: '' };
+    const origin =
+      state.activeTab.origin.indexOf(extensionin.runtime.id) > -1 &&
+      siteMetadata.origin
+        ? siteMetadata.origin
+        : state.activeTab.origin;
+    return origin;
+  }
+  return '';
 }
+
+// export function getOriginOfCurrentTab(state) {
+//   return state.activeTab.origin;
+// }
 
 export function getIpfsGateway(state) {
   return state.metamask.ipfsGateway;
