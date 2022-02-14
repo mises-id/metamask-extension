@@ -26,7 +26,7 @@ export default class ExtensionPlatform {
   }
 
   moveTab(tabId, options) {
-    console.log("moveTab", tabId, options)
+    console.log('moveTab', tabId, options);
     return new Promise((resolve, reject) => {
       extension.tabs.move(tabId, options, (newTab) => {
         const error = checkForError();
@@ -39,30 +39,43 @@ export default class ExtensionPlatform {
   }
 
   openWindow(options) {
-    console.log("openWindow", options)
+    console.log('openWindow', options);
     return new Promise((resolve, reject) => {
       if (isMobile()) {
-        const {url, openerTabId, index} = options
-        extension.tabs.create({ 
-          url, openerTabId, index
-        }, (newWindow) => {
-          const error = checkForError();
-          if (error) {
-            return reject(error);
-          }
-          return resolve(newWindow);
-        });
+        const { url, openerTabId, index } = options;
+        extension.tabs.create(
+          {
+            url,
+            openerTabId,
+            index,
+          },
+          (newWindow) => {
+            const error = checkForError();
+            if (error) {
+              return reject(error);
+            }
+            return resolve(newWindow);
+          },
+        );
       } else {
-        const {url, type, width, height, left, top} = options
-        extension.windows.create({
-          url, type, width, height, left, top
-        }, (newWindow) => {
-          const error = checkForError();
-          if (error) {
-            return reject(error);
-          }
-          return resolve(newWindow);
-        });
+        const { url, type, width, height, left, top } = options;
+        extension.windows.create(
+          {
+            url,
+            type,
+            width,
+            height,
+            left,
+            top,
+          },
+          (newWindow) => {
+            const error = checkForError();
+            if (error) {
+              return reject(error);
+            }
+            return resolve(newWindow);
+          },
+        );
       }
     });
   }
@@ -211,7 +224,6 @@ export default class ExtensionPlatform {
     } else {
       extension.windows.onRemoved.addListener(listener);
     }
-    
   }
 
   getAllWindows() {
@@ -264,7 +276,7 @@ export default class ExtensionPlatform {
   }
 
   switchToTab(tabId) {
-    console.log("switchToTab", tabId)
+    console.log('switchToTab', tabId);
     return new Promise((resolve, reject) => {
       extension.tabs.update(tabId, { highlighted: true }, (tab) => {
         const err = checkForError();

@@ -694,7 +694,7 @@ extension.runtime.onStartup.addListener(() => {
   console.log('extension.runtime.onStartup');
   checkAndInject();
 });
-extension.tabs.onHighlighted.addListener(setActiveUrl);
+extension.tabs.onActivated.addListener(setActiveUrl);
 function restoreAccount() {
   notificationManager.platform.openExtensionInBrowser(RESTORE_VAULT_ROUTE);
 }

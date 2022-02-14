@@ -10,7 +10,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-02-07 16:43:18
+ * @LastEditTime: 2022-02-11 10:16:30
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -355,9 +355,10 @@ export default class MisesController {
         transformFlag: res.height > 0 ? 'success' : 'error',
       });
       // history.push(MISES_SEND_CONFIRM_ROUTE);
+      console.log(res, 'success-setMisesBook');
       return true;
     } catch (error) {
-      // console.log(error, 'wwww');
+      console.log(error, 'err-setMisesBook');
       this.store.updateState({
         transformFlag: 'error',
       });
@@ -423,9 +424,10 @@ export default class MisesController {
           accountList,
         });
       }
+      console.log(list);
       return list;
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       return Promise.reject(error);
     }
   }
@@ -442,9 +444,9 @@ export default class MisesController {
     );
     if (index > -1) {
       const { transactions } = accountList[index];
-      const last = transactions[transactions.length - 1] || {};
-      // console.log(last);
-      accountList[index].height = last.height;
+      const last = transactions[0] || {};
+      console.log(last);
+      accountList[index].height = last.height + 1;
       // console.log(last.height, accountList, 'setAccountTransactionsHeight');
       this.store.updateState({
         accountList,
