@@ -13,7 +13,7 @@ export const RINKEBY_NETWORK_ID = '4';
 export const GOERLI_NETWORK_ID = '5';
 export const KOVAN_NETWORK_ID = '42';
 export const LOCALHOST_NETWORK_ID = '1337';
-export const MISES_NETWORK_ID = '6';
+export const MISES_NETWORK_ID = '46';
 
 export const MAINNET_CHAIN_ID = '0x1';
 export const ROPSTEN_CHAIN_ID = '0x3';
@@ -25,7 +25,7 @@ export const BSC_CHAIN_ID = '0x38';
 export const OPTIMISM_CHAIN_ID = '0xa';
 export const OPTIMISM_TESTNET_CHAIN_ID = '0x45';
 export const POLYGON_CHAIN_ID = '0x89';
-export const MISES_CHAIN_ID = '0x89';
+export const MISES_CHAIN_ID = '0xa46a';
 
 /**
  * The largest possible chain ID we can handle.

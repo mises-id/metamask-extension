@@ -114,6 +114,7 @@ export default class MetamaskController extends EventEmitter {
     this.opts = opts;
     this.extension = opts.extension;
     this.platform = opts.platform;
+    this.notificationManager = opts.notificationManager;
     const initState = opts.initState || {};
     const version = this.platform.getVersion();
     this.recordFirstTimeInfo(initState);
@@ -1145,6 +1146,7 @@ export default class MetamaskController extends EventEmitter {
       recentTransactions: nodeify(this.recentTransactions, this),
       updataBalance: nodeify(this.updataBalance, this),
       resetMisesAccount: nodeify(this.resetMisesAccount, this),
+      closePopUp: nodeify(this.closePopUp, this),
       getMisesUser: nodeify(this.getMisesUser, this),
       addressToMisesId: nodeify(this.addressToMisesId, this),
       resetTranstionFlag: nodeify(this.resetTranstionFlag, this),
@@ -3470,5 +3472,10 @@ export default class MetamaskController extends EventEmitter {
 
   resetMisesAccount() {
     return this.misesController.setAccountTransactionsHeight();
+  }
+
+  closePopUp() {
+    console.log(this.opts.notificationManager, 'this.opts.notificationManager');
+    this.opts.notificationManager.closePopup();
   }
 }

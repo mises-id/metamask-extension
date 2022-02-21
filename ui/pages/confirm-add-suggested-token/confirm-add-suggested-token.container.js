@@ -1,7 +1,11 @@
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { withRouter } from 'react-router-dom';
-import { rejectWatchAsset, acceptWatchAsset } from '../../store/actions';
+import {
+  rejectWatchAsset,
+  acceptWatchAsset,
+  closePopUp,
+} from '../../store/actions';
 import { getMostRecentOverviewPage } from '../../ducks/history/history';
 import ConfirmAddSuggestedToken from './confirm-add-suggested-token.component';
 
@@ -23,6 +27,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(rejectWatchAsset(suggestedAssetID)),
     acceptWatchAsset: (suggestedAssetID) =>
       dispatch(acceptWatchAsset(suggestedAssetID)),
+    closePopUp,
   };
 };
 

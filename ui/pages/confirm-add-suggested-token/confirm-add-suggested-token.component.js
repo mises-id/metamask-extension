@@ -4,7 +4,10 @@ import Button from '../../components/ui/button';
 import Identicon from '../../components/ui/identicon';
 import TokenBalance from '../../components/ui/token-balance';
 import { getEnvironmentType } from '../../../app/scripts/lib/util';
-import { ENVIRONMENT_TYPE_NOTIFICATION } from '../../../shared/constants/app';
+import {
+  ENVIRONMENT_TYPE_NOTIFICATION,
+  ENVIRONMENT_TYPE_POPUP,
+} from '../../../shared/constants/app';
 import { isEqualCaseInsensitive } from '../../helpers/utils/util';
 
 export default class ConfirmAddSuggestedToken extends Component {
@@ -20,6 +23,7 @@ export default class ConfirmAddSuggestedToken extends Component {
     mostRecentOverviewPage: PropTypes.string.isRequired,
     suggestedAssets: PropTypes.array,
     tokens: PropTypes.array,
+    closePopUp: PropTypes.func,
   };
 
   componentDidMount() {
@@ -35,13 +39,19 @@ export default class ConfirmAddSuggestedToken extends Component {
       mostRecentOverviewPage,
       suggestedAssets = [],
       history,
+      closePopUp,
     } = this.props;
-
+    console.log(suggestedAssets, 'suggestedAssets', getEnvironmentType());
     if (suggestedAssets.length > 0) {
       return;
     }
-    if (getEnvironmentType() === ENVIRONMENT_TYPE_NOTIFICATION) {
-      global.METAMASK_NOTIFIER.closePopup();
+    if (
+      [ENVIRONMENT_TYPE_NOTIFICATION, ENVIRONMENT_TYPE_POPUP].includes(
+        getEnvironmentType(),
+      )
+    ) {
+      closePopUp();
+      // global.METAMASK_NOTIFIER.closePopup();
     } else {
       history.push(mostRecentOverviewPage);
     }

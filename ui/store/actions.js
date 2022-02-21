@@ -13,6 +13,7 @@ import { isEqualCaseInsensitive } from '../helpers/utils/util';
 import switchDirection from '../helpers/utils/switch-direction';
 import {
   ENVIRONMENT_TYPE_NOTIFICATION,
+  ENVIRONMENT_TYPE_POPUP,
   POLLING_TOKEN_ENVIRONMENT_TYPES,
 } from '../../shared/constants/app';
 import { hasUnconfirmedTransactions } from '../helpers/utils/confirm-tx.util';
@@ -996,8 +997,14 @@ export function cancelTxs(txDataList) {
         dispatch(completedTx(id));
       });
     } finally {
-      if (getEnvironmentType() === ENVIRONMENT_TYPE_NOTIFICATION) {
-        global.METAMASK_NOTIFIER.closePopup();
+      console.log('finallysuggestedAssets', getEnvironmentType());
+      if (
+        [ENVIRONMENT_TYPE_NOTIFICATION, ENVIRONMENT_TYPE_POPUP].includes(
+          getEnvironmentType(),
+        )
+      ) {
+        // global.METAMASK_NOTIFIER.closePopup();
+        promisifiedBackground.closePopUp();
       } else {
         dispatch(hideLoadingIndication());
       }
@@ -1809,11 +1816,19 @@ export function hideModal(payload) {
 
 export function closeCurrentNotificationWindow() {
   return (_, getState) => {
+    console.log(
+      getEnvironmentType() === ENVIRONMENT_TYPE_NOTIFICATION,
+      hasUnconfirmedTransactions(getState()),
+    );
+    /* This judgment is turned off because pop is also turned off 【】*/
     if (
-      getEnvironmentType() === ENVIRONMENT_TYPE_NOTIFICATION &&
+      [ENVIRONMENT_TYPE_NOTIFICATION, ENVIRONMENT_TYPE_POPUP].includes(
+        getEnvironmentType(),
+      ) &&
       !hasUnconfirmedTransactions(getState())
     ) {
-      global.METAMASK_NOTIFIER.closePopup();
+      // global.METAMASK_NOTIFIER.closePopup();
+      promisifiedBackground.closePopUp();
     }
   };
 }
@@ -3111,4 +3126,8 @@ export function clearKeyrings() {
   return () => {
     promisifiedBackground.clearKeyrings();
   };
+}
+
+export function closePopUp() {
+  promisifiedBackground.closePopUp();
 }

@@ -252,6 +252,7 @@ function setupController(initState, initLangCode) {
       return openMetamaskTabsIDs;
     },
     restoreAccount,
+    notificationManager,
   });
 
   setupEnsIpfsResolver({
@@ -610,7 +611,10 @@ async function triggerUi() {
     popupIsOpen,
     currentlyActiveMetamaskTab,
   );
+  const flag = await setExtensionTab();
+  console.log(flag, 'setExtensionTab');
   if (
+    !flag &&
     !uiIsTriggering &&
     (isVivaldi || !popupIsOpen) &&
     !currentlyActiveMetamaskTab
@@ -624,6 +628,33 @@ async function triggerUi() {
   }
 }
 
+async function setExtensionTab() {
+  try {
+    const chromeTabs = await platform.getTabs({});
+    const findExtensionTab = chromeTabs.find(
+      (val) =>
+        val.title &&
+        val.url &&
+        val.title.indexOf('MetaMask') > -1 &&
+        val.url.indexOf('chrome-extension://') > -1,
+    );
+    console.log(findExtensionTab, 'findExtensionTab', chromeTabs);
+    if (findExtensionTab) {
+      const activeTabs = await platform.getActiveTabs();
+      notificationManager._openerTab =
+        activeTabs.length > 0 ? activeTabs[0] : undefined;
+      const tab = await platform.switchToTab(findExtensionTab.id);
+      extension.tabs.reload(tab.id);
+      notificationManager._popupId = tab.id;
+      notificationManager.setExtensionTab = true;
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.log(error, 'setExtensionTabError');
+    return false;
+  }
+}
 /**
  * Opens the browser popup for user confirmation of watchAsset
  * then it waits until user interact with the UI
@@ -694,7 +725,14 @@ extension.runtime.onStartup.addListener(() => {
   console.log('extension.runtime.onStartup');
   checkAndInject();
 });
-extension.tabs.onActivated.addListener(setActiveUrl);
+extension.tabs.onActivated.addListener((e) => {
+  console.log('onActivated');
+  setActiveUrl(e);
+});
+extension.tabs.onUpdated.addListener((e) => {
+  console.log('onUpdated', e);
+  setActiveUrl(e);
+});
 function restoreAccount() {
   notificationManager.platform.openExtensionInBrowser(RESTORE_VAULT_ROUTE);
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-12-13 16:44:36
- * @LastEditTime: 2022-01-26 21:35:10
+ * @LastEditTime: 2022-02-18 16:19:26
  * @LastEditors: lmk
  * @Description:
  */
@@ -83,6 +83,7 @@ export default class Home extends PureComponent {
     selectedAddress: PropTypes.string,
     restoreFromThreeBox: PropTypes.func,
     setShowRestorePromptToFalse: PropTypes.func,
+    closePopUp: PropTypes.func,
     threeBoxLastUpdated: PropTypes.number,
     firstPermissionsRequestId: PropTypes.string,
     totalUnapprovedCount: PropTypes.number.isRequired,
@@ -121,6 +122,7 @@ export default class Home extends PureComponent {
     const {
       firstPermissionsRequestId,
       history,
+      isPopup,
       isNotification,
       suggestedAssets = [],
       totalUnapprovedCount,
@@ -130,13 +132,21 @@ export default class Home extends PureComponent {
       swapsFetchParams,
       pendingConfirmations,
       isSigningQRHardwareTransaction,
+      closePopUp,
     } = this.props;
+
+    console.log(
+      isNotification,
+      totalUnapprovedCount === 0,
+      !isSigningQRHardwareTransaction,
+    );
     if (
-      isNotification &&
+      (isNotification || isPopup) &&
       totalUnapprovedCount === 0 &&
       !isSigningQRHardwareTransaction
     ) {
-      global.platform.closeCurrentWindow();
+      // global.platform.closeCurrentWindow();
+      closePopUp();
     } else if (!isNotification && showAwaitingSwapScreen) {
       history.push(AWAITING_SWAP_ROUTE);
     } else if (!isNotification && haveSwapsQuotes) {

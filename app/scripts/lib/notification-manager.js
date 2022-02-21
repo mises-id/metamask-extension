@@ -15,6 +15,7 @@ export default class NotificationManager extends EventEmitter {
    * @typedef {Object} NotificationManager
    *
    */
+  setExtensionTab = false;
 
   constructor() {
     super();
@@ -75,8 +76,11 @@ export default class NotificationManager extends EventEmitter {
   }
 
   async closePopup() {
-    await this.platform.closeCurrentWindow();
+    if (this._popupId) {
+      await this.platform.closeCurrentWindow();
+    }
     if (this._openerTab) {
+      console.log('closePopup');
       await this.platform.switchToTab(this._openerTab.id);
       this._openerTab = undefined;
     }

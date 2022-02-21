@@ -124,8 +124,9 @@ export default class ExtensionPlatform {
 
   closeCurrentWindow() {
     if (isMobile()) {
-      return extension.tabs.getCurrent((windowDetails) => {
-        return extension.tabs.remove(windowDetails.id);
+      return this.getActiveTabs().then((windowDetails) => {
+        console.log(windowDetails);
+        return windowDetails && extension.tabs.remove(windowDetails[0].id);
       });
     }
     return extension.windows.getCurrent((windowDetails) => {
@@ -278,7 +279,7 @@ export default class ExtensionPlatform {
   switchToTab(tabId) {
     console.log('switchToTab', tabId);
     return new Promise((resolve, reject) => {
-      extension.tabs.update(tabId, { highlighted: true }, (tab) => {
+      extension.tabs.update(tabId, { active: true }, (tab) => {
         const err = checkForError();
         if (err) {
           reject(err);

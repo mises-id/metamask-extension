@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-11-16 23:10:59
- * @LastEditTime: 2022-02-10 16:16:41
+ * @LastEditTime: 2022-02-21 17:58:13
  * @LastEditors: lmk
  * @Description:
  */
@@ -99,8 +99,9 @@ const __getFavicon = (_) => {
 };
 window.misesModule = {
   getWindowInformation() {
+    const config = window.$misesShare;
     const url = window.location.href;
-    const icon = __getLargeImg() || __getFavicon();
+    const icon = config ? config.images : __getLargeImg() || __getFavicon();
     const { title } = window.document;
     console.log({ url, icon, title });
     return { url, icon, title };
