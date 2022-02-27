@@ -122,11 +122,14 @@ export default class ExtensionPlatform {
     });
   }
 
-  closeCurrentWindow() {
+  closeCurrentWindow(id) {
     if (isMobile()) {
       return this.getActiveTabs().then((windowDetails) => {
-        console.log(windowDetails);
-        return windowDetails && extension.tabs.remove(windowDetails[0].id);
+        console.log(windowDetails, id, 'closeCurrentWindow');
+        const closeId = windowDetails[0].id;
+        if (closeId === id) {
+          return windowDetails && extension.tabs.remove(windowDetails[0].id);
+        }
       });
     }
     return extension.windows.getCurrent((windowDetails) => {
@@ -279,14 +282,18 @@ export default class ExtensionPlatform {
   switchToTab(tabId) {
     console.log('switchToTab', tabId);
     return new Promise((resolve, reject) => {
-      extension.tabs.update(tabId, { active: true }, (tab) => {
-        const err = checkForError();
-        if (err) {
-          reject(err);
-        } else {
-          resolve(tab);
-        }
-      });
+      extension.tabs.update(
+        tabId,
+        { active: true, highlighted: true },
+        (tab) => {
+          const err = checkForError();
+          if (err) {
+            reject(err);
+          } else {
+            resolve(tab);
+          }
+        },
+      );
     });
   }
 

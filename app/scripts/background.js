@@ -643,9 +643,9 @@ async function setExtensionTab() {
       const activeTabs = await platform.getActiveTabs();
       notificationManager._openerTab =
         activeTabs.length > 0 ? activeTabs[0] : undefined;
-      const tab = await platform.switchToTab(findExtensionTab.id);
-      extension.tabs.reload(tab.id);
-      notificationManager._popupId = tab.id;
+      await platform.switchToTab(findExtensionTab.id);
+      extension.tabs.reload(findExtensionTab.id);
+      notificationManager._popupId = findExtensionTab.id;
       notificationManager.setExtensionTab = true;
       return true;
     }

@@ -1147,6 +1147,7 @@ export default class MetamaskController extends EventEmitter {
       updataBalance: nodeify(this.updataBalance, this),
       resetMisesAccount: nodeify(this.resetMisesAccount, this),
       closePopUp: nodeify(this.closePopUp, this),
+      getPopupId: nodeify(this.getPopupId, this),
       getMisesUser: nodeify(this.getMisesUser, this),
       addressToMisesId: nodeify(this.addressToMisesId, this),
       resetTranstionFlag: nodeify(this.resetTranstionFlag, this),
@@ -3474,8 +3475,16 @@ export default class MetamaskController extends EventEmitter {
     return this.misesController.setAccountTransactionsHeight();
   }
 
-  closePopUp() {
-    console.log(this.opts.notificationManager, 'this.opts.notificationManager');
+  closePopUp(from) {
+    console.log(
+      this.opts.notificationManager,
+      'this.opts.notificationManager',
+      from,
+    );
     this.opts.notificationManager.closePopup();
+  }
+
+  getPopupId() {
+    return this.opts.notificationManager.setExtensionTab;
   }
 }

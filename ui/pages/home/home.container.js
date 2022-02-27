@@ -33,6 +33,7 @@ import {
   setRecoveryPhraseReminderLastShown,
   setNewNetworkAdded,
   closePopUp,
+  getPopupId,
 } from '../../store/actions';
 import { setThreeBoxLastUpdated, hideWhatsNewPopup } from '../../ducks/app/app';
 import { getWeb3ShimUsageAlertEnabledness } from '../../ducks/metamask/metamask';
@@ -157,6 +158,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(setNewNetworkAdded(newNetwork));
   },
   closePopUp,
+  getPopupId,
 });
 
 export default compose(

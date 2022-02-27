@@ -77,7 +77,7 @@ export default class NotificationManager extends EventEmitter {
 
   async closePopup() {
     if (this._popupId) {
-      await this.platform.closeCurrentWindow();
+      await this.platform.closeCurrentWindow(this._popupId);
     }
     if (this._openerTab) {
       console.log('closePopup');
@@ -90,6 +90,7 @@ export default class NotificationManager extends EventEmitter {
     console.log(windowId, 'onremove');
     if (windowId === this._popupId) {
       this._popupId = undefined;
+      this.setExtensionTab = false;
       this.emit(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED);
     }
   }

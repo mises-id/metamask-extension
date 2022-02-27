@@ -1004,7 +1004,7 @@ export function cancelTxs(txDataList) {
         )
       ) {
         // global.METAMASK_NOTIFIER.closePopup();
-        promisifiedBackground.closePopUp();
+        closePopUp('cancelTxs');
       } else {
         dispatch(hideLoadingIndication());
       }
@@ -1828,7 +1828,7 @@ export function closeCurrentNotificationWindow() {
       !hasUnconfirmedTransactions(getState())
     ) {
       // global.METAMASK_NOTIFIER.closePopup();
-      promisifiedBackground.closePopUp();
+      closePopUp('closeCurrentNotificationWindow');
     }
   };
 }
@@ -3128,6 +3128,9 @@ export function clearKeyrings() {
   };
 }
 
-export function closePopUp() {
-  promisifiedBackground.closePopUp();
+export function closePopUp(from) {
+  promisifiedBackground.closePopUp(from);
+}
+export function getPopupId() {
+  return promisifiedBackground.getPopupId();
 }

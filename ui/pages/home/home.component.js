@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-12-13 16:44:36
- * @LastEditTime: 2022-02-18 16:19:26
+ * @LastEditTime: 2022-02-23 16:51:21
  * @LastEditors: lmk
  * @Description:
  */
@@ -110,6 +110,7 @@ export default class Home extends PureComponent {
     newNetworkAdded: PropTypes.string,
     setNewNetworkAdded: PropTypes.func.isRequired,
     isSigningQRHardwareTransaction: PropTypes.bool.isRequired,
+    getPopupId: PropTypes.func,
   };
 
   state = {
@@ -118,7 +119,7 @@ export default class Home extends PureComponent {
     canShowBlockageNotification: true,
   };
 
-  checkStatusAndNavigate() {
+  async checkStatusAndNavigate() {
     const {
       firstPermissionsRequestId,
       history,
@@ -133,20 +134,29 @@ export default class Home extends PureComponent {
       pendingConfirmations,
       isSigningQRHardwareTransaction,
       closePopUp,
+      getPopupId,
     } = this.props;
-
+    const _popupId = await getPopupId();
     console.log(
       isNotification,
       totalUnapprovedCount === 0,
       !isSigningQRHardwareTransaction,
+      _popupId,
     );
     if (
-      (isNotification || isPopup) &&
+      isNotification &&
       totalUnapprovedCount === 0 &&
       !isSigningQRHardwareTransaction
     ) {
-      // global.platform.closeCurrentWindow();
-      closePopUp();
+      closePopUp('home-page');
+      // closePopUp('home-page');
+    } else if (
+      !isNotification &&
+      isPopup &&
+      totalUnapprovedCount === 0 &&
+      _popupId
+    ) {
+      closePopUp('home-page');
     } else if (!isNotification && showAwaitingSwapScreen) {
       history.push(AWAITING_SWAP_ROUTE);
     } else if (!isNotification && haveSwapsQuotes) {
