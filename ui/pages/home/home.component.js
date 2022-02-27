@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-12-13 16:44:36
- * @LastEditTime: 2022-02-23 16:51:21
+ * @LastEditTime: 2022-02-27 15:33:05
  * @LastEditors: lmk
  * @Description:
  */
@@ -144,17 +144,10 @@ export default class Home extends PureComponent {
       _popupId,
     );
     if (
-      isNotification &&
-      totalUnapprovedCount === 0 &&
-      !isSigningQRHardwareTransaction
-    ) {
-      closePopUp('home-page');
-      // closePopUp('home-page');
-    } else if (
-      !isNotification &&
-      isPopup &&
-      totalUnapprovedCount === 0 &&
-      _popupId
+      (isNotification &&
+        totalUnapprovedCount === 0 &&
+        !isSigningQRHardwareTransaction) ||
+      (!isNotification && isPopup && totalUnapprovedCount === 0 && _popupId)
     ) {
       closePopUp('home-page');
     } else if (!isNotification && showAwaitingSwapScreen) {
