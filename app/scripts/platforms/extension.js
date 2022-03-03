@@ -127,9 +127,12 @@ export default class ExtensionPlatform {
       return this.getActiveTabs().then((windowDetails) => {
         console.log(windowDetails, id, 'closeCurrentWindow');
         const closeId = windowDetails[0].id;
-        if (closeId === id) {
-          return windowDetails && extension.tabs.remove(windowDetails[0].id);
-        }
+        extension.tabs.get(closeId, (e) => {
+          if (e && closeId === id) {
+            console.log(id, 'closeCurrentWindow=closeCurrentWindow');
+            extension.tabs.remove(id);
+          }
+        });
       });
     }
     return extension.windows.getCurrent((windowDetails) => {

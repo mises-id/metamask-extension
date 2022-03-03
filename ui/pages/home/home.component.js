@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-12-13 16:44:36
- * @LastEditTime: 2022-02-27 15:33:05
+ * @LastEditTime: 2022-03-03 15:47:21
  * @LastEditors: lmk
  * @Description:
  */
@@ -149,7 +149,7 @@ export default class Home extends PureComponent {
         !isSigningQRHardwareTransaction) ||
       (!isNotification && isPopup && totalUnapprovedCount === 0 && _popupId)
     ) {
-      closePopUp('home-page');
+      closePopUp('home');
     } else if (!isNotification && showAwaitingSwapScreen) {
       history.push(AWAITING_SWAP_ROUTE);
     } else if (!isNotification && haveSwapsQuotes) {
@@ -214,13 +214,13 @@ export default class Home extends PureComponent {
       threeBoxLastUpdated,
       threeBoxSynced,
       isNotification,
+      isPopup,
     } = this.props;
 
     if (!prevState.closing && this.state.closing) {
       global.platform.closeCurrentWindow();
     }
-
-    isNotification && this.checkStatusAndNavigate();
+    (isNotification || isPopup) && this.checkStatusAndNavigate();
 
     if (threeBoxSynced && showRestorePrompt && threeBoxLastUpdated === null) {
       setupThreeBox();
