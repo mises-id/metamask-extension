@@ -21,7 +21,6 @@ function mapStateToProps(state) {
     provider: state.metamask.provider,
   };
 }
-
 function mapDispatchToProps(dispatch) {
   return {
     updateSendAmount: (newAmount) => dispatch(updateSendAmount(newAmount)),

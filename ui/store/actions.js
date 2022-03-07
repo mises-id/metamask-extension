@@ -1758,7 +1758,6 @@ export function addToMisesBook(address) {
       address.indexOf('mises') > -1
         ? address
         : await promisifiedBackground.addressToMisesId(address);
-    console.log(misesId, 'wwww');
     let set;
     try {
       await promisifiedBackground.setMisesBook(misesId, amount.value);
@@ -3133,4 +3132,32 @@ export function closePopUp(from) {
 }
 export function getPopupId() {
   return promisifiedBackground.getPopupId();
+}
+/**
+ * @description: get gas fee
+ * @param {String} amount
+ * @param {String} misesId
+ * @return {*}
+ */
+export function getMisesGasfee() {
+  return async (dispatch, getState) => {
+    const { metamask } = getState();
+    const misesAccount = metamask.accountList.find(
+      (val) => val.address === metamask.selectedAddress,
+    );
+    dispatch(showLoadingIndication());
+    return new Promise((resolve) => {
+      promisifiedBackground
+        .setMisesBook(misesAccount.misesId, '0.001', true)
+        .then((res) => {
+          resolve(res);
+        })
+        .catch(() => {
+          resolve({});
+        })
+        .finally(() => {
+          dispatch(hideLoadingIndication());
+        });
+    });
+  };
 }

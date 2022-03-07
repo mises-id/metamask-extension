@@ -49,6 +49,7 @@ function mapDispatchToProps(dispatch) {
           recipient,
         }),
       ),
+    getMisesGasfee: () => dispatch(actions.getMisesGasfee()),
   };
 }
 
@@ -59,6 +60,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     ...restStateProps,
     showAddToAddressBookModal: () =>
       dispatchProps.showAddToAddressBookModal(to),
+    getMisesGasfee: () => dispatchProps.getMisesGasfee(),
   };
 }
 

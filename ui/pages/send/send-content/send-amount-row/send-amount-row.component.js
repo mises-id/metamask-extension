@@ -21,6 +21,7 @@ export default class SendAmountRow extends Component {
       type: PropTypes.string,
       ticker: PropTypes.string,
     }).isRequired,
+    misesGas: PropTypes.object,
     accounts: PropTypes.object.isRequired,
     selectedAddress: PropTypes.string.isRequired,
   };
@@ -29,17 +30,25 @@ export default class SendAmountRow extends Component {
     t: PropTypes.func,
   };
 
-  handleChange = (newAmount) => {
-    const { provider, accounts, selectedAddress } = this.props;
+  handleChange = async (newAmount) => {
+    const {
+      provider,
+      updateMisesSendAmount,
+      updateSendAmount,
+      misesGas,
+      accounts,
+      selectedAddress,
+    } = this.props;
     if (provider.type === MISESNETWORK) {
+      const { gasWanted } = misesGas;
       const { misesBalance = { amount: 0 } } = accounts[selectedAddress];
-      this.props.updateMisesSendAmount({
+      updateMisesSendAmount({
         amount: newAmount,
-        balance: misesBalance.amount,
+        gasWanted,
+        balance: misesBalance,
       });
-      console.log(newAmount);
     } else {
-      this.props.updateSendAmount(newAmount);
+      updateSendAmount(newAmount);
     }
   };
 
@@ -79,7 +88,7 @@ export default class SendAmountRow extends Component {
         showError={inError}
         errorType="amount"
       >
-        <AmountMaxButton inError={inError} />
+        <AmountMaxButton inError={inError} misesGas={this.props.misesGas} />
         {this.renderInput()}
       </SendRowWrapper>
     );

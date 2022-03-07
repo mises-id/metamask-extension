@@ -649,13 +649,9 @@ const slice = createSlice({
       slice.caseReducers.validateSendState(state);
     },
     updateMisesSendAmount: (state, action) => {
-      const { amount, balance } = action.payload;
-      let flag = 0;
-      if (balance && amount) {
-        flag = new BigNumber(balance).comparedTo(new BigNumber(amount));
-      }
-      state.amount.error = flag === -1 ? INSUFFICIENT_FUNDS_ERROR : null;
+      const { amount, flag } = action.payload;
       state.amount.value = amount;
+      state.amount.error = flag === -1 ? INSUFFICIENT_FUNDS_ERROR : null;
       slice.caseReducers.validateSendState(state);
     },
     /**
@@ -690,8 +686,7 @@ const slice = createSlice({
       // draftTransaction update happens in updateSendAmount
     },
     updateMiseAmountToMax: (state, action) => {
-      state.amount.value = action.payload;
-      slice.caseReducers.updateSendAmount(state, {
+      slice.caseReducers.updateMisesSendAmount(state, {
         payload: action.payload,
       });
     },
@@ -1360,9 +1355,15 @@ export function updateSendAmount(amount) {
   };
 }
 
-export function updateMisesSendAmount(amount) {
+export function updateMisesSendAmount(payload) {
   return async (dispatch) => {
-    await dispatch(actions.updateMisesSendAmount(amount));
+    const flag = new BigNumber(payload.balance.amount)
+      .minus(new BigNumber(payload.gasWanted || 0))
+      .comparedTo(new BigNumber(payload.amount));
+    if (flag === -1) {
+      await dispatch(actions.updateAmountMode(AMOUNT_MODES.INPUT));
+    }
+    await dispatch(actions.updateMisesSendAmount({ ...payload, flag }));
   };
 }
 
@@ -1531,7 +1532,7 @@ export function updateSendHexData(hexData) {
  * moving from INPUT to MAX.
  * @returns {void}
  */
-export function toggleSendMaxMode() {
+export function toggleSendMaxMode(misesGas) {
   return async (dispatch, getState) => {
     const state = getState();
     const {
@@ -1545,16 +1546,22 @@ export function toggleSendMaxMode() {
       const account = accountList.find(
         (val) => val.address === selectedAddress,
       );
-      if (account) {
+      if (state.metamask.provider.type === MISESNETWORK) {
+        console.log(misesGas);
         const {
           misesBalance: { amount },
         } = account;
-        await dispatch(actions.updateMiseAmountToMax(amount));
+        const amountInputValue = new BigNumber(amount)
+          .minus(new BigNumber(misesGas.gasWanted))
+          .toString();
+        await dispatch(
+          actions.updateMiseAmountToMax({ amount: amountInputValue }),
+        );
       } else {
         await dispatch(actions.updateAmountToMax());
+        await dispatch(computeEstimatedGasLimit());
       }
     }
-    await dispatch(computeEstimatedGasLimit());
   };
 }
 
@@ -1816,7 +1823,6 @@ export function getRecipient(state) {
   if (account.misesId && provider.type === MISESNETWORK) {
     form.misesId = account.misesId;
   }
-  console.log(form);
   return form;
 }
 

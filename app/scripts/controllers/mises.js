@@ -1,5 +1,6 @@
 import MisesSdk from 'mises-js-sdk';
 import { ObservableStore } from '@metamask/obs-store';
+import BigNumber from 'bignumber.js';
 import {
   getBaseApi,
   MISES_POINT,
@@ -10,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-02-11 10:16:30
+ * @LastEditTime: 2022-03-07 15:13:18
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -28,11 +29,11 @@ export default class MisesController {
       accountList: [],
       transformFlag: 'loading',
     });
-    const config = MisesSdk.newConfig();
+    this.config = MisesSdk.newConfig();
     this.coinDefine = MisesSdk.newCoinDefine();
     this.coinDefine.load();
-    config.setLCDEndpoint(MISES_POINT);
-    this.misesSdk = MisesSdk.newSdk(config);
+    this.config.setLCDEndpoint(MISES_POINT);
+    this.misesSdk = MisesSdk.newSdk(this.config);
     this.misesUser = this.misesSdk.userMgr();
     this.misesAppMgr = this.misesSdk.appMgr();
   }
@@ -93,6 +94,12 @@ export default class MisesController {
       url: getBaseApi('signin'),
       method: 'POST',
       body: query,
+    });
+  }
+
+  getGasPrices() {
+    return request({
+      url: getBaseApi('gasprices'),
     });
   }
 
@@ -343,20 +350,33 @@ export default class MisesController {
     }
   }
 
-  async setMisesBook(misesId, amount) {
+  async setMisesBook(misesId, amount, simulate = false) {
     try {
       const activeUser = this.misesUser.activeUser();
       const amountLong = this.coinDefine.fromCoin({
         amount,
         denom: 'mis',
       });
-      const res = await activeUser.sendUMIS(misesId, amountLong);
-      this.store.updateState({
-        transformFlag: res.height > 0 ? 'success' : 'error',
+      if (!simulate) {
+        const res = await activeUser.sendUMIS(misesId, amountLong);
+        this.store.updateState({
+          transformFlag: res.height > 0 ? 'success' : 'error',
+        });
+        console.log(res, 'success-setMisesBook');
+        return true;
+      }
+      const res = await activeUser.sendUMIS(misesId, amountLong, simulate);
+      const gasPrices = await this.getGasPrices();
+      const gasprice = new BigNumber(gasPrices.propose_gasprice)
+        .times(new BigNumber(res.gasWanted))
+        .toString();
+      const gasWanted = this.coinDefine.fromCoin({
+        amount: gasprice,
+        denom: 'umis',
       });
-      // history.push(MISES_SEND_CONFIRM_ROUTE);
-      console.log(res, 'success-setMisesBook');
-      return true;
+      const toCoinMIS = await this.coinDefine.toCoinMIS(gasWanted);
+      res.gasWanted = toCoinMIS.amount;
+      return res;
     } catch (error) {
       console.log(error, 'err-setMisesBook');
       this.store.updateState({

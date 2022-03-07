@@ -24,6 +24,7 @@ export default class SendContent extends Component {
   static propTypes = {
     isAssetSendable: PropTypes.bool,
     showAddToAddressBookModal: PropTypes.func,
+    getMisesGasfee: PropTypes.func,
     showHexData: PropTypes.bool,
     contact: PropTypes.object,
     isOwnedAccount: PropTypes.bool,
@@ -42,6 +43,18 @@ export default class SendContent extends Component {
       ticker: PropTypes.string,
     }).isRequired,
   };
+
+  state = {
+    misesGas: {},
+  };
+
+  componentDidMount() {
+    this.props.getMisesGasfee().then((res) => {
+      this.setState({
+        misesGas: res,
+      });
+    });
+  }
 
   render() {
     const {
@@ -81,7 +94,7 @@ export default class SendContent extends Component {
           {warning ? this.renderWarning() : null}
           {/* {this.maybeRenderAddContact()} */}
           <SendAssetRow />
-          <SendAmountRow />
+          <SendAmountRow misesGas={this.state.misesGas} />
           {networkOrAccountNotSupports1559 ? <SendGasRow /> : null}
           {showHexData ? <SendHexDataRow /> : null}
         </div>

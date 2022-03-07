@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:20:20
- * @LastEditTime: 2022-01-11 13:56:49
+ * @LastEditTime: 2022-03-07 14:57:38
  * @LastEditors: lmk
  * @Description: network api manager
  */
@@ -14,6 +14,8 @@ export const getBaseApi = (type) => {
   switch (type) {
     case 'signin': // get api token
       return `${MISES_SITE_API}/signin`;
+    case 'gasprices': // get gasprices
+      return `${MISES_SITE_API}/mises/gasprices`;
     default:
       throw new Error('getBaseApi requires an api call type');
   }

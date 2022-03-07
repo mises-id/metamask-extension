@@ -1,6 +1,7 @@
 import React from 'react';
 import classnames from 'classnames';
 import { useDispatch, useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
 import {
   getSendMaxModeState,
   isSendFormInvalid,
@@ -9,7 +10,7 @@ import {
 import { useI18nContext } from '../../../../../hooks/useI18nContext';
 import { useMetricEvent } from '../../../../../hooks/useMetricEvent';
 
-export default function AmountMaxButton() {
+export default function AmountMaxButton({ misesGas }) {
   const isDraftTransactionInvalid = useSelector(isSendFormInvalid);
   const maxModeOn = useSelector(getSendMaxModeState);
   const dispatch = useDispatch();
@@ -24,7 +25,7 @@ export default function AmountMaxButton() {
 
   const onMaxClick = () => {
     trackClickedMax();
-    dispatch(toggleSendMaxMode());
+    dispatch(toggleSendMaxMode(misesGas));
   };
 
   const disabled = isDraftTransactionInvalid;
@@ -46,3 +47,6 @@ export default function AmountMaxButton() {
     </button>
   );
 }
+AmountMaxButton.propTypes = {
+  misesGas: PropTypes.object,
+};
