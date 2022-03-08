@@ -11,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-03-07 15:13:18
+ * @LastEditTime: 2022-03-08 15:23:03
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -97,10 +97,15 @@ export default class MisesController {
     });
   }
 
-  getGasPrices() {
-    return request({
-      url: getBaseApi('gasprices'),
-    });
+  async getGasPrices() {
+    try {
+      const res = await request({
+        url: getBaseApi('gasprices'),
+      });
+      return res;
+    } catch (error) {
+      return {};
+    }
   }
 
   getActive() {
@@ -358,18 +363,23 @@ export default class MisesController {
         denom: 'mis',
       });
       if (!simulate) {
+        console.log(simulate, 'simulate');
         const res = await activeUser.sendUMIS(misesId, amountLong);
         this.store.updateState({
-          transformFlag: res.height > 0 ? 'success' : 'error',
+          transformFlag: res.code === 0 ? 'success' : 'error',
         });
         console.log(res, 'success-setMisesBook');
         return true;
       }
       const res = await activeUser.sendUMIS(misesId, amountLong, simulate);
       const gasPrices = await this.getGasPrices();
-      const gasprice = new BigNumber(gasPrices.propose_gasprice)
+      const proposeGasprice =
+        gasPrices.propose_gasprice || this.config.gasPrice();
+      const gasprice = new BigNumber(proposeGasprice)
         .times(new BigNumber(res.gasWanted))
         .toString();
+      this.config.setGasPriceAndLimit(proposeGasprice, 200000);
+      console.log(proposeGasprice, res, 'propose_gasprice');
       const gasWanted = this.coinDefine.fromCoin({
         amount: gasprice,
         denom: 'umis',
