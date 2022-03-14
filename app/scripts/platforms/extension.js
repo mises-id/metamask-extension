@@ -177,8 +177,9 @@ export default class ExtensionPlatform {
     route = null,
     queryString = null,
     keepWindowOpen = false,
+    url = 'home.html',
   ) {
-    let extensionURL = extension.runtime.getURL('home.html');
+    let extensionURL = extension.runtime.getURL(url);
 
     if (route) {
       extensionURL += `#${route}`;

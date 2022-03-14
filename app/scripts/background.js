@@ -21,7 +21,7 @@ import {
   REJECT_NOTFICIATION_CLOSE,
   REJECT_NOTFICIATION_CLOSE_SIG,
 } from '../../shared/constants/metametrics';
-import { RESTORE_VAULT_ROUTE } from '../../ui/helpers/constants/routes';
+import { DEFAULT_ROUTE } from '../../ui/helpers/constants/routes';
 import { isMobile } from '../../ui/helpers/utils/is-mobile-view';
 import migrations from './migrations';
 import Migrator from './lib/migrator';
@@ -628,7 +628,7 @@ async function triggerUi() {
   }
 }
 
-async function setExtensionTab() {
+async function setExtensionTab(type) {
   try {
     const chromeTabs = await platform.getTabs({});
     const findExtensionTab = chromeTabs.find(
@@ -641,12 +641,15 @@ async function setExtensionTab() {
     console.log(findExtensionTab, 'findExtensionTab', chromeTabs);
     if (findExtensionTab) {
       const activeTabs = await platform.getActiveTabs();
-      notificationManager._openerTab =
-        activeTabs.length > 0 ? activeTabs[0] : undefined;
       await platform.switchToTab(findExtensionTab.id);
       extension.tabs.reload(findExtensionTab.id);
-      notificationManager._popupId = findExtensionTab.id;
-      notificationManager.setExtensionTab = true;
+      if (!type) {
+        notificationManager._openerTab =
+          activeTabs.length > 0 ? activeTabs[0] : undefined;
+        notificationManager._popupId = findExtensionTab.id;
+        notificationManager.setExtensionTab = true;
+      }
+
       return true;
     }
     return false;
@@ -733,6 +736,14 @@ extension.tabs.onUpdated.addListener((e) => {
   console.log('onUpdated', e);
   setActiveUrl(e);
 });
-function restoreAccount() {
-  notificationManager.platform.openExtensionInBrowser(RESTORE_VAULT_ROUTE);
+async function restoreAccount() {
+  const flag = await setExtensionTab('openPopup');
+  if (!flag) {
+    notificationManager.platform.openExtensionInBrowser(
+      DEFAULT_ROUTE,
+      null,
+      null,
+      'popup.html',
+    );
+  }
 }

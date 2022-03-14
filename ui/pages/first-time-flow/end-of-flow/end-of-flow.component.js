@@ -72,16 +72,16 @@ export default class EndOfFlowScreen extends PureComponent {
         </div>
         <div className="end-of-flow__box">
           <div className="end-of-flow__emoji">🎉</div>
-          <div className="first-time-flow__header">Congradulations!</div>
+          <div className="first-time-flow__header">Congratulations!</div>
           <div className="first-time-flow__text-block end-of-flow__text-1">
-            you have successfully created your misesid & metamask account.
+            You have successfully created your Mises ID & Metamask account.
           </div>
           <div className="first-time-flow__text-block end-of-flow__text-2">
-            keep your secret recovery phrase safe, you do not want to lose your
-            assets & data
+            Please keep your seed phrase safe, or you&apos;ll put your assets
+            and data at risk!
           </div>
           <div className="first-time-flow__text-block end-of-flow__text-2">
-            connect mises chain to edit your personal info
+            Please connect to Mises chain to edit your personal info.
           </div>
         </div>
         {/* <div className="end-of-flow__text-3">
