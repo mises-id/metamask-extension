@@ -232,7 +232,7 @@ export default class NewAccount extends PureComponent {
                   <a
                     onClick={(e) => e.stopPropagation()}
                     key="first-time-flow__link-text"
-                    href="https://metamask.io/terms.html"
+                    href="https://www.mises.site/teamsofuse"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

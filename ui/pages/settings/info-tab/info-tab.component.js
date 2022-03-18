@@ -32,7 +32,7 @@ export default class InfoTab extends PureComponent {
         <div className="info-tab__link-item">
           <Button
             type="link"
-            href="https://metamask.io/terms.html"
+            href="https://www.mises.site/teamsofuse"
             target="_blank"
             rel="noopener noreferrer"
             className="info-tab__link-text"

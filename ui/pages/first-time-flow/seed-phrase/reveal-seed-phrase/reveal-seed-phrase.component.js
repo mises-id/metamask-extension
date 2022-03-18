@@ -167,8 +167,8 @@ export default class RevealSeedPhrase extends PureComponent {
               {t('secretRecoveryPhrase')}
             </div>
             <div className="first-time-flow__text-block">
-              Your Secret Recovery Phrase is a 12-word phrase,it makes easy to
-              back up and restore your account.
+              Your Secret Recovery Phrase is composed of 12 words. It can help
+              you backup and restore your account easily.
             </div>
             {this.renderSecretWordsContainer()}
           </div>
@@ -178,13 +178,12 @@ export default class RevealSeedPhrase extends PureComponent {
               <span className="seed-phrase__warning">WARNING:</span>
             </div>
             <div className="first-time-flow__text-block1">
-              {`Never disclose your Secret Recovery 
-              Phrase. Anyone with this phrase  can take your 
-              Ether forever. `}
+              Never disclosing your Secret Recovery Phrase please. Anyone with
+              it can get access to your assets.
             </div>
             <div className="first-time-flow__text-block1">
-              {`Please keep your Secret Recovery Phrase safety, 
-              NO ONE can  recover your Secret  Recovery Phrase.`}
+              Please keep your Secret Recovery Phrase safe. No one can recover
+              your Secret Recovery Phrase once lost.
             </div>
             {/* <div className="first-time-flow__text-block">
               {t('writePhrase')}

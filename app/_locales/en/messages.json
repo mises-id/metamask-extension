@@ -1269,16 +1269,16 @@
     "message": "Import Tokens"
   },
   "importWalletTitle1":{
-    "message":"Already have a Metamask account?"
+    "message":"Already had a Metamask account?"
   },
   "importWalletTitle2":{
     "message":"Created a Mises ID before? "
   },
   "importWalletContent1":{
-    "message":"Use mnemonics to restore your Metamask account, the Enhanced Metamask plugin will create Mises ID the same as your Metamask account."
+    "message":"Using Secret Recovery Phrase to restore your Metamask account. Then the enhanced Metamask plugin will generate a Mises ID the same as your Metamask account."
   },
   "importWalletContent2":{
-    "message":"Use mnemonics to restore your Mises ID & Metamask account. "
+    "message":"Using Secret Recovery Phrase to restore your Mises ID & Metamask account. "
   },
   "importWallet1": {
     "message": "Restore Mises ID"
