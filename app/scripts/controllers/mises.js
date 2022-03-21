@@ -11,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-03-08 15:23:03
+ * @LastEditTime: 2022-03-21 16:40:55
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -203,7 +203,7 @@ export default class MisesController {
    * @param {object} params:{misesId:string,nickname:string,avatar:string,token:string}
    */
   setToMisesPrivate(params) {
-    // console.log('准备i调用setMisesId', params);
+    console.log('Ready to call setmisesid', params);
     window.localStorage.setItem('setAccount', true);
     return new Promise((resolve) => {
       /* global chrome */
@@ -211,7 +211,7 @@ export default class MisesController {
         chrome.misesPrivate.setMisesId(JSON.stringify(params));
         return resolve();
       }
-      // console.log('chrome.misesPrivate对象不存在');
+      console.log('The missesprivate object does not exist');
       return resolve('not defind setMisesId Function');
       // return reject(JSON.stringify(params));
     });

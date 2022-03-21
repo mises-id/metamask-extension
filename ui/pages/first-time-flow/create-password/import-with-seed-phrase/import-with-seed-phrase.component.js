@@ -347,7 +347,7 @@ export default class ImportWithSeedPhrase extends PureComponent {
                 <a
                   onClick={(e) => e.stopPropagation()}
                   key="first-time-flow__link-text"
-                  href="https://www.mises.site/teamsofuse"
+                  href="https://www.mises.site/termsofuse"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -18,7 +18,7 @@ const BetaWelcomeFooter = () => {
         <p>{t('betaMetamaskDescription')}</p>
         <p>
           {t('betaMetamaskDescriptionExplanation', [
-            <a href="https://www.mises.site/teamsofuse" key="terms-link">
+            <a href="https://www.mises.site/termsofuse" key="terms-link">
               {t('betaMetamaskDescriptionExplanationTermsLinkText')}
             </a>,
             <a href="https://metamask.io/beta-terms.html" key="beta-terms-link">

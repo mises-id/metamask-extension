@@ -54,7 +54,7 @@
     "message": "* Accelerating a transaction by using a higher gas price increases its chances of getting processed by the network faster, but it is not always guaranteed."
   },
   "acceptTermsOfUse": {
-    "message": "I have read and agree to the Terms of Use",
+    "message": "I have read and agree to the $1",
     "description": "$1 is the `terms` message"
   },
   "accessAndSpendNotice": {

@@ -47,7 +47,7 @@ export default function SwapsFooter({
         <div
           className="swaps-footer__bottom-text"
           onClick={() =>
-            global.platform.openTab({ url: 'https://www.mises.site/teamsofuse' })
+            global.platform.openTab({ url: 'https://www.mises.site/termsofuse' })
           }
         >
           {t('termsOfService')}

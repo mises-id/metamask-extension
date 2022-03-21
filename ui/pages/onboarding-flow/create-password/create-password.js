@@ -181,7 +181,7 @@ export default function CreatePassword({
                 <a
                   onClick={(e) => e.stopPropagation()}
                   key="create-password__link-text"
-                  href="https://www.mises.site/teamsofuse"
+                  href="https://www.mises.site/termsofuse"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
