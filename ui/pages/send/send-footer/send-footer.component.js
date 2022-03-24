@@ -128,12 +128,13 @@ export default class SendFooter extends Component {
 
   render() {
     const { t } = this.context;
-    const { sendStage } = this.props;
+    const { sendStage, provider } = this.props;
     return (
       <PageContainerFooter
         onCancel={() => this.onCancel()}
         onSubmit={(e) => this.onSubmit(e)}
         disabled={this.props.disabled}
+        submitText={provider.type === 'MisesTestNet' ? 'Send' : ''}
         cancelText={sendStage === SEND_STAGES.EDIT ? t('reject') : t('cancel')}
       />
     );

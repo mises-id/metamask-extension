@@ -3102,8 +3102,8 @@ export async function resetTranstionFlag() {
   promisifiedBackground.resetTranstionFlag();
 }
 
-export function recentTransactions() {
-  return promisifiedBackground.recentTransactions();
+export function recentTransactions(type) {
+  return promisifiedBackground.recentTransactions(type);
 }
 
 export function updataBalance(type) {

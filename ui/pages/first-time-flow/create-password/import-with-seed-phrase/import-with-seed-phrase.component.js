@@ -252,6 +252,7 @@ export default class ImportWithSeedPhrase extends PureComponent {
           </div>
           <div className="first-time-flow__textarea-wrapper">
             <label>{t('secretRecoveryPhrase')}</label>
+            <div className="phraseTips">{t('showPhraseTips')}</div>
             {showSeedPhrase ? (
               <textarea
                 className="first-time-flow__textarea"

@@ -118,26 +118,59 @@ export default function TransactionList({
     () => setLimit((prev) => prev + PAGE_INCREMENT),
     [],
   );
-  const [misesCompletedTransactions, setmisesCompletedTransactions] = useState(
+  let [misesCompletedTransactions, setmisesCompletedTransactions] = useState(
     [],
   );
   if (misesCompletedTransactions.length) {
     completedTransactions = misesCompletedTransactions;
   }
   const pendingLength = pendingTransactions.length;
-  useEffect(() => {
-    setmisesCompletedTransactions([]);
-    if (provider.type === MISESNETWORK) {
-      recentTransactions()
-        .then((res) => {
-          setmisesCompletedTransactions([...res]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      setmisesCompletedTransactions([]);
+  const [loading, setloading] = useState('');
+  const unique = (arr) => {
+    const uniqueArr = [];
+    if (Array.isArray(arr)) {
+      arr.forEach((val) => {
+        const flag = uniqueArr.some((item) => item.height === val.height);
+        if (!flag) uniqueArr.push(val);
+      });
     }
+    return uniqueArr.sort((a, b) => b.height - a.height);
+  };
+  const getMisesTransactions = () => {
+    setloading('loading');
+    // get cache
+    recentTransactions('cache')
+      .then((res) => {
+        setmisesCompletedTransactions(
+          unique([...misesCompletedTransactions, ...res]),
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    // get refresh data
+    recentTransactions()
+      .then((res) => {
+        setmisesCompletedTransactions(
+          unique([...misesCompletedTransactions, ...res]),
+        );
+        setloading('success');
+        setTimeout(() => {
+          setloading('');
+        }, 1000);
+      })
+      .catch((err) => {
+        setloading('error');
+        console.log(err);
+      });
+  };
+  useEffect(() => {
+    if (provider.type === MISESNETWORK && selectedAddress) {
+      misesCompletedTransactions = [];
+    }
+    provider.type === MISESNETWORK
+      ? getMisesTransactions()
+      : setmisesCompletedTransactions([]);
   }, [provider.type, selectedAddress]);
 
   return (
@@ -157,6 +190,19 @@ export default function TransactionList({
             ))}
           </div>
         )}
+        {loading === 'loading' && (
+          <div style={{ textAlign: 'center', padding: '10px' }}>
+            Getting new data...
+          </div>
+        )}
+        {loading === 'success' && (
+          <div style={{ textAlign: 'center', padding: '10px' }}>success</div>
+        )}
+        {loading === 'error' && (
+          <div style={{ textAlign: 'center', padding: '10px' }}>
+            Data refresh error
+          </div>
+        )}
         <div className="transaction-list__completed-transactions">
           {pendingLength > 0 ? (
             <div className="transaction-list__header">{t('history')}</div>
@@ -173,7 +219,7 @@ export default function TransactionList({
           ) : (
             <div className="transaction-list__empty">
               <div className="transaction-list__empty-text">
-                {t('noTransactions')}
+                {loading === '' && t('noTransactions')}
               </div>
             </div>
           )}

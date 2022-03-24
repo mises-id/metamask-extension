@@ -178,6 +178,7 @@ class RestoreVaultPage extends Component {
                 <label className="import-account__input-label">
                   {this.context.t('walletSeedRestore')}
                 </label>
+                <div className="phraseTips">{t('showPhraseTips')}</div>
                 {showSeedPhrase ? (
                   <textarea
                     className="import-account__secret-phrase"

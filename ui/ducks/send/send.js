@@ -1357,9 +1357,9 @@ export function updateSendAmount(amount) {
 
 export function updateMisesSendAmount(payload) {
   return async (dispatch) => {
-    const flag = new BigNumber(payload.balance.amount)
+    const flag = new BigNumber(payload.balance.amount || 0)
       .minus(new BigNumber(payload.gasWanted || 0))
-      .comparedTo(new BigNumber(payload.amount));
+      .comparedTo(new BigNumber(payload.amount || 0));
     if (flag === -1) {
       await dispatch(actions.updateAmountMode(AMOUNT_MODES.INPUT));
     }

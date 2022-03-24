@@ -2398,6 +2398,9 @@
   "showSeedPhrase": {
     "message": "Show Secret Recovery Phrase"
   },
+  "showPhraseTips": {
+    "message": "*Each word should be separated by a space"
+  },
   "showTestnetNetworks": {
     "message": "Show test networks"
   },

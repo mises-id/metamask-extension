@@ -3460,8 +3460,8 @@ export default class MetamaskController extends EventEmitter {
     return this.misesController.resetTranstionFlag();
   }
 
-  recentTransactions() {
-    return this.misesController.recentTransactions();
+  recentTransactions(type) {
+    return this.misesController.recentTransactions(type);
   }
 
   updataBalance(type) {

@@ -19510,7 +19510,7 @@ minizlib@^2.1.1:
     minipass "^3.0.0"
     yallist "^4.0.0"
 
-mises-js-sdk@^0.1.7:
+mises-js-sdk@^0.1.8:
   version "0.1.7"
   resolved "https://registry.npmmirror.com/mises-js-sdk/-/mises-js-sdk-0.1.7.tgz#0daec32bf06c6a72a79ba207395a6741e3e1558a"
   integrity sha512-GyQCnxzDWv1ql0jTqkylfMJUFcMtuAdHcfGKbPtsp9hCyQV/bTmvO0pwF9Ueawt6mrKZuPb3KsPFuAzRj8lPwA==

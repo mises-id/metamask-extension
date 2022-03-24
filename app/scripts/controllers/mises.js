@@ -11,14 +11,16 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-03-21 16:40:55
+ * @LastEditTime: 2022-03-24 14:35:13
  * @LastEditors: lmk
  * @Description: mises controller
  */
 export default class MisesController {
   timer;
 
-  intervalTime = 20000;
+  intervalTime = 200000;
+
+  misesGasfee;
 
   constructor({ exportAccount, getKeyringAccounts, getSelectedAddress }) {
     this.exportAccount = exportAccount;
@@ -104,7 +106,7 @@ export default class MisesController {
       });
       return res;
     } catch (error) {
-      return {};
+      return Promise.resolve({});
     }
   }
 
@@ -127,7 +129,7 @@ export default class MisesController {
     try {
       // console.log('获取用户数据');
       const nonce = new Date().getTime();
-      const activeUser = this.misesUser.activeUser();
+      const activeUser = this.getActive();
       const auth = await this.generateAuth(nonce);
       const { accountList } = this.store.getState();
       const misesBalance = await this.getUserBalance(address);
@@ -191,11 +193,16 @@ export default class MisesController {
   }
 
   async generateAuth(nonce, key) {
-    let activeUser = this.misesUser.activeUser();
-    if (!activeUser) {
-      activeUser = await this.misesUser.activateUser(key);
+    try {
+      let activeUser = this.getActive();
+      if (!activeUser) {
+        activeUser = await this.activate(key);
+      }
+      return activeUser.generateAuth(nonce);
+    } catch (error) {
+      console.log(error);
+      return error;
     }
-    return activeUser.generateAuth(nonce);
   }
 
   /**
@@ -229,7 +236,7 @@ export default class MisesController {
 
   async setUserInfo(data) {
     try {
-      const activeUser = this.misesUser.activeUser();
+      const activeUser = this.getActive();
       const userinfo = await activeUser.info();
       const version = userinfo.version.add(1);
       // console.log({
@@ -255,21 +262,21 @@ export default class MisesController {
           misesId,
         });
       }
-      // console.log('setinfo success', info);
+      console.log('setinfo success', info);
       return info;
     } catch (error) {
-      // console.log(error, 'error');
+      console.log(error, 'error');
       return false;
     }
   }
 
   setUnFollow(data) {
-    const activeUser = this.misesUser.activeUser();
+    const activeUser = this.getActive();
     return activeUser.follow(data);
   }
 
   setFollow(data) {
-    const activeUser = this.misesUser.activeUser();
+    const activeUser = this.getActive();
     return activeUser.unfollow(data);
   }
 
@@ -313,7 +320,7 @@ export default class MisesController {
   async initMisesBalance() {
     // console.log('initMisesBalance');
     const accountList = await this.getAccountMisesBalance();
-    await Promise.all(accountList).then((res) => {
+    Promise.all(accountList).then((res) => {
       // console.log(res, 'accountList');
       this.store.updateState({
         accountList: res,
@@ -356,28 +363,45 @@ export default class MisesController {
   }
 
   async setMisesBook(misesId, amount, simulate = false) {
-    try {
-      const activeUser = this.misesUser.activeUser();
-      const amountLong = this.coinDefine.fromCoin({
-        amount,
-        denom: 'mis',
-      });
-      if (!simulate) {
-        console.log(simulate, 'simulate');
+    const activeUser = this.getActive();
+    const amountLong = this.coinDefine.fromCoin({
+      amount,
+      denom: 'mis',
+    });
+    console.log(simulate, 'simulate');
+    if (!simulate) {
+      try {
         const res = await activeUser.sendUMIS(misesId, amountLong);
         this.store.updateState({
           transformFlag: res.code === 0 ? 'success' : 'error',
         });
         console.log(res, 'success-setMisesBook');
         return true;
+      } catch (error) {
+        this.store.updateState({
+          transformFlag: 'error',
+        });
+        console.log(error, 'err-setMisesBook');
+        return false;
+      }
+    }
+
+    try {
+      if (this.misesGasfee) {
+        console.log('get cache misesGasfee');
+        return this.misesGasfee;
       }
       const res = await activeUser.sendUMIS(misesId, amountLong, simulate);
+
       const gasPrices = await this.getGasPrices();
+
       const proposeGasprice =
         gasPrices.propose_gasprice || this.config.gasPrice();
+
       const gasprice = new BigNumber(proposeGasprice)
-        .times(new BigNumber(res.gasWanted))
+        .times(new BigNumber(res.gasWanted || 67751))
         .toString();
+
       this.config.setGasPriceAndLimit(proposeGasprice, 200000);
       console.log(proposeGasprice, res, 'propose_gasprice');
       const gasWanted = this.coinDefine.fromCoin({
@@ -386,12 +410,10 @@ export default class MisesController {
       });
       const toCoinMIS = await this.coinDefine.toCoinMIS(gasWanted);
       res.gasWanted = toCoinMIS.amount;
+      this.misesGasfee = res;
       return res;
     } catch (error) {
-      console.log(error, 'err-setMisesBook');
-      this.store.updateState({
-        transformFlag: 'error',
-      });
+      console.log(error, 'err-simulate');
       return false;
     }
   }
@@ -402,16 +424,20 @@ export default class MisesController {
     });
   }
 
-  async recentTransactions() {
+  async recentTransactions(type) {
     const selectedAddress = this.getSelectedAddress();
     const accountList = this.getAccountList();
     const index = accountList.findIndex(
       (val) => val.address === selectedAddress,
     );
     const currentAddress = accountList[index] || {};
-    // console.log(currentAddress);
+    if (type === 'cache') {
+      console.log('get cache', currentAddress);
+      return currentAddress.transactions || [];
+    }
+    console.log('get network');
     try {
-      const activeUser = this.misesUser.activeUser();
+      const activeUser = this.getActive();
       let list = await activeUser.recentTransactions(currentAddress.height);
       list = list.map((val) => {
         val.rawLog = JSON.parse(val.rawLog);
@@ -424,7 +450,7 @@ export default class MisesController {
         });
         const balanceObj = this.coinDefine.toCoinMIS(currency);
         balanceObj.denom = balanceObj.denom.toUpperCase();
-        const transactionGroup = {
+        return {
           category:
             transfers[0].value === activeUser.address() ? 'receive' : 'send',
           date: `${val.height}`,
@@ -445,7 +471,6 @@ export default class MisesController {
           initialTransaction: { id: '0x0' },
           primaryTransaction: { err: {}, status: '' },
         };
-        return transactionGroup;
       });
       list.sort((a, b) => b.height - a.height);
       if (index > -1) {
