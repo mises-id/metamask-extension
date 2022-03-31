@@ -11,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-03-31 17:30:23
+ * @LastEditTime: 2022-03-31 21:06:36
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -267,12 +267,12 @@ export default class MisesController {
 
   setUnFollow(data) {
     const activeUser = this.getActive();
-    return activeUser.follow(data);
+    return activeUser.unfollow(data);
   }
 
   setFollow(data) {
     const activeUser = this.getActive();
-    return activeUser.unfollow(data);
+    return activeUser.follow(data);
   }
 
   async connect({ domain, appid, userid, permissions }) {
