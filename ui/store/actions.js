@@ -3142,9 +3142,10 @@ export function getPopupId() {
 export function getMisesGasfee() {
   return async (dispatch, getState) => {
     const { metamask } = getState();
-    const misesAccount = metamask.accountList.find(
-      (val) => val.address === metamask.selectedAddress,
-    );
+    const misesAccount =
+      metamask.accountList.find(
+        (val) => val.address === metamask.selectedAddress,
+      ) || {};
     dispatch(showLoadingIndication());
     return new Promise((resolve) => {
       promisifiedBackground

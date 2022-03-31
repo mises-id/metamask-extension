@@ -11,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-03-24 14:35:13
+ * @LastEditTime: 2022-03-31 17:30:23
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -38,16 +38,11 @@ export default class MisesController {
     this.misesSdk = MisesSdk.newSdk(this.config);
     this.misesUser = this.misesSdk.userMgr();
     this.misesAppMgr = this.misesSdk.appMgr();
+
+    this.gasPriceAndLimit();
   }
 
-  async updataBalance(type) {
-    if (type === 'close') {
-      this.clearTimer();
-      return;
-    }
-    this.timer = setTimeout(() => {
-      this.updataBalance();
-    }, this.intervalTime);
+  async updataBalance() {
     const balanceList = await this.getAccountMisesBalance();
     Promise.all(balanceList).then((res) => {
       let accountList = this.getAccountList();
@@ -58,7 +53,7 @@ export default class MisesController {
         }
         return val;
       });
-      // console.log('updataBalance', accountList);
+      console.log('updataBalance', accountList);
       this.store.updateState({
         accountList,
       });
@@ -345,7 +340,7 @@ export default class MisesController {
       const user = await this.getMisesUser(address);
       const balanceLong = await user.getBalanceUMIS();
       if (user && balanceLong) {
-        const balanceObj = await this.coinDefine.toCoinMIS(balanceLong);
+        const balanceObj = this.coinDefine.toCoinMIS(balanceLong);
         balanceObj.denom = balanceObj.denom.toUpperCase();
         return balanceObj;
       }
@@ -359,6 +354,21 @@ export default class MisesController {
         amount: '0',
         denom: 'MIS',
       });
+    }
+  }
+
+  async gasPriceAndLimit() {
+    try {
+      const gasPrices = await this.getGasPrices();
+
+      const proposeGasprice =
+        gasPrices.propose_gasprice || this.config.gasPrice();
+
+      this.config.setGasPriceAndLimit(proposeGasprice, 200000);
+      console.log('gasPriceAndLimit', proposeGasprice);
+      return proposeGasprice;
+    } catch (error) {
+      return Promise.resolve(this.config.gasPrice());
     }
   }
 
@@ -393,16 +403,12 @@ export default class MisesController {
       }
       const res = await activeUser.sendUMIS(misesId, amountLong, simulate);
 
-      const gasPrices = await this.getGasPrices();
-
-      const proposeGasprice =
-        gasPrices.propose_gasprice || this.config.gasPrice();
+      const proposeGasprice = await this.gasPriceAndLimit();
 
       const gasprice = new BigNumber(proposeGasprice)
         .times(new BigNumber(res.gasWanted || 67751))
         .toString();
 
-      this.config.setGasPriceAndLimit(proposeGasprice, 200000);
       console.log(proposeGasprice, res, 'propose_gasprice');
       const gasWanted = this.coinDefine.fromCoin({
         amount: gasprice,
@@ -498,7 +504,7 @@ export default class MisesController {
       (val) => val.address === selectedAddress,
     );
     if (index > -1) {
-      const { transactions } = accountList[index];
+      const { transactions = [] } = accountList[index];
       const last = transactions[0] || {};
       console.log(last);
       accountList[index].height = last.height + 1;

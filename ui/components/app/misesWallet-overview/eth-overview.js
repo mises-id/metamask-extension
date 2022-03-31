@@ -78,10 +78,27 @@ const MisesEthOverview = ({ className }) => {
   //   category: 'swaps',
   // });
   // const defaultSwapsToken = useSelector(getSwapsDefaultToken);
-  useEffect(() => {
+  let timer = null;
+  const closeTimer = () => {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  };
+  const getBalance = () => {
+    if (timer) {
+      closeTimer();
+    }
+    console.log('getBalance page');
     updataBalance();
+    timer = setTimeout(() => {
+      getBalance();
+    }, 20000);
+  };
+  useEffect(() => {
+    getBalance();
     return () => {
-      updataBalance('close');
+      closeTimer();
     };
   }, []);
   return (
