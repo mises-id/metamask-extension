@@ -11,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-04-02 15:11:03
+ * @LastEditTime: 2022-04-02 17:35:49
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -162,7 +162,9 @@ export default class MisesController {
       });
     }
     const userinfo = {
-      nickname: account.userInfo && account.userInfo.name,
+      nickname: account.userInfo
+        ? account.userInfo.name
+        : shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS),
       avatar: account.userInfo && account.userInfo.avatarUrl,
       misesId,
       token: account.token,
@@ -303,7 +305,7 @@ export default class MisesController {
   async initMisesBalance() {
     // console.log('initMisesBalance');
     const accountList = await this.getAccountMisesBalance();
-    return Promise.all(accountList).then((res) => {
+    Promise.all(accountList).then((res) => {
       // console.log(res, 'accountList');
       this.store.updateState({
         accountList: res,
