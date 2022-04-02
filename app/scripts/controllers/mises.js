@@ -11,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-03-31 21:06:36
+ * @LastEditTime: 2022-04-02 15:11:03
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -115,76 +115,59 @@ export default class MisesController {
    * @return {*}
    */
   async getMisesUserInfo(address) {
-    /* 
-    1.拿到用户信息 使用misesid+时间戳调用signMsg获取sign字段
-    2.使用activeUser拿到用户信息
-    2.使用时间戳调用generateAuth返回参数 使用参数拿到token
-    3.拿到token组装数据给setToMisesPrivate(userinfo)
-    */
-    try {
-      // console.log('获取用户数据');
-      const nonce = new Date().getTime();
-      const activeUser = this.getActive();
-      const auth = await this.generateAuth(nonce);
-      const { accountList } = this.store.getState();
+    const { accountList } = this.store.getState();
+    const activeUser = this.getActive();
+    const misesId = activeUser.address();
+    let account = accountList.find((val) => val.address === address) || null;
+    const nonce = new Date().getTime();
+    const auth = await this.generateAuth(nonce);
+    if (!account) {
       const misesBalance = await this.getUserBalance(address);
-      const misesId = activeUser.address();
-      const account = accountList.find((val) => val.address === address) || {
+      account = {
         address,
-        auth,
-        misesBalance,
         misesId,
+        misesBalance,
+        auth,
       };
-      if (!account.token) {
+    }
+    if (!account.token) {
+      try {
         const { token } = await this.getServerToken({
           provider: 'mises',
           user_authz: { auth },
         });
         account.token = token;
-        const findIndex = accountList.findIndex(
-          (val) => val.address === account.address,
-        );
-        if (findIndex > -1) {
-          accountList[findIndex] = account;
-        } else {
-          // console.log(accountList, account, 'account');
-          accountList.push(account);
-        }
-        this.store.updateState({
-          accountList,
-        });
-        // accountList.push(account);
-        // this.store.updateState({
-        //   accountList,
-        // });
+      } catch (error) {
+        return Promise.reject(error, 'get token Error');
       }
       const isRegistered = await activeUser.isRegistered();
-      // const misesId = activeUser.misesID();
       if (isRegistered) {
+        console.log(isRegistered, 'not found userinfo cache');
         const userInfo = await activeUser.info();
-        // console.log(userInfo, misesId, '用户数据');
-        return {
-          nickname:
+        account.userInfo = {
+          name:
             userInfo.name ||
             shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS),
-          avatar: userInfo.avatarUrl,
-          misesId,
-          token: account.token,
+          avatarUrl: userInfo.avatarUrl,
         };
       }
-      return { token: account.token, misesId };
-      // return {
-      //   token: account.token,
-      //   misesId: 'did:mises:mises16q6leu5py42kv3xlr5l7p74560ve2xa9gj422v',
-      //   username: 'test',
-      //   gender: 'other',
-      //   mobile: '13800138000',
-      //   email: 'exp@qq.com',
-      // };
-    } catch (error) {
-      // console.log(error, 'error');
-      return Promise.reject(error);
+      const findIndex = accountList.findIndex(
+        (val) => val.address === account.address,
+      );
+      findIndex > -1
+        ? (accountList[findIndex] = account)
+        : accountList.push(account);
+      this.store.updateState({
+        accountList,
+      });
     }
+    const userinfo = {
+      nickname: account.userInfo && account.userInfo.name,
+      avatar: account.userInfo && account.userInfo.avatarUrl,
+      misesId,
+      token: account.token,
+    };
+    return userinfo;
   }
 
   async generateAuth(nonce, key) {
@@ -234,28 +217,34 @@ export default class MisesController {
       const activeUser = this.getActive();
       const userinfo = await activeUser.info();
       const version = userinfo.version.add(1);
-      // console.log({
-      //   ...data,
-      //   version,
-      // });
       const info = await activeUser.setInfo({
         ...data,
         version,
       });
       const { accountList } = this.store.getState();
       const misesId = activeUser.address();
-      const { token } =
-        accountList.find((val) => val.misesId === misesId) || {};
-      // console.log(token);
-      if (token) {
-        this.setToMisesPrivate({
+      const index = accountList.findIndex((val) => val.misesId === misesId);
+      if (index > -1) {
+        const { token } = accountList[index] || {};
+        const updateUserInfo = {
           nickname:
             data.name ||
             shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS),
           avatar: data.avatarUrl,
           token,
           misesId,
+        };
+        token && this.setToMisesPrivate(updateUserInfo); // set mises userInfo to browser
+        // set mises to chrome extension
+        accountList[index].userInfo = {
+          name: updateUserInfo.nickname,
+          avatarUrl: updateUserInfo.avatar,
+        };
+        // update accountList
+        this.store.updateState({
+          accountList,
         });
+        console.log('update userinfo cache ', accountList[index]);
       }
       console.log('setinfo success', info);
       return info;
@@ -300,7 +289,7 @@ export default class MisesController {
 
   async getAccountMisesBalance() {
     const keyringList = await this.getKeyringAccounts();
-    const accountList = keyringList.map(async (val) => {
+    return keyringList.map(async (val) => {
       const misesBalance = await this.getUserBalance(val);
       const user = await this.getMisesUser(val);
       return {
@@ -309,13 +298,12 @@ export default class MisesController {
         misesId: user.address(),
       };
     });
-    return accountList;
   }
 
   async initMisesBalance() {
     // console.log('initMisesBalance');
     const accountList = await this.getAccountMisesBalance();
-    Promise.all(accountList).then((res) => {
+    return Promise.all(accountList).then((res) => {
       // console.log(res, 'accountList');
       this.store.updateState({
         accountList: res,
