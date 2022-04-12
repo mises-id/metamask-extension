@@ -3402,7 +3402,7 @@ export default class MetamaskController extends EventEmitter {
   async setSelectedAddress(address, type) {
     await this.preferencesController.setSelectedAddress(address); // set address
     if (type !== 'first') {
-      console.log('切换了用户');
+      console.log('Switching users');
       this.setMisesUser(address); // set mises userinfo
     }
   }
@@ -3413,7 +3413,7 @@ export default class MetamaskController extends EventEmitter {
    * @return {promise} any
    */
   async setMisesUser(address) {
-    console.log('设置用户');
+    console.log('Set user');
     try {
       const key = await this.keyringController.exportAccount(address); // get priKeyHex
       await this.misesController.activate(key); // set activity user
@@ -3421,7 +3421,7 @@ export default class MetamaskController extends EventEmitter {
       await this.misesController.setToMisesPrivate(userInfo); // set userinfo to chrome
       return Promise.resolve();
     } catch (error) {
-      console.log(error, '设置用户信息失败');
+      console.log(error, 'Failed to set user information');
       return Promise.reject(error);
     }
   }

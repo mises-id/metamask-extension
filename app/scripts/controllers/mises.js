@@ -11,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-04-02 17:35:49
+ * @LastEditTime: 2022-04-06 16:34:41
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -132,9 +132,11 @@ export default class MisesController {
     }
     if (!account.token) {
       try {
+        const referrer = await this.getinstallreferrer();
         const { token } = await this.getServerToken({
           provider: 'mises',
           user_authz: { auth },
+          referrer,
         });
         account.token = token;
       } catch (error) {
@@ -503,5 +505,17 @@ export default class MisesController {
         accountList,
       });
     }
+  }
+
+  getinstallreferrer() {
+    return new Promise((resolve) => {
+      if (chrome.misesPrivate && chrome.misesPrivate.getInstallReferrer) {
+        chrome.misesPrivate.getInstallReferrer((res) => {
+          resolve(res);
+        });
+        return;
+      }
+      resolve('');
+    });
   }
 }
