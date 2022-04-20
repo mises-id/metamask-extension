@@ -65,26 +65,31 @@ export const NETWORK_EVENTS = {
   // Fired when not using an Infura network or when Infura returns no error, indicating support
   INFURA_IS_UNBLOCKED: 'infuraIsUnblocked',
 };
-class DummyEmitter extends SafeEventEmitter {
-  sendAsync(req, callback) {
-    // console.log('DummyEmitter', 'sendAsync', req);
-    callback(
-      null,
-      req.method === 'net_version'
-        ? { id: req.id, jsonrpc: req.jsonrpc, result: '0x4' }
-        : {},
-    );
-  }
 
-  send(req, callback) {
-    // console.log('DummyEmitter', 'send', req);
-    callback(
-      null,
-      req.method === 'net_version'
-        ? { id: req.id, jsonrpc: req.jsonrpc, result: '0x4' }
-        : {},
-    );
-  }
+function createMisesMiddleware() {
+  return (req, res, next, end) => {
+    console.log('MisesMiddleware', 'req', req);
+    if (req.method === 'eth_chainId') {
+      res.result = -1;
+      return end();
+    }
+    if (req.method === 'net_version') {
+      res.result = '0x4';
+      return end();
+    }
+    if (req.method === 'eth_getBalance') {
+      res.result = 0;
+      return end();
+    }
+    if (req.method === 'eth_getBlockByNumber') {
+      res.result = null;
+      return end();
+    }
+    if (req.method === 'eth_call' || req.method === 'eth_sendTransaction'|| req.method === 'eth_sendTransaction') {
+      throw new Error('Your Metamask wallet is now connected to Mises chain, please switch to ETH chain before invoke ' + req.method);
+    }
+    return next();
+  };
 }
 
 class DummyBlockTracker extends SafeEventEmitter {
@@ -444,11 +449,8 @@ export default class NetworkController extends EventEmitter {
       this._configureStandardProvider(rpcUrl, chainId);
     } else if (type === MISESNETWORK) {
       const blockTracker = new DummyBlockTracker();
-      const provider = new DummyEmitter();
-      // const bt = new PollingBlockTracker({ provider });
-      // this._setProviderAndBlockTracker({ provider, bt });
-      this._setProviderAndBlockTracker({ provider, blockTracker });
-      // this._configureStandardProvider(rpcUrl, chainId);
+      const networkMiddleware = createMisesMiddleware();
+      this._setNetworkClient({networkMiddleware, blockTracker});
     } else {
       throw new Error(
         `NetworkController - _configureProvider - unknown type "${type}"`,
