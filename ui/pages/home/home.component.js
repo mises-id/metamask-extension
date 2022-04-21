@@ -1,7 +1,7 @@
 /*
  * @Author: lmk
  * @Date: 2021-12-13 16:44:36
- * @LastEditTime: 2022-03-03 15:47:21
+ * @LastEditTime: 2022-04-21 11:36:24
  * @LastEditors: lmk
  * @Description:
  */
@@ -481,6 +481,18 @@ export default class Home extends PureComponent {
                       onClickAsset={(asset) =>
                         history.push(`${ASSET_ROUTE}/${asset}`)
                       }
+                    />
+                  </Tab>
+                  <Tab
+                    activeClassName="home__tab--active"
+                    className="home__tab"
+                    data-testid="home__nfts-tab"
+                    name={t('nfts')}
+                  >
+                    <CollectiblesList
+                      onAddNFT={() => {
+                        history.push(ADD_COLLECTIBLE_ROUTE);
+                      }}
                     />
                   </Tab>
                   <Tab
