@@ -176,6 +176,7 @@ const getMisesAccount = async ({
       ),
     );
   }
+  console.log(hasPermission('eth_accounts'), 'hasPermission');
   if (hasPermission('eth_accounts')) {
     isProcessingRequestAccounts = true;
     try {
