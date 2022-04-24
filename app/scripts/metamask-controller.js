@@ -252,9 +252,6 @@ export default class MetamaskController extends EventEmitter {
       getAccountFlag: this.misesController.getAccountFlag.bind(
         this.misesController,
       ),
-      getAccounts: this.keyringController.getAccounts.bind(
-        this.keyringController,
-      ),
     });
     this.networkController.setInfuraProjectId(opts.infuraProjectId);
 
@@ -2250,6 +2247,8 @@ export default class MetamaskController extends EventEmitter {
 
   /**
    * Sets the first address in the state to the selected address
+   *
+   * @param type
    */
   selectFirstIdentity(type) {
     const { identities } = this.preferencesController.store.getState();
@@ -2260,7 +2259,7 @@ export default class MetamaskController extends EventEmitter {
   /**
    * @description: get the first address in the state to the selected address
    * @param {*}
-   * @return {*} address
+   * @returns {*} address
    */
   getFirstIdentity() {
     const { identities } = this.preferencesController.store.getState();
@@ -2587,6 +2586,7 @@ export default class MetamaskController extends EventEmitter {
    * array.
    */
   async getPermittedAccounts(origin) {
+    console.log(origin, 'origin');
     try {
       return await this.permissionController.executeRestrictedMethod(
         origin,
@@ -3607,6 +3607,7 @@ export default class MetamaskController extends EventEmitter {
       getUnlockPromise: this.appStateController.getUnlockPromise.bind(
         this.appStateController,
       ),
+      getAccounts: this.getPermittedAccounts.bind(this, origin),
     });
     ///: BEGIN:ONLY_INCLUDE_IN(flask)
     engine.push(
@@ -4201,6 +4202,8 @@ export default class MetamaskController extends EventEmitter {
 
   /**
    * import mises account
+   *
+   * @param res
    */
   async importAccount(res) {
     return this.misesController.importAccount(res);
@@ -4208,8 +4211,9 @@ export default class MetamaskController extends EventEmitter {
 
   /**
    * @description: set Selected Address
+   * @param type
    * @param {string} address
-   * @return {*}
+   * @returns {*}
    */
   async setSelectedAddress(address, type) {
     await this.preferencesController.setSelectedAddress(address); // set address
@@ -4222,7 +4226,7 @@ export default class MetamaskController extends EventEmitter {
   /**
    * @description: set mises user info
    * @param {string} address
-   * @return {promise} any
+   * @returns {promise} any
    */
   async setMisesUser(address) {
     console.log('Set user');

@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import EventEmitter from 'events';
 import { ComposedStore, ObservableStore } from '@metamask/obs-store';
-import { JsonRpcEngine } from 'json-rpc-engine';
+import { JsonRpcEngine, mergeMiddleware } from 'json-rpc-engine';
 import { providerFromEngine } from 'eth-json-rpc-middleware';
 import { ethErrors } from 'eth-rpc-errors';
 import log from 'loglevel';
@@ -176,7 +176,6 @@ const getMisesAccount = async ({
       ),
     );
   }
-  console.log(hasPermission('eth_accounts'), 'hasPermission');
   if (hasPermission('eth_accounts')) {
     isProcessingRequestAccounts = true;
     try {
@@ -188,6 +187,7 @@ const getMisesAccount = async ({
   }
   // first, just try to get accounts
   let accounts = await getAccounts();
+  console.log(accounts, 'accounts');
   if (accounts.length > 0) {
     const nonce = new Date().getTime();
     const key = await exportAccount(accounts[0]);
@@ -246,14 +246,20 @@ function createMisesMiddleware() {
       return end();
     }
     if (
-      ['eth_call', 'eth_sendTransaction', 'eth_sendTransaction'].includes(
-        req.method,
-      )
+      req.method === 'eth_call' ||
+      req.method === 'eth_sendTransaction' ||
+      req.method === 'eth_sendTransaction'
     ) {
       throw new Error(
         `Your Metamask wallet is now connected to Mises chain, please switch to ETH chain before invoke ${req.method}`,
       );
     }
+    return next();
+  };
+}
+function misesMethodsMiddleware() {
+  return (req, res, next, end) => {
+    console.log('misesMethodsMiddleware', 'req', req);
     if (req.method === 'mises_requestAccounts') {
       getMisesAccount(globalOptions)
         .then((data) => {
@@ -668,9 +674,13 @@ export default class NetworkController extends EventEmitter {
     const metamaskMiddleware = createMetamaskMiddleware(
       this._baseProviderParams,
     );
+    const networkMiddlewareFn = mergeMiddleware([
+      misesMethodsMiddleware(),
+      networkMiddleware,
+    ]);
     const engine = new JsonRpcEngine();
     engine.push(metamaskMiddleware);
-    engine.push(networkMiddleware);
+    engine.push(networkMiddlewareFn);
     const provider = providerFromEngine(engine);
     this._setProviderAndBlockTracker({ provider, blockTracker });
   }
