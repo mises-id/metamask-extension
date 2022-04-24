@@ -1,12 +1,14 @@
 const { promises: fs } = require('fs');
 const { strict: assert } = require('assert');
-const { until, error: webdriverError, By } = require('selenium-webdriver');
+const { until, error: webdriverError, By, Key } = require('selenium-webdriver');
 const cssToXPath = require('css-to-xpath');
 
 /**
  * Temporary workaround to patch selenium's element handle API with methods
  * that match the playwright API for Elements
+ *
  * @param {Object} element - Selenium Element
+ * @param driver
  * @returns {Object} modified Selenium Element
  */
 function wrapElementWithAPI(element, driver) {
@@ -37,6 +39,7 @@ class Driver {
   /**
    * @param {!ThenableWebDriver} driver - A {@code WebDriver} instance
    * @param {string} browser - The type of browser this driver is controlling
+   * @param extensionUrl
    * @param {number} timeout
    */
   constructor(driver, browser, extensionUrl, timeout = 10000) {
@@ -245,6 +248,37 @@ class Driver {
     assert.ok(!dataTab, 'Found element that should not be present');
   }
 
+  async isElementPresent(element) {
+    try {
+      await this.findElement(element);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /**
+   * Paste a string into a field.
+   *
+   * @param {string} element - The element locator.
+   * @param {string} contentToPaste - The content to paste.
+   */
+  async pasteIntoField(element, contentToPaste) {
+    // Throw if double-quote is present in content to paste
+    // so that we don't have to worry about escaping double-quotes
+    if (contentToPaste.includes('"')) {
+      throw new Error('Cannot paste content with double-quote');
+    }
+    // Click to focus the field
+    await this.clickElement(element);
+    await this.executeScript(
+      `navigator.clipboard.writeText("${contentToPaste}")`,
+    );
+    const modifierKey =
+      process.platform === 'darwin' ? Key.COMMAND : Key.CONTROL;
+    await this.fill(element, Key.chord(modifierKey, 'v'));
+  }
+
   // Navigation
 
   async navigate(page = Driver.PAGES.HOME) {
@@ -315,6 +349,7 @@ class Driver {
 
   /**
    * Closes all windows except those in the given list of exceptions
+   *
    * @param {Array<string>} exceptions - The list of window handle exceptions
    * @param {Array} [windowHandles] - The full list of window handles
    * @returns {Promise<void>}
@@ -358,7 +393,11 @@ class Driver {
     const ignoredLogTypes = ['WARNING'];
     const ignoredErrorMessages = [
       // Third-party Favicon 404s show up as errors
-      'favicon.ico - Failed to load resource: the server responded with a status of 404 (Not Found)',
+      'favicon.ico - Failed to load resource: the server responded with a status of 404',
+      // Sentry rate limiting
+      'Failed to load resource: the server responded with a status of 429',
+      // 4Byte
+      'Failed to load resource: the server responded with a status of 502 (Bad Gateway)',
     ];
     const browserLogs = await this.driver.manage().logs().get('browser');
     const errorEntries = browserLogs.filter(

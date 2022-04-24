@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 import Button from '../../components/ui/button';
 
 export default class NewAccountCreateForm extends Component {
@@ -16,32 +17,46 @@ export default class NewAccountCreateForm extends Component {
 
   render() {
     const { newAccountName, defaultAccountName } = this.state;
-    const { history, createAccount, mostRecentOverviewPage } = this.props;
+    const {
+      history,
+      createAccount,
+      mostRecentOverviewPage,
+      accounts,
+    } = this.props;
+
     const createClick = (_) => {
       createAccount(newAccountName || defaultAccountName)
         .then(() => {
-          this.context.metricsEvent({
-            eventOpts: {
-              category: 'Accounts',
+          this.context.trackEvent({
+            category: 'Accounts',
+            event: 'Added New Account',
+            properties: {
               action: 'Add New Account',
-              name: 'Added New Account',
+              legacy_event: true,
             },
           });
           history.push(mostRecentOverviewPage);
         })
         .catch((e) => {
-          this.context.metricsEvent({
-            eventOpts: {
-              category: 'Accounts',
+          this.context.trackEvent({
+            category: 'Accounts',
+            event: 'Error',
+            properties: {
               action: 'Add New Account',
-              name: 'Error',
-            },
-            customVariables: {
+              legacy_event: true,
               errorMessage: e.message,
             },
           });
         });
     };
+
+    const accountNameExists = (allAccounts, accountName) => {
+      const accountsNames = allAccounts.map((item) => item.name);
+
+      return accountsNames.includes(accountName);
+    };
+
+    const existingAccountName = accountNameExists(accounts, newAccountName);
 
     return (
       <div className="new-account-create-form">
@@ -50,7 +65,9 @@ export default class NewAccountCreateForm extends Component {
         </div>
         <div>
           <input
-            className="new-account-create-form__input"
+            className={classnames('new-account-create-form__input', {
+              'new-account-create-form__input__error': existingAccountName,
+            })}
             value={newAccountName}
             placeholder={defaultAccountName}
             maxLength={25}
@@ -59,6 +76,16 @@ export default class NewAccountCreateForm extends Component {
             }
             autoFocus
           />
+          {existingAccountName ? (
+            <div
+              className={classnames(
+                ' new-account-create-form__error',
+                ' new-account-create-form__error-amount',
+              )}
+            >
+              {this.context.t('accountNameDuplicate')}
+            </div>
+          ) : null}
           <div className="new-account-create-form__buttons">
             <Button
               type="secondary"
@@ -73,6 +100,7 @@ export default class NewAccountCreateForm extends Component {
               large
               className="new-account-create-form__button"
               onClick={createClick}
+              disabled={existingAccountName}
             >
               {this.context.t('create')}
             </Button>
@@ -88,9 +116,10 @@ NewAccountCreateForm.propTypes = {
   newAccountNumber: PropTypes.number,
   history: PropTypes.object,
   mostRecentOverviewPage: PropTypes.string.isRequired,
+  accounts: PropTypes.array,
 };
 
 NewAccountCreateForm.contextTypes = {
   t: PropTypes.func,
-  metricsEvent: PropTypes.func,
+  trackEvent: PropTypes.func,
 };

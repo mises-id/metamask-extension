@@ -25,6 +25,7 @@ export default class AccountDetailsModal extends Component {
       type: PropTypes.string,
       ticker: PropTypes.string,
     }).isRequired,
+    accounts: PropTypes.array,
   };
 
   static contextTypes = {
@@ -42,12 +43,19 @@ export default class AccountDetailsModal extends Component {
       rpcPrefs,
       misesOpt,
       provider,
+      accounts,
     } = this.props;
     const { name, address } = selectedIdentity;
     const { isMises, account = {} } = misesOpt;
     const keyring = keyrings.find((kr) => {
       return kr.accounts.includes(address);
     });
+
+    const getAccountsNames = (allAccounts, currentName) => {
+      return Object.values(allAccounts)
+        .map((item) => item.name)
+        .filter((itemName) => itemName !== currentName);
+    };
 
     let exportPrivateKeyFeatureEnabled = true;
     // This feature is disabled for hardware wallets
@@ -61,6 +69,7 @@ export default class AccountDetailsModal extends Component {
           className="account-details-modal__name"
           defaultValue={name}
           onSubmit={(label) => setAccountLabel(address, label)}
+          accountsNames={getAccountsNames(accounts, name)}
         />
 
         <QrView

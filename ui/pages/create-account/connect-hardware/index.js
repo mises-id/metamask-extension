@@ -44,9 +44,16 @@ const LATTICE_HD_PATHS = [
   { name: `Ledger Legacy (${LATTICE_MEW_PATH})`, value: LATTICE_MEW_PATH },
 ];
 
+const TREZOR_TESTNET_PATH = `m/44'/1'/0'/0`;
+const TREZOR_HD_PATHS = [
+  { name: `BIP44 Standard (e.g. MetaMask, Trezor)`, value: BIP44_PATH },
+  { name: `Trezor Testnets`, value: TREZOR_TESTNET_PATH },
+];
+
 const HD_PATHS = {
   ledger: LEDGER_HD_PATHS,
   lattice: LATTICE_HD_PATHS,
+  trezor: TREZOR_HD_PATHS,
 };
 
 class ConnectHardwareForm extends Component {
@@ -246,23 +253,23 @@ class ConnectHardwareForm extends Component {
       description,
     )
       .then((_) => {
-        this.context.metricsEvent({
-          eventOpts: {
-            category: 'Accounts',
+        this.context.trackEvent({
+          category: 'Accounts',
+          event: `Connected Account with: ${device}`,
+          properties: {
             action: 'Connected Hardware Wallet',
-            name: `Connected Account with: ${device}`,
+            legacy_event: true,
           },
         });
         history.push(mostRecentOverviewPage);
       })
       .catch((e) => {
-        this.context.metricsEvent({
-          eventOpts: {
-            category: 'Accounts',
+        this.context.trackEvent({
+          category: 'Accounts',
+          event: 'Error connecting hardware wallet',
+          properties: {
             action: 'Connected Hardware Wallet',
-            name: 'Error connecting hardware wallet',
-          },
-          customVariables: {
+            legacy_event: true,
             error: e.message,
           },
         });
@@ -407,7 +414,7 @@ const mapDispatchToProps = (dispatch) => {
 
 ConnectHardwareForm.contextTypes = {
   t: PropTypes.func,
-  metricsEvent: PropTypes.func,
+  trackEvent: PropTypes.func,
 };
 
 export default connect(

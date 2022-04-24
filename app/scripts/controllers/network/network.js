@@ -3,6 +3,7 @@ import EventEmitter from 'events';
 import { ComposedStore, ObservableStore } from '@metamask/obs-store';
 import { JsonRpcEngine } from 'json-rpc-engine';
 import { providerFromEngine } from 'eth-json-rpc-middleware';
+import { ethErrors } from 'eth-rpc-errors';
 import log from 'loglevel';
 import {
   createSwappableProxy,
@@ -31,9 +32,9 @@ import createJsonRpcClient from './createJsonRpcClient';
 
 const env = process.env.METAMASK_ENV;
 const fetchWithTimeout = getFetchWithTimeout(SECOND * 30);
-
+let globalOptions = {};
 let defaultProviderConfigOpts;
-if (process.env.IN_TEST === 'true') {
+if (process.env.IN_TEST) {
   defaultProviderConfigOpts = {
     type: NETWORK_TYPE_RPC,
     rpcUrl: 'http://localhost:8545',
@@ -66,6 +67,164 @@ export const NETWORK_EVENTS = {
   INFURA_IS_UNBLOCKED: 'infuraIsUnblocked',
 };
 
+const getMisesMethods = async (
+  method,
+  params,
+  {
+    setInfo,
+    setFollow,
+    setUnFollow,
+    getAccountFlag,
+    getActive,
+    restorePage,
+    connect,
+    disconnect,
+    addressToMisesId,
+  },
+) => {
+  switch (method) {
+    case 'mises_setUserInfo': {
+      try {
+        await setInfo(params[0]);
+        return true;
+      } catch (error) {
+        return error;
+      }
+    }
+    case 'mises_userFollow': {
+      try {
+        await setFollow(params[0]);
+        return true;
+      } catch (error) {
+        return error;
+      }
+    }
+    case 'mises_userUnFollow': {
+      try {
+        await setUnFollow(params[0]);
+        return true;
+      } catch (error) {
+        return error;
+      }
+    }
+    case 'mises_getMisesAccount': {
+      try {
+        return getAccountFlag();
+      } catch (error) {
+        console.log(error);
+        return error;
+      }
+    }
+    case 'mises_getActive': {
+      try {
+        const flag = await getActive();
+        console.log(flag, '有active');
+        return Boolean(flag);
+      } catch (error) {
+        return error;
+      }
+    }
+    case 'mises_openRestore': {
+      try {
+        restorePage();
+        return true;
+      } catch (error) {
+        return error;
+      }
+    }
+    case 'mises_connect': {
+      try {
+        connect(params[0]);
+        return true;
+      } catch (error) {
+        return error;
+      }
+    }
+    case 'mises_disconnect': {
+      try {
+        disconnect(params[0]);
+        return true;
+      } catch (error) {
+        return error;
+      }
+    }
+    case 'mises_getAddressToMisesId': {
+      try {
+        return addressToMisesId(params[0]);
+      } catch (error) {
+        return error;
+      }
+    }
+    default:
+      break;
+  }
+  return true;
+};
+const getMisesAccount = async ({
+  exportAccount,
+  generateAuth,
+  getAccounts,
+  hasPermission,
+  getUnlockPromise,
+  requestAccountsPermission,
+}) => {
+  let isProcessingRequestAccounts = false;
+  if (isProcessingRequestAccounts) {
+    return Promise.reject(
+      ethErrors.rpc.resourceUnavailable(
+        'Already processing eth_requestAccounts. Please wait.',
+      ),
+    );
+  }
+  if (hasPermission('eth_accounts')) {
+    isProcessingRequestAccounts = true;
+    try {
+      await getUnlockPromise(true);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+    isProcessingRequestAccounts = false;
+  }
+  // first, just try to get accounts
+  let accounts = await getAccounts();
+  if (accounts.length > 0) {
+    const nonce = new Date().getTime();
+    const key = await exportAccount(accounts[0]);
+    const auth = await generateAuth(nonce, key); // get mises auth
+    console.log('first, just try to get accounts');
+    return {
+      accounts,
+      auth,
+    };
+  }
+  // if no accounts, request the accounts permission
+  try {
+    await requestAccountsPermission();
+  } catch (err) {
+    return Promise.reject(err);
+  }
+
+  // get the accounts again
+  accounts = await getAccounts();
+  /* istanbul ignore else: too hard to induce, see below comment */
+  if (accounts.length > 0) {
+    const nonce = new Date().getTime();
+    const key = await exportAccount(accounts[0]);
+    const auth = await generateAuth(nonce, key); // get mises auth
+    console.log('get the accounts again');
+    return {
+      accounts,
+      auth,
+    };
+  }
+  // this should never happen, because it should be caught in the
+  // above catch clause
+  return Promise.reject(
+    ethErrors.rpc.internal(
+      'Accounts unexpectedly unavailable. Please report this bug.',
+    ),
+  );
+};
 function createMisesMiddleware() {
   return (req, res, next, end) => {
     console.log('MisesMiddleware', 'req', req);
@@ -85,13 +244,40 @@ function createMisesMiddleware() {
       res.result = null;
       return end();
     }
-    if (req.method === 'eth_call' || req.method === 'eth_sendTransaction'|| req.method === 'eth_sendTransaction') {
-      throw new Error('Your Metamask wallet is now connected to Mises chain, please switch to ETH chain before invoke ' + req.method);
+    if (
+      ['eth_call', 'eth_sendTransaction', 'eth_sendTransaction'].includes(
+        req.method,
+      )
+    ) {
+      throw new Error(
+        `Your Metamask wallet is now connected to Mises chain, please switch to ETH chain before invoke ${req.method}`,
+      );
     }
-    return next();
+    if (req.method === 'mises_requestAccounts') {
+      getMisesAccount(globalOptions)
+        .then((data) => {
+          res.result = data;
+          return end();
+        })
+        .catch((err) => {
+          res.error = err;
+          return end();
+        });
+    } else if (req.method && req.method.indexOf('mises_') > -1) {
+      getMisesMethods(req.method, req.params, globalOptions)
+        .then((data) => {
+          res.result = data;
+          return end();
+        })
+        .catch(() => {
+          res.result = false;
+          return end();
+        });
+    } else {
+      return next();
+    }
   };
 }
-
 class DummyBlockTracker extends SafeEventEmitter {
   isRunning() {
     return true;
@@ -116,7 +302,6 @@ class DummyBlockTracker extends SafeEventEmitter {
 export default class NetworkController extends EventEmitter {
   constructor(opts = {}) {
     super();
-
     // create stores
     this.providerStore = new ObservableStore(
       opts.provider || { ...defaultProviderConfig },
@@ -149,7 +334,7 @@ export default class NetworkController extends EventEmitter {
     // provider and block tracker proxies - because the network changes
     this._providerProxy = null;
     this._blockTrackerProxy = null;
-
+    globalOptions = opts;
     this.on(NETWORK_EVENTS.NETWORK_DID_CHANGE, this.lookupNetwork);
   }
 
@@ -157,8 +342,7 @@ export default class NetworkController extends EventEmitter {
    * Sets the Infura project ID
    *
    * @param {string} projectId - The Infura project ID
-   * @throws {Error} if the project ID is not a valid string
-   * @return {void}
+   * @throws {Error} If the project ID is not a valid string.
    */
   setInfuraProjectId(projectId) {
     if (!projectId || typeof projectId !== 'string') {
@@ -184,6 +368,7 @@ export default class NetworkController extends EventEmitter {
 
   /**
    * Method to return the latest block for the current network
+   *
    * @returns {Object} Block header
    */
   getLatestBlock() {
@@ -205,6 +390,7 @@ export default class NetworkController extends EventEmitter {
   /**
    * Method to check if the block header contains fields that indicate EIP 1559
    * support (baseFeePerGas).
+   *
    * @returns {Promise<boolean>} true if current network supports EIP 1559
    */
   async getEIP1559Compatibility() {
@@ -236,6 +422,7 @@ export default class NetworkController extends EventEmitter {
 
   /**
    * Set EIP support indication in the networkDetails store
+   *
    * @param {number} EIPNumber - The number of the EIP to mark support for
    * @param {boolean} isSupported - True if the EIP is supported
    */
@@ -361,6 +548,8 @@ export default class NetworkController extends EventEmitter {
 
   /**
    * Sets the provider config and switches the network.
+   *
+   * @param config
    */
   setProviderConfig(config) {
     this.previousProviderStore.updateState(this.getProviderConfig());
@@ -450,7 +639,8 @@ export default class NetworkController extends EventEmitter {
     } else if (type === MISESNETWORK) {
       const blockTracker = new DummyBlockTracker();
       const networkMiddleware = createMisesMiddleware();
-      this._setNetworkClient({networkMiddleware, blockTracker});
+      this._setNetworkClient({ networkMiddleware, blockTracker });
+      console.log(this);
     } else {
       throw new Error(
         `NetworkController - _configureProvider - unknown type "${type}"`,
@@ -501,5 +691,9 @@ export default class NetworkController extends EventEmitter {
     // set new provider and blockTracker
     this._provider = provider;
     this._blockTracker = blockTracker;
+  }
+
+  mergeNetworkOpts(options) {
+    globalOptions = { ...globalOptions, ...options };
   }
 }

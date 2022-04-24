@@ -1,9 +1,15 @@
 import { connect } from 'react-redux';
 
-import { setPendingTokens, clearPendingTokens } from '../../store/actions';
+import {
+  setPendingTokens,
+  clearPendingTokens,
+  getTokenStandardAndDetails,
+} from '../../store/actions';
 import { getMostRecentOverviewPage } from '../../ducks/history/history';
 import {
   getRpcPrefsForCurrentProvider,
+  getIsTokenDetectionSupported,
+  getTokenDetectionSupportNetworkByChainId,
   getIsMainnet,
 } from '../../selectors/selectors';
 import ImportToken from './import-token.component';
@@ -17,14 +23,17 @@ const mapStateToProps = (state) => {
       provider: { chainId },
       useTokenDetection,
       tokenList,
+      selectedAddress,
     },
   } = state;
-  const showSearchTabCustomNetwork =
-    useTokenDetection && Boolean(Object.keys(tokenList).length);
+
+  const tokenDetectionV2Supported =
+    process.env.TOKEN_DETECTION_V2 && getIsTokenDetectionSupported(state);
   const showSearchTab =
     getIsMainnet(state) ||
-    showSearchTabCustomNetwork ||
-    process.env.IN_TEST === 'true';
+    tokenDetectionV2Supported ||
+    Boolean(process.env.IN_TEST);
+
   return {
     identities,
     mostRecentOverviewPage: getMostRecentOverviewPage(state),
@@ -34,13 +43,18 @@ const mapStateToProps = (state) => {
     chainId,
     rpcPrefs: getRpcPrefsForCurrentProvider(state),
     tokenList,
+    useTokenDetection,
+    selectedAddress,
+    isTokenDetectionSupported: getIsTokenDetectionSupported(state),
+    networkName: getTokenDetectionSupportNetworkByChainId(state),
   };
 };
-
 const mapDispatchToProps = (dispatch) => {
   return {
     setPendingTokens: (tokens) => dispatch(setPendingTokens(tokens)),
     clearPendingTokens: () => dispatch(clearPendingTokens()),
+    getTokenStandardAndDetails: (address, selectedAddress) =>
+      getTokenStandardAndDetails(address, selectedAddress, null),
   };
 };
 

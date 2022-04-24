@@ -1,6 +1,7 @@
 # The MetaMask Build System
 
-> _tl;dr_ `yarn dist` for prod, `yarn start` for local development
+> _tl;dr_ `yarn dist` for prod, `yarn start` for local development.
+> Add `--build-type flask` to build Flask, our canary distribution with more experimental features.
 
 This directory contains the MetaMask build system, which is used to build the MetaMask Extension such that it can be used in a supported browser.
 From the repository root, the build system entry file is located at [`./development/build/index.js`](https://github.com/MetaMask/metamask-extension/blob/develop/development/build/index.js).
@@ -40,7 +41,8 @@ Commands:
                         e2e tests.
 
 Options:
-  --build-type        The "type" of build to create. One of: "beta", "main"
+  --build-type        The "type" of build to create. One of: "beta", "flask",
+                      "main"
                                                       [string] [default: "main"]
   --lint-fence-files  Whether files with code fences should be linted after
                       fences have been removed by the code fencing transform.
@@ -52,6 +54,9 @@ Options:
                       bundle. Setting this to `false` is useful e.g. when
                       linking dependencies that are incompatible with lockdown.
                                                        [boolean] [default: true]
+  --policy-only       Stops the build after generating the LavaMoat policy,
+                      skipping any writes to disk.
+                                                       [boolean] [deafult: false]
   --skip-stats        Whether to refrain from logging build progress. Mostly
                       used internally.
                                                       [boolean] [default: false]

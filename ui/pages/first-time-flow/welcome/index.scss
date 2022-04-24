@@ -5,7 +5,7 @@
   align-items: center;
   max-width: 442px;
   padding: 0 18px;
-  color: black;
+  color: var(--color-text-default);
 
   &__wrapper {
     display: flex;
@@ -35,7 +35,7 @@
     }
 
     a {
-      color: $primary-1;
+      color: var(--color-primary-default);
     }
 
     @media screen and (max-width: $break-small) {
@@ -46,6 +46,6 @@
   .first-time-flow__button {
     width: 184px;
     font-weight: 500;
-    margin-top: 44px;
+    margin: 44px auto;
   }
 }

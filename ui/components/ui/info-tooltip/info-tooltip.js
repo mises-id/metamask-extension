@@ -17,7 +17,7 @@ export default function InfoTooltip({
   containerClassName,
   wrapperClassName,
   wide,
-  iconFillColor = '#b8b8b8',
+  iconFillColor = 'var(--color-icon-default)',
 }) {
   return (
     <div className="info-tooltip">
@@ -41,10 +41,28 @@ export default function InfoTooltip({
 }
 
 InfoTooltip.propTypes = {
+  /**
+   * Text label that shows up after hover
+   */
   contentText: PropTypes.node,
+  /**
+   * Shows position of the tooltip
+   */
   position: PropTypes.oneOf(['top', 'left', 'bottom', 'right']),
+  /**
+   * Set if the tooltip wide
+   */
   wide: PropTypes.bool,
+  /**
+   * Add custom CSS class for container
+   */
   containerClassName: PropTypes.string,
+  /**
+   * Add custom CSS class for the wrapper
+   */
   wrapperClassName: PropTypes.string,
+  /**
+   * Add color for the icon
+   */
   iconFillColor: PropTypes.string,
 };

@@ -131,9 +131,11 @@ const EMPTY_INIT_STATE = {
     topAggId: null,
     routeState: '',
     swapsFeatureIsLive: true,
-    useNewSwapsApi: false,
+    swapsFeatureFlags: {},
     swapsQuoteRefreshTime: 60000,
     swapsQuotePrefetchingRefreshTime: 60000,
+    swapsStxBatchStatusRefreshTime: 10000,
+    swapsStxGetTransactionsRefreshTime: 10000,
     swapsUserFeeLevel: '',
     saveFetchedQuotes: false,
   },
@@ -373,7 +375,9 @@ describe('SwapsController', function () {
         assert.strictEqual(gasEstimate, bufferedGasLimit);
         assert.strictEqual(
           gasEstimateWithRefund,
-          new BigNumber(maxGas, 10).minus(estimatedRefund, 10).toString(16),
+          `0x${new BigNumber(maxGas, 10)
+            .minus(estimatedRefund, 10)
+            .toString(16)}`,
         );
       });
 
@@ -691,7 +695,7 @@ describe('SwapsController', function () {
           isBestQuote: true,
           // TODO: find a way to calculate these values dynamically
           gasEstimate: 2000000,
-          gasEstimateWithRefund: 'b8cae',
+          gasEstimateWithRefund: '0xb8cae',
           savings: {
             fee: '0',
             metaMaskFee: '0.5050505050505050505',
@@ -707,7 +711,6 @@ describe('SwapsController', function () {
         assert.strictEqual(
           fetchTradesInfoStub.calledOnceWithExactly(MOCK_FETCH_PARAMS, {
             ...MOCK_FETCH_METADATA,
-            useNewSwapsApi: false,
           }),
           true,
         );
@@ -840,6 +843,9 @@ describe('SwapsController', function () {
           swapsQuoteRefreshTime: old.swapsQuoteRefreshTime,
           swapsQuotePrefetchingRefreshTime:
             old.swapsQuotePrefetchingRefreshTime,
+          swapsStxGetTransactionsRefreshTime:
+            old.swapsStxGetTransactionsRefreshTime,
+          swapsStxBatchStatusRefreshTime: old.swapsStxBatchStatusRefreshTime,
         });
       });
 
@@ -885,17 +891,21 @@ describe('SwapsController', function () {
         const tokens = 'test';
         const fetchParams = 'test';
         const swapsFeatureIsLive = false;
-        const useNewSwapsApi = false;
+        const swapsFeatureFlags = {};
         const swapsQuoteRefreshTime = 0;
         const swapsQuotePrefetchingRefreshTime = 0;
+        const swapsStxBatchStatusRefreshTime = 0;
+        const swapsStxGetTransactionsRefreshTime = 0;
         swapsController.store.updateState({
           swapsState: {
             tokens,
             fetchParams,
             swapsFeatureIsLive,
-            useNewSwapsApi,
+            swapsFeatureFlags,
             swapsQuoteRefreshTime,
             swapsQuotePrefetchingRefreshTime,
+            swapsStxBatchStatusRefreshTime,
+            swapsStxGetTransactionsRefreshTime,
           },
         });
 

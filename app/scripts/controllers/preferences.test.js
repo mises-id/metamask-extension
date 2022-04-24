@@ -31,6 +31,7 @@ describe('preferences controller', function () {
       .callsFake(() => ({ type: 'mainnet' }));
 
     preferencesController = new PreferencesController({
+      initLangCode: 'en_US',
       migrateAddressBookState,
       network,
       provider,
@@ -39,6 +40,30 @@ describe('preferences controller', function () {
 
   afterEach(function () {
     sinon.restore();
+  });
+
+  describe('useBlockie', function () {
+    it('defaults useBlockie to false', function () {
+      assert.equal(preferencesController.store.getState().useBlockie, false);
+    });
+
+    it('setUseBlockie to true', function () {
+      preferencesController.setUseBlockie(true);
+      assert.equal(preferencesController.store.getState().useBlockie, true);
+    });
+  });
+
+  describe('setCurrentLocale', function () {
+    it('checks the default currentLocale', function () {
+      const { currentLocale } = preferencesController.store.getState();
+      assert.equal(currentLocale, 'en_US');
+    });
+
+    it('sets current locale in preferences controller', function () {
+      preferencesController.setCurrentLocale('ja');
+      const { currentLocale } = preferencesController.store.getState();
+      assert.equal(currentLocale, 'ja');
+    });
   });
 
   describe('setAddresses', function () {
@@ -267,6 +292,42 @@ describe('preferences controller', function () {
     });
   });
 
+  describe('setUseCollectibleDetection', function () {
+    it('should default to false', function () {
+      const state = preferencesController.store.getState();
+      assert.equal(state.useCollectibleDetection, false);
+    });
+
+    it('should set the useCollectibleDetection property in state', function () {
+      assert.equal(
+        preferencesController.store.getState().useCollectibleDetection,
+        false,
+      );
+      preferencesController.setOpenSeaEnabled(true);
+      preferencesController.setUseCollectibleDetection(true);
+      assert.equal(
+        preferencesController.store.getState().useCollectibleDetection,
+        true,
+      );
+    });
+  });
+
+  describe('setOpenSeaEnabled', function () {
+    it('should default to false', function () {
+      const state = preferencesController.store.getState();
+      assert.equal(state.openSeaEnabled, false);
+    });
+
+    it('should set the openSeaEnabled property in state', function () {
+      assert.equal(
+        preferencesController.store.getState().openSeaEnabled,
+        false,
+      );
+      preferencesController.setOpenSeaEnabled(true);
+      assert.equal(preferencesController.store.getState().openSeaEnabled, true);
+    });
+  });
+
   describe('setAdvancedGasFee', function () {
     it('should default to null', function () {
       const state = preferencesController.store.getState();
@@ -288,6 +349,20 @@ describe('preferences controller', function () {
         preferencesController.store.getState().advancedGasFee.priorityFee,
         '2',
       );
+    });
+  });
+
+  describe('setTheme', function () {
+    it('should default to value "default"', function () {
+      const state = preferencesController.store.getState();
+      assert.equal(state.theme, 'default');
+    });
+
+    it('should set the setTheme property in state', function () {
+      const state = preferencesController.store.getState();
+      assert.equal(state.theme, 'default');
+      preferencesController.setTheme('dark');
+      assert.equal(preferencesController.store.getState().theme, 'dark');
     });
   });
 });

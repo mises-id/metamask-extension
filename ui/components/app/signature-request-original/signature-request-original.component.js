@@ -6,6 +6,7 @@ import { ObjectInspector } from 'react-inspector';
 import LedgerInstructionField from '../ledger-instruction-field';
 
 import { MESSAGE_TYPE } from '../../../../shared/constants/app';
+import { getURLHostName } from '../../../helpers/utils/util';
 import Identicon from '../../ui/identicon';
 import AccountListItem from '../account-list-item';
 import { conversionUtil } from '../../../../shared/modules/conversion.utils';
@@ -15,7 +16,7 @@ import SiteIcon from '../../ui/site-icon';
 export default class SignatureRequestOriginal extends Component {
   static contextTypes = {
     t: PropTypes.func.isRequired,
-    metricsEvent: PropTypes.func.isRequired,
+    trackEvent: PropTypes.func.isRequired,
   };
 
   static propTypes = {
@@ -32,7 +33,7 @@ export default class SignatureRequestOriginal extends Component {
     requesterAddress: PropTypes.string,
     sign: PropTypes.func.isRequired,
     txData: PropTypes.object.isRequired,
-    domainMetadata: PropTypes.object,
+    subjectMetadata: PropTypes.object,
     hardwareWalletRequiresConnection: PropTypes.bool,
     isLedgerWallet: PropTypes.bool,
     nativeCurrency: PropTypes.string.isRequired,
@@ -121,11 +122,11 @@ export default class SignatureRequestOriginal extends Component {
   };
 
   renderOriginInfo = () => {
-    const { txData, domainMetadata } = this.props;
+    const { txData, subjectMetadata } = this.props;
     const { t } = this.context;
 
-    const originMetadata = txData.msgParams.origin
-      ? domainMetadata?.[txData.msgParams.origin]
+    const targetSubjectMetadata = txData.msgParams.origin
+      ? subjectMetadata?.[txData.msgParams.origin]
       : null;
 
     return (
@@ -133,10 +134,13 @@ export default class SignatureRequestOriginal extends Component {
         <div className="request-signature__origin-label">
           {`${t('origin')}:`}
         </div>
-        {originMetadata?.icon ? (
+        {targetSubjectMetadata?.iconUrl ? (
           <SiteIcon
-            icon={originMetadata.icon}
-            name={originMetadata.hostname}
+            icon={targetSubjectMetadata.iconUrl}
+            name={
+              getURLHostName(targetSubjectMetadata.origin) ||
+              targetSubjectMetadata.origin
+            }
             size={24}
           />
         ) : null}
@@ -258,7 +262,7 @@ export default class SignatureRequestOriginal extends Component {
       txData: { type },
       hardwareWalletRequiresConnection,
     } = this.props;
-    const { metricsEvent, t } = this.context;
+    const { trackEvent, t } = this.context;
 
     return (
       <div className="request-signature__footer">
@@ -268,13 +272,12 @@ export default class SignatureRequestOriginal extends Component {
           className="request-signature__footer__cancel-button"
           onClick={async (event) => {
             await cancel(event);
-            metricsEvent({
-              eventOpts: {
-                category: 'Transactions',
+            trackEvent({
+              category: 'Transactions',
+              event: 'Cancel',
+              properties: {
                 action: 'Sign Request',
-                name: 'Cancel',
-              },
-              customVariables: {
+                legacy_event: true,
                 type,
               },
             });
@@ -292,13 +295,12 @@ export default class SignatureRequestOriginal extends Component {
           disabled={hardwareWalletRequiresConnection}
           onClick={async (event) => {
             await sign(event);
-            metricsEvent({
-              eventOpts: {
-                category: 'Transactions',
+            trackEvent({
+              category: 'Transactions',
+              event: 'Confirm',
+              properties: {
                 action: 'Sign Request',
-                name: 'Confirm',
-              },
-              customVariables: {
+                legacy_event: true,
                 type,
               },
             });

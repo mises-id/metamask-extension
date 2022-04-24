@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 import Button from '../../../components/ui/button';
 import Snackbar from '../../../components/ui/snackbar';
 import MetaFoxLogo from '../../../components/ui/metafox-logo';
+import { SUPPORT_REQUEST_LINK } from '../../../helpers/constants/common';
 import { DEFAULT_ROUTE } from '../../../helpers/constants/routes';
 import { returnToOnboardingInitiator } from '../onboarding-initiator-util';
 
 export default class EndOfFlowScreen extends PureComponent {
   static contextTypes = {
     t: PropTypes.func,
-    metricsEvent: PropTypes.func,
+    trackEvent: PropTypes.func,
   };
 
   static propTypes = {
@@ -33,11 +34,12 @@ export default class EndOfFlowScreen extends PureComponent {
   async _onOnboardingComplete() {
     const { setCompletedOnboarding, completionMetaMetricsName } = this.props;
     await setCompletedOnboarding();
-    this.context.metricsEvent({
-      eventOpts: {
-        category: 'Onboarding',
+    this.context.trackEvent({
+      category: 'Onboarding',
+      event: completionMetaMetricsName,
+      properties: {
         action: 'Onboarding Complete',
-        name: completionMetaMetricsName,
+        legacy_event: true,
       },
     });
   }
@@ -103,7 +105,7 @@ export default class EndOfFlowScreen extends PureComponent {
               target="_blank"
               key="metamaskSupportLink"
               rel="noopener noreferrer"
-              href="https://metamask.zendesk.com/hc/en-us/requests/new"
+              href={SUPPORT_REQUEST_LINK}
             >
               <span className="first-time-flow__link-text">
                 {this.context.t('here')}

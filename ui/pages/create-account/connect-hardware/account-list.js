@@ -8,6 +8,8 @@ import Dropdown from '../../../components/ui/dropdown';
 
 import { getURLHostName } from '../../../helpers/utils/util';
 
+import { DEVICE_NAMES } from '../../../../shared/constants/hardware-wallets';
+
 class AccountList extends Component {
   state = {
     pathValue: null,
@@ -61,8 +63,11 @@ class AccountList extends Component {
 
   renderHeader() {
     const { device } = this.props;
-    const shouldShowHDPaths =
-      device.toLowerCase() === 'ledger' || device.toLowerCase() === 'lattice';
+    const shouldShowHDPaths = [
+      DEVICE_NAMES.LEDGER,
+      DEVICE_NAMES.LATTICE,
+      DEVICE_NAMES.TREZOR,
+    ].includes(device.toLowerCase());
     return (
       <div className="hw-connect">
         <h3 className="hw-connect__unlock-title">
@@ -147,7 +152,10 @@ class AccountList extends Component {
                 rel="noopener noreferrer"
                 title={this.context.t('etherscanView')}
               >
-                <img src="images/popout.svg" alt="" />
+                <i
+                  className="fa fa-share-square"
+                  style={{ color: 'var(--color-icon-default)' }}
+                />
               </a>
             </div>
           );

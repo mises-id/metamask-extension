@@ -1,26 +1,76 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 
-import { INSUFFICIENT_FUNDS_ERROR_KEY } from '../../../helpers/constants/error-keys';
+import { PRIORITY_LEVELS } from '../../../../shared/constants/gas';
 import { submittedPendingTransactionsSelector } from '../../../selectors/transactions';
 import { useGasFeeContext } from '../../../contexts/gasFee';
+import { useI18nContext } from '../../../hooks/useI18nContext';
 import ActionableMessage from '../../../components/ui/actionable-message/actionable-message';
-import ErrorMessage from '../../../components/ui/error-message';
 import I18nValue from '../../../components/ui/i18n-value';
+import Button from '../../../components/ui/button';
+import Typography from '../../../components/ui/typography';
+import { TYPOGRAPHY } from '../../../helpers/constants/design-system';
+import { TRANSACTION_TYPES } from '../../../../shared/constants/transaction';
 
-const TransactionAlerts = () => {
-  const { balanceError, estimateUsed } = useGasFeeContext();
+const TransactionAlerts = ({
+  userAcknowledgedGasMissing,
+  setUserAcknowledgedGasMissing,
+  isBuyableChain,
+  nativeCurrency,
+  networkName,
+  showBuyModal,
+  type,
+}) => {
+  const {
+    balanceError,
+    estimateUsed,
+    hasSimulationError,
+    supportsEIP1559V2,
+    isNetworkBusy,
+  } = useGasFeeContext();
   const pendingTransactions = useSelector(submittedPendingTransactionsSelector);
+  const t = useI18nContext();
+
+  if (!supportsEIP1559V2) {
+    return null;
+  }
 
   return (
     <div className="transaction-alerts">
+      {hasSimulationError && (
+        <ActionableMessage
+          message={<I18nValue messageKey="simulationErrorMessageV2" />}
+          useIcon
+          iconFillColor="var(--color-error-default)"
+          type="danger"
+          primaryActionV2={
+            userAcknowledgedGasMissing === true
+              ? undefined
+              : {
+                  label: t('proceedWithTransaction'),
+                  onClick: setUserAcknowledgedGasMissing,
+                }
+          }
+        />
+      )}
       {pendingTransactions?.length > 0 && (
         <ActionableMessage
           message={
-            <div className="transaction-alerts__pending-transactions">
+            <Typography
+              align="left"
+              className="transaction-alerts__pending-transactions"
+              margin={[0, 0]}
+              tag={TYPOGRAPHY.Paragraph}
+              variant={TYPOGRAPHY.H7}
+            >
               <strong>
                 <I18nValue
-                  messageKey="pendingTransaction"
+                  messageKey={
+                    pendingTransactions?.length === 1
+                      ? 'pendingTransactionSingle'
+                      : 'pendingTransactionMultiple'
+                  }
                   options={[pendingTransactions?.length]}
                 />
               </strong>{' '}
@@ -38,36 +88,93 @@ const TransactionAlerts = () => {
                   </a>,
                 ]}
               />
-            </div>
+            </Typography>
           }
           useIcon
-          iconFillColor="#f8c000"
+          iconFillColor="var(--color-warning-default)"
           type="warning"
         />
       )}
-      {balanceError && (
-        <>
-          {pendingTransactions?.length > 0 && (
-            <div className="transaction-alerts--separator" />
-          )}
-          <ErrorMessage errorKey={INSUFFICIENT_FUNDS_ERROR_KEY} />
-        </>
+      {balanceError && type === TRANSACTION_TYPES.DEPLOY_CONTRACT ? (
+        <ActionableMessage
+          className="actionable-message--warning"
+          message={
+            isBuyableChain ? (
+              <Typography variant={TYPOGRAPHY.H7} align="left">
+                {t('insufficientCurrencyBuyOrDeposit', [
+                  nativeCurrency,
+                  networkName,
+                  <Button
+                    type="inline"
+                    className="confirm-page-container-content__link"
+                    onClick={showBuyModal}
+                    key={`${nativeCurrency}-buy-button`}
+                  >
+                    {t('buyAsset', [nativeCurrency])}
+                  </Button>,
+                ])}
+              </Typography>
+            ) : (
+              <Typography variant={TYPOGRAPHY.H7} align="left">
+                {t('insufficientCurrencyDeposit', [
+                  nativeCurrency,
+                  networkName,
+                ])}
+              </Typography>
+            )
+          }
+          useIcon
+          iconFillColor="var(--color-error-default)"
+          type="danger"
+        />
+      ) : null}
+      {estimateUsed === PRIORITY_LEVELS.LOW && (
+        <ActionableMessage
+          dataTestId="low-gas-fee-alert"
+          message={
+            <Typography
+              align="left"
+              margin={[0, 0]}
+              tag={TYPOGRAPHY.Paragraph}
+              variant={TYPOGRAPHY.H7}
+            >
+              <I18nValue messageKey="lowPriorityMessage" />
+            </Typography>
+          }
+          useIcon
+          iconFillColor="var(--color-warning-default)"
+          type="warning"
+        />
       )}
-      {estimateUsed === 'low' && (
-        <>
-          {balanceError && (
-            <div className="transaction-alerts-message--separator" />
-          )}
-          <ActionableMessage
-            message={<I18nValue messageKey="lowPriorityMessage" />}
-            useIcon
-            iconFillColor="#f8c000"
-            type="warning"
-          />
-        </>
-      )}
+      {isNetworkBusy ? (
+        <ActionableMessage
+          message={
+            <Typography
+              align="left"
+              margin={[0, 0]}
+              tag={TYPOGRAPHY.Paragraph}
+              variant={TYPOGRAPHY.H7}
+            >
+              <I18nValue messageKey="networkIsBusy" />
+            </Typography>
+          }
+          iconFillColor="var(--color-warning-default)"
+          type="warning"
+          useIcon
+        />
+      ) : null}
     </div>
   );
+};
+
+TransactionAlerts.propTypes = {
+  userAcknowledgedGasMissing: PropTypes.bool,
+  setUserAcknowledgedGasMissing: PropTypes.func,
+  nativeCurrency: PropTypes.string,
+  networkName: PropTypes.string,
+  showBuyModal: PropTypes.func,
+  type: PropTypes.string,
+  isBuyableChain: PropTypes.bool,
 };
 
 export default TransactionAlerts;

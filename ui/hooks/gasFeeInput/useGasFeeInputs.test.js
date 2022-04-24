@@ -4,6 +4,7 @@ import { TRANSACTION_ENVELOPE_TYPES } from '../../../shared/constants/transactio
 import {
   GAS_RECOMMENDATIONS,
   CUSTOM_GAS_ESTIMATE,
+  EDIT_GAS_MODES,
 } from '../../../shared/constants/gas';
 
 import { ETH, PRIMARY } from '../../helpers/constants/common';
@@ -314,6 +315,45 @@ describe('useGasFeeInputs', () => {
       expect(result.current.maxPriorityFeePerGasFiat).toBe('');
       expect(result.current.estimatedMaximumFiat).toBe('');
       expect(result.current.estimatedMinimumFiat).toBe('');
+    });
+  });
+
+  describe('supportsEIP1559V2', () => {
+    beforeEach(() => {
+      configureEIP1559();
+      useSelector.mockImplementation(
+        generateUseSelectorRouter({
+          checkNetworkAndAccountSupports1559Response: true,
+          eip1559V2Enabled: true,
+        }),
+      );
+    });
+
+    it('return true for fee_market transaction type', () => {
+      const { result } = renderHook(() =>
+        useGasFeeInputs(null, {
+          txParams: { type: TRANSACTION_ENVELOPE_TYPES.FEE_MARKET },
+        }),
+      );
+      expect(result.current.supportsEIP1559V2).toBe(true);
+    });
+
+    it('return false for legacy transaction type', () => {
+      const { result } = renderHook(() =>
+        useGasFeeInputs(null, {
+          txParams: { type: TRANSACTION_ENVELOPE_TYPES.LEGACY },
+        }),
+      );
+      expect(result.current.supportsEIP1559V2).toBe(false);
+    });
+  });
+
+  describe('editGasMode', () => {
+    it('should return editGasMode passed', () => {
+      const { result } = renderHook(() =>
+        useGasFeeInputs(undefined, undefined, undefined, EDIT_GAS_MODES.SWAPS),
+      );
+      expect(result.current.editGasMode).toBe(EDIT_GAS_MODES.SWAPS);
     });
   });
 });

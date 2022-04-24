@@ -8,12 +8,15 @@ export const NOTIFICATION_MANAGER_EVENTS = {
   POPUP_CLOSED: 'onPopupClosed',
 };
 
+/**
+ * A collection of methods for controlling the showing and hiding of the notification popup.
+ */
 export default class NotificationManager extends EventEmitter {
   /**
    * A collection of methods for controlling the showing and hiding of the notification popup.
    *
    * @typedef {Object} NotificationManager
-   *
+   * @property
    */
   setExtensionTab = false;
 
@@ -21,6 +24,16 @@ export default class NotificationManager extends EventEmitter {
     super();
     this.platform = new ExtensionPlatform();
     this.platform.addOnRemovedListener(this._onWindowClosed.bind(this));
+  }
+
+  /**
+   * Mark the notification popup as having been automatically closed.
+   *
+   * This lets us differentiate between the cases where we close the
+   * notification popup v.s. when the user closes the popup window directly.
+   */
+  markAsAutomaticallyClosed() {
+    this._popupAutomaticallyClosed = true;
   }
 
   /**
@@ -91,7 +104,10 @@ export default class NotificationManager extends EventEmitter {
     if (windowId === this._popupId) {
       this._popupId = undefined;
       this.setExtensionTab = false;
-      this.emit(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED);
+      this.emit(NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED, {
+        automaticallyClosed: this._popupAutomaticallyClosed,
+      });
+      this._popupAutomaticallyClosed = undefined;
     }
   }
 
@@ -100,8 +116,6 @@ export default class NotificationManager extends EventEmitter {
    * type 'popup')
    *
    * @private
-   * @param {Function} cb - A node style callback that to which the found notification window will be passed.
-   *
    */
   async _getPopup() {
     const windows = await this.platform.getAllWindows();
@@ -113,7 +127,6 @@ export default class NotificationManager extends EventEmitter {
    *
    * @private
    * @param {Array} windows - An array of objects containing data about the open MetaMask extension windows.
-   *
    */
   _getPopupIn(windows) {
     return windows

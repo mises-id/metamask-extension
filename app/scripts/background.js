@@ -6,15 +6,17 @@ import endOfStream from 'end-of-stream';
 import pump from 'pump';
 import debounce from 'debounce-stream';
 import log from 'loglevel';
-import extension from 'extensionizer';
+import browser from 'webextension-polyfill';
 import { storeAsStream, storeTransformStream } from '@metamask/obs-store';
 import PortStream from 'extension-port-stream';
 import { captureException } from '@sentry/browser';
 
+import { ethErrors } from 'eth-rpc-errors';
 import {
   ENVIRONMENT_TYPE_POPUP,
   ENVIRONMENT_TYPE_NOTIFICATION,
   ENVIRONMENT_TYPE_FULLSCREEN,
+  PLATFORM_FIREFOX,
 } from '../../shared/constants/app';
 import { SECOND } from '../../shared/constants/time';
 import {
@@ -39,6 +41,7 @@ import rawFirstTimeState from './first-time-state';
 import getFirstPreferredLangCode from './lib/get-first-preferred-lang-code';
 import getObjStructure from './lib/getObjStructure';
 import setupEnsIpfsResolver from './lib/ens-ipfs/setup';
+import { getPlatform } from './lib/util';
 /* eslint-enable import/first */
 
 const { sentry } = global;
@@ -57,7 +60,7 @@ const openMetamaskTabsIDs = {};
 const requestAccountTabIds = {};
 
 // state persistence
-const inTest = process.env.IN_TEST === 'true';
+const inTest = process.env.IN_TEST;
 const localStore = inTest ? new ReadOnlyNetworkStore() : new LocalStore();
 let versionedData;
 
@@ -74,6 +77,7 @@ initialize().catch(log.error);
 
 /**
  * The data emitted from the MetaMaskController.store EventEmitter, also used to initialize the MetaMaskController. Available in UI on React state as state.metamask.
+ *
  * @typedef MetaMaskState
  * @property {boolean} isInitialized - Whether the first vault has been created.
  * @property {boolean} isUnlocked - Whether the vault is currently decrypted and accounts are available for selection.
@@ -119,7 +123,7 @@ initialize().catch(log.error);
 /**
  * @typedef VersionedData
  * @property {MetaMaskState} data - The data emitted from MetaMask controller, or used to initialize it.
- * @property {Number} version - The latest migration version that has been run.
+ * @property {number} version - The latest migration version that has been run.
  */
 
 /**
@@ -149,6 +153,7 @@ const setActiveUrl = async () => {
 
 /**
  * Initializes the MetaMask controller, and sets up all platform configuration.
+ *
  * @returns {Promise} Setup complete.
  */
 
@@ -167,6 +172,7 @@ async function initialize() {
 /**
  * Loads any stored data, prioritizing the latest storage strategy.
  * Migrates that data schema in case it was last loaded on an older version.
+ *
  * @returns {Promise<MetaMaskState>} Last data emitted from previous instance of MetaMask.
  */
 async function loadStateFromPersistence() {
@@ -244,7 +250,8 @@ function setupController(initState, initLangCode) {
     initLangCode,
     // platform specific api
     platform,
-    extension,
+    notificationManager,
+    browser,
     getRequestAccountTabIds: () => {
       return requestAccountTabIds;
     },
@@ -252,7 +259,6 @@ function setupController(initState, initLangCode) {
       return openMetamaskTabsIDs;
     },
     restoreAccount,
-    notificationManager,
   });
 
   setupEnsIpfsResolver({
@@ -278,6 +284,7 @@ function setupController(initState, initLangCode) {
 
   /**
    * Assigns the given state to the versioned object (with metadata), and returns that.
+   *
    * @param {Object} state - The state object as emitted by the MetaMaskController.
    * @returns {VersionedData} The state object wrapped in an object that includes a metadata key.
    */
@@ -315,8 +322,8 @@ function setupController(initState, initLangCode) {
   //
   // connect to other contexts
   //
-  extension.runtime.onConnect.addListener(connectRemote);
-  extension.runtime.onConnectExternal.addListener(connectExternal);
+  browser.runtime.onConnect.addListener(connectRemote);
+  browser.runtime.onConnectExternal.addListener(connectExternal);
 
   const metamaskInternalProcessHash = {
     [ENVIRONMENT_TYPE_POPUP]: true,
@@ -354,6 +361,7 @@ function setupController(initState, initLangCode) {
 
   /**
    * A runtime.Port object, as provided by the browser:
+   *
    * @see https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/runtime/Port
    * @typedef Port
    * @type Object
@@ -362,14 +370,24 @@ function setupController(initState, initLangCode) {
   /**
    * Connects a Port to the MetaMask controller via a multiplexed duplex stream.
    * This method identifies trusted (MetaMask) interfaces, and connects them differently from untrusted (web pages).
+   *
    * @param {Port} remotePort - The port provided by a new context.
    */
   function connectRemote(remotePort) {
     const processName = remotePort.name;
-    const isMetaMaskInternalProcess = metamaskInternalProcessHash[processName];
 
     if (metamaskBlockedPorts.includes(remotePort.name)) {
       return;
+    }
+
+    let isMetaMaskInternalProcess = false;
+    const sourcePlatform = getPlatform();
+
+    if (sourcePlatform === PLATFORM_FIREFOX) {
+      isMetaMaskInternalProcess = metamaskInternalProcessHash[processName];
+    } else {
+      isMetaMaskInternalProcess =
+        remotePort.sender.origin === `chrome-extension://${browser.runtime.id}`;
     }
 
     if (isMetaMaskInternalProcess) {
@@ -441,7 +459,10 @@ function setupController(initState, initLangCode) {
   // communication with page or other extension
   function connectExternal(remotePort) {
     const portStream = new PortStream(remotePort);
-    controller.setupUntrustedCommunication(portStream, remotePort.sender);
+    controller.setupUntrustedCommunication({
+      connectionStream: portStream,
+      sender: remotePort.sender,
+    });
   }
 
   //
@@ -489,6 +510,15 @@ function setupController(initState, initLangCode) {
    */
   function updateBadge() {
     let label = '';
+    const count = getUnapprovedTransactionCount();
+    if (count) {
+      label = String(count);
+    }
+    browser.browserAction.setBadgeText({ text: label });
+    browser.browserAction.setBadgeBackgroundColor({ color: '#037DD6' });
+  }
+
+  function getUnapprovedTransactionCount() {
     const unapprovedTxCount = controller.txController.getUnapprovedTxCount();
     const { unapprovedMsgCount } = controller.messageManager;
     const { unapprovedPersonalMsgCount } = controller.personalMessageManager;
@@ -500,7 +530,7 @@ function setupController(initState, initLangCode) {
     const pendingApprovalCount = controller.approvalController.getTotalApprovalCount();
     const waitingForUnlockCount =
       controller.appStateController.waitingForUnlock.length;
-    const count =
+    return (
       unapprovedTxCount +
       unapprovedMsgCount +
       unapprovedPersonalMsgCount +
@@ -508,17 +538,19 @@ function setupController(initState, initLangCode) {
       unapprovedEncryptionPublicKeyMsgCount +
       unapprovedTypedMessagesCount +
       pendingApprovalCount +
-      waitingForUnlockCount;
-    if (count) {
-      label = String(count);
-    }
-    extension.browserAction.setBadgeText({ text: label });
-    extension.browserAction.setBadgeBackgroundColor({ color: '#037DD6' });
+      waitingForUnlockCount
+    );
   }
 
   notificationManager.on(
     NOTIFICATION_MANAGER_EVENTS.POPUP_CLOSED,
-    rejectUnapprovedNotifications,
+    ({ automaticallyClosed }) => {
+      if (!automaticallyClosed) {
+        rejectUnapprovedNotifications();
+      } else if (getUnapprovedTransactionCount() > 0) {
+        triggerUi();
+      }
+    },
   );
 
   function rejectUnapprovedNotifications() {
@@ -568,8 +600,11 @@ function setupController(initState, initLangCode) {
         ),
       );
 
-    // We're specifcally avoid using approvalController directly for better
-    // Error support during rejection
+    // Finally, reject all approvals managed by the ApprovalController
+    controller.approvalController.clear(
+      ethErrors.provider.userRejectedRequest(),
+    );
+
     Object.keys(
       controller.permissionsController.approvals.state.pendingApprovals,
     ).forEach((approvalId) => {
@@ -594,6 +629,7 @@ function setupController(initState, initLangCode) {
  */
 async function triggerUi() {
   const tabs = await platform.getActiveTabs();
+  console.log(tabs, '212222');
   const currentlyActiveMetamaskTab = Boolean(
     tabs.find((tab) => openMetamaskTabsIDs[tab.id]),
   );
@@ -642,7 +678,7 @@ async function setExtensionTab(type) {
     if (findExtensionTab) {
       const activeTabs = await platform.getActiveTabs();
       await platform.switchToTab(findExtensionTab.id);
-      extension.tabs.reload(findExtensionTab.id);
+      browser.tabs.reload(findExtensionTab.id);
       if (!type) {
         notificationManager._openerTab =
           activeTabs.length > 0 ? activeTabs[0] : undefined;
@@ -677,10 +713,10 @@ async function openPopup() {
 function injectDynamic() {
   console.log('injectDynamic');
   // in manifest v2, it affects only the active tab
-  for (const cs of extension.runtime.getManifest().content_scripts) {
+  for (const cs of browser.runtime.getManifest().content_scripts) {
     console.log('executeScript', cs);
     for (const csjs of cs.js) {
-      extension.tabs.executeScript({
+      browser.tabs.executeScript({
         file: csjs,
         runAt: cs.run_at,
       });
@@ -696,7 +732,7 @@ async function checkAndInject() {
     return;
   }
 
-  extension.tabs.sendMessage(
+  browser.tabs.sendMessage(
     activeTab.id,
     { check: 'contentscript' },
     function (response) {
@@ -709,30 +745,33 @@ async function checkAndInject() {
   );
 }
 
-extension.runtime.onMessage.addListener(function (request, _, sendResponse) {
+browser.runtime.onMessage.addListener(function (request, _, sendResponse) {
   if (request.check === 'backgroundscript') {
     sendResponse({ message: 'ready' });
   }
 });
 
 // On first install, open a new tab with MetaMask
-extension.runtime.onInstalled.addListener(({ reason }) => {
-  console.log('extension.runtime.onInstalled');
+browser.runtime.onInstalled.addListener(({ reason }) => {
   const isMobileFlag = isMobile();
-  if (reason === 'install' && !isMobileFlag) {
+  if (
+    reason === 'install' &&
+    !isMobileFlag &&
+    !(process.env.METAMASK_DEBUG || process.env.IN_TEST)
+  ) {
     platform.openExtensionInBrowser();
   }
 });
 
-extension.runtime.onStartup.addListener(() => {
+browser.runtime.onStartup.addListener(() => {
   console.log('extension.runtime.onStartup');
   checkAndInject();
 });
-extension.tabs.onActivated.addListener((e) => {
+browser.tabs.onActivated.addListener((e) => {
   console.log('onActivated');
   setActiveUrl(e);
 });
-extension.tabs.onUpdated.addListener((e) => {
+browser.tabs.onUpdated.addListener((e) => {
   console.log('onUpdated', e);
   setActiveUrl(e);
 });

@@ -28,7 +28,7 @@ import {
 } from '../../../ui/pages/swaps/swaps.util';
 import fetchWithCache from '../../../ui/helpers/utils/fetch-with-cache';
 import { MINUTE, SECOND } from '../../../shared/constants/time';
-import { isEqualCaseInsensitive } from '../../../ui/helpers/utils/util';
+import { isEqualCaseInsensitive } from '../../../shared/modules/string-utils';
 import { NETWORK_EVENTS } from './network';
 
 // The MAX_GAS_LIMIT is a number that is higher than the maximum gas costs we have observed on any aggregator
@@ -41,6 +41,8 @@ const POLL_COUNT_LIMIT = 3;
 // If for any reason the MetaSwap API fails to provide a refresh time,
 // provide a reasonable fallback to avoid further errors
 const FALLBACK_QUOTE_REFRESH_TIME = MINUTE;
+const FALLBACK_SMART_TRANSACTION_REFRESH_TIME = SECOND * 10;
+const FALLBACK_SMART_TRANSACTIONS_DEADLINE = 180;
 
 function calculateGasEstimateWithRefund(
   maxGas = MAX_GAS_LIMIT,
@@ -51,10 +53,12 @@ function calculateGasEstimateWithRefund(
     estimatedRefund,
     10,
   );
+  const isMaxGasMinusRefundNegative = maxGasMinusRefund.lt(0);
 
-  const gasEstimateWithRefund = maxGasMinusRefund.lt(estimatedGas, 16)
-    ? maxGasMinusRefund.toString(16)
-    : estimatedGas;
+  const gasEstimateWithRefund =
+    !isMaxGasMinusRefundNegative && maxGasMinusRefund.lt(estimatedGas, 16)
+      ? `0x${maxGasMinusRefund.toString(16)}`
+      : estimatedGas;
 
   return gasEstimateWithRefund;
 }
@@ -79,10 +83,12 @@ const initialState = {
     topAggId: null,
     routeState: '',
     swapsFeatureIsLive: true,
-    useNewSwapsApi: false,
     saveFetchedQuotes: false,
     swapsQuoteRefreshTime: FALLBACK_QUOTE_REFRESH_TIME,
     swapsQuotePrefetchingRefreshTime: FALLBACK_QUOTE_REFRESH_TIME,
+    swapsStxBatchStatusRefreshTime: FALLBACK_SMART_TRANSACTION_REFRESH_TIME,
+    swapsStxGetTransactionsRefreshTime: FALLBACK_SMART_TRANSACTION_REFRESH_TIME,
+    swapsFeatureFlags: {},
   },
 };
 
@@ -123,9 +129,9 @@ export default class SwapsController {
     });
   }
 
-  async fetchSwapsRefreshRates(chainId, useNewSwapsApi) {
+  async fetchSwapsRefreshRates(chainId) {
     const response = await fetchWithCache(
-      getBaseApi('network', chainId, useNewSwapsApi),
+      getBaseApi('network', chainId),
       { method: 'GET' },
       { cacheRefreshTime: 600000 },
     );
@@ -143,19 +149,18 @@ export default class SwapsController {
     return {
       quotes: refreshRates.quotes * 1000,
       quotesPrefetching: refreshRates.quotesPrefetching * 1000,
+      stxGetTransactions: refreshRates.stxGetTransactions * 1000,
+      stxBatchStatus: refreshRates.stxBatchStatus * 1000,
+      stxStatusDeadline: refreshRates.stxStatusDeadline,
     };
   }
 
   // Sets the refresh rate for quote updates from the MetaSwap API
   async _setSwapsRefreshRates() {
     const chainId = this._getCurrentChainId();
-    const { swapsState } = this.store.getState();
     let swapsRefreshRates;
     try {
-      swapsRefreshRates = await this.fetchSwapsRefreshRates(
-        chainId,
-        swapsState.useNewSwapsApi,
-      );
+      swapsRefreshRates = await this.fetchSwapsRefreshRates(chainId);
     } catch (e) {
       console.error('Request for swaps quote refresh time failed: ', e);
     }
@@ -167,6 +172,15 @@ export default class SwapsController {
           swapsRefreshRates?.quotes || FALLBACK_QUOTE_REFRESH_TIME,
         swapsQuotePrefetchingRefreshTime:
           swapsRefreshRates?.quotesPrefetching || FALLBACK_QUOTE_REFRESH_TIME,
+        swapsStxGetTransactionsRefreshTime:
+          swapsRefreshRates?.stxGetTransactions ||
+          FALLBACK_SMART_TRANSACTION_REFRESH_TIME,
+        swapsStxBatchStatusRefreshTime:
+          swapsRefreshRates?.stxBatchStatus ||
+          FALLBACK_SMART_TRANSACTION_REFRESH_TIME,
+        swapsStxStatusDeadline:
+          swapsRefreshRates?.stxStatusDeadline ||
+          FALLBACK_SMART_TRANSACTIONS_DEADLINE,
       },
     });
   }
@@ -210,11 +224,7 @@ export default class SwapsController {
   ) {
     const { chainId } = fetchParamsMetaData;
     const {
-      swapsState: {
-        useNewSwapsApi,
-        quotesPollingLimitEnabled,
-        saveFetchedQuotes,
-      },
+      swapsState: { quotesPollingLimitEnabled, saveFetchedQuotes },
     } = this.store.getState();
 
     if (!fetchParams) {
@@ -242,7 +252,6 @@ export default class SwapsController {
     let [newQuotes] = await Promise.all([
       this._fetchTradesInfo(fetchParams, {
         ...fetchParamsMetaData,
-        useNewSwapsApi,
       }),
       this._setSwapsRefreshRates(),
     ]);
@@ -278,14 +287,16 @@ export default class SwapsController {
         fetchParams.fromAddress,
         chainId,
       );
+      const [firstQuote] = Object.values(newQuotes);
 
       // For a user to be able to swap a token, they need to have approved the MetaSwap contract to withdraw that token.
       // _getERC20Allowance() returns the amount of the token they have approved for withdrawal. If that amount is greater
       // than 0, it means that approval has already occurred and is not needed. Otherwise, for tokens to be swapped, a new
       // call of the ERC-20 approve method is required.
       approvalRequired =
+        firstQuote.approvalNeeded &&
         allowance.eq(0) &&
-        Object.values(newQuotes)[0].aggregator !== 'wrappedNative';
+        firstQuote.aggregator !== 'wrappedNative';
       if (!approvalRequired) {
         newQuotes = mapValues(newQuotes, (quote) => ({
           ...quote,
@@ -293,7 +304,7 @@ export default class SwapsController {
         }));
       } else if (!isPolledRequest) {
         const { gasLimit: approvalGas } = await this.timedoutGasReturn(
-          Object.values(newQuotes)[0].approvalNeeded,
+          firstQuote.approvalNeeded,
         );
 
         newQuotes = mapValues(newQuotes, (quote) => ({
@@ -574,9 +585,16 @@ export default class SwapsController {
 
   setSwapsLiveness(swapsLiveness) {
     const { swapsState } = this.store.getState();
-    const { swapsFeatureIsLive, useNewSwapsApi } = swapsLiveness;
+    const { swapsFeatureIsLive } = swapsLiveness;
     this.store.updateState({
-      swapsState: { ...swapsState, swapsFeatureIsLive, useNewSwapsApi },
+      swapsState: { ...swapsState, swapsFeatureIsLive },
+    });
+  }
+
+  setSwapsFeatureFlags(swapsFeatureFlags) {
+    const { swapsState } = this.store.getState();
+    this.store.updateState({
+      swapsState: { ...swapsState, swapsFeatureFlags },
     });
   }
 
@@ -588,10 +606,10 @@ export default class SwapsController {
         tokens: swapsState.tokens,
         fetchParams: swapsState.fetchParams,
         swapsFeatureIsLive: swapsState.swapsFeatureIsLive,
-        useNewSwapsApi: swapsState.useNewSwapsApi,
         swapsQuoteRefreshTime: swapsState.swapsQuoteRefreshTime,
         swapsQuotePrefetchingRefreshTime:
           swapsState.swapsQuotePrefetchingRefreshTime,
+        swapsFeatureFlags: swapsState.swapsFeatureFlags,
       },
     });
     clearTimeout(this.pollingTimeout);
@@ -856,7 +874,7 @@ export default class SwapsController {
 /**
  * Calculates the median overallValueOfQuote of a sample of quotes.
  *
- * @param {Array} quotes - A sample of quote objects with overallValueOfQuote, ethFee, metaMaskFeeInEth, and ethValueOfTokens properties
+ * @param {Array} _quotes - A sample of quote objects with overallValueOfQuote, ethFee, metaMaskFeeInEth, and ethValueOfTokens properties
  * @returns {Object} An object with the ethValueOfTokens, ethFee, and metaMaskFeeInEth of the quote with the median overallValueOfQuote
  */
 function getMedianEthValueQuote(_quotes) {

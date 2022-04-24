@@ -2,28 +2,30 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import PageContainerContent from '../../../components/ui/page-container/page-container-content.component';
 import Dialog from '../../../components/ui/dialog';
+import NicknamePopovers from '../../../components/app/modals/nickname-popovers';
 import {
   ETH_GAS_PRICE_FETCH_WARNING_KEY,
   GAS_PRICE_FETCH_FAILURE_ERROR_KEY,
   GAS_PRICE_EXCESSIVE_ERROR_KEY,
-  UNSENDABLE_ASSET_ERROR_KEY,
   INSUFFICIENT_FUNDS_FOR_GAS_ERROR_KEY,
 } from '../../../helpers/constants/error-keys';
 import { MISESNETWORK } from '../../../../shared/constants/network';
-import { ASSET_TYPES } from '../../../ducks/send';
+import { ASSET_TYPES } from '../../../../shared/constants/transaction';
 import SendAmountRow from './send-amount-row';
 import SendHexDataRow from './send-hex-data-row';
 import SendAssetRow from './send-asset-row';
 import SendGasRow from './send-gas-row';
 
 export default class SendContent extends Component {
+  state = {
+    showNicknamePopovers: false,
+  };
+
   static contextTypes = {
     t: PropTypes.func,
   };
 
   static propTypes = {
-    isAssetSendable: PropTypes.bool,
-    showAddToAddressBookModal: PropTypes.func,
     getMisesGasfee: PropTypes.func,
     showHexData: PropTypes.bool,
     contact: PropTypes.object,
@@ -42,6 +44,8 @@ export default class SendContent extends Component {
       type: PropTypes.string,
       ticker: PropTypes.string,
     }).isRequired,
+    to: PropTypes.string,
+    assetError: PropTypes.string,
   };
 
   state = {
@@ -63,11 +67,11 @@ export default class SendContent extends Component {
       gasIsExcessive,
       isEthGasPrice,
       noGasPrice,
-      isAssetSendable,
       networkOrAccountNotSupports1559,
       getIsBalanceInsufficient,
       asset,
       provider,
+      assetError,
     } = this.props;
 
     let gasError;
@@ -78,17 +82,17 @@ export default class SendContent extends Component {
         gasError = INSUFFICIENT_FUNDS_FOR_GAS_ERROR_KEY;
     }
     const showHexData =
-      this.props.showHexData && asset.type !== ASSET_TYPES.TOKEN;
+      this.props.showHexData &&
+      asset.type !== ASSET_TYPES.TOKEN &&
+      asset.type !== ASSET_TYPES.COLLECTIBLE;
 
     return (
       <PageContainerContent>
         <div className="send-v2__form">
+          {assetError ? this.renderError(assetError) : null}
           {gasError ? this.renderError(gasError) : null}
           {isEthGasPrice
             ? this.renderWarning(ETH_GAS_PRICE_FETCH_WARNING_KEY)
-            : null}
-          {isAssetSendable === false
-            ? this.renderError(UNSENDABLE_ASSET_ERROR_KEY)
             : null}
           {error ? this.renderError(error) : null}
           {warning ? this.renderWarning() : null}
@@ -104,24 +108,29 @@ export default class SendContent extends Component {
 
   maybeRenderAddContact() {
     const { t } = this.context;
-    const {
-      isOwnedAccount,
-      showAddToAddressBookModal,
-      contact = {},
-    } = this.props;
+    const { isOwnedAccount, contact = {}, to } = this.props;
+    const { showNicknamePopovers } = this.state;
 
     if (isOwnedAccount || contact.name) {
       return null;
     }
 
     return (
-      <Dialog
-        type="message"
-        className="send__dialog"
-        onClick={showAddToAddressBookModal}
-      >
-        {t('newAccountDetectedDialogMessage')}
-      </Dialog>
+      <>
+        <Dialog
+          type="message"
+          className="send__dialog"
+          onClick={() => this.setState({ showNicknamePopovers: true })}
+        >
+          {t('newAccountDetectedDialogMessage')}
+        </Dialog>
+        {showNicknamePopovers ? (
+          <NicknamePopovers
+            onClose={() => this.setState({ showNicknamePopovers: false })}
+            address={to}
+          />
+        ) : null}
+      </>
     );
   }
 

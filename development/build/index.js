@@ -7,6 +7,8 @@ const path = require('path');
 const livereload = require('gulp-livereload');
 const minimist = require('minimist');
 const { sync: globby } = require('globby');
+const { getVersion } = require('../lib/get-version');
+const { BuildType } = require('../lib/build-type');
 const {
   createTask,
   composeSeries,
@@ -18,11 +20,12 @@ const createScriptTasks = require('./scripts');
 const createStyleTasks = require('./styles');
 const createStaticAssetTasks = require('./static');
 const createEtcTasks = require('./etc');
-const { BuildType, getBrowserVersionMap } = require('./utils');
+const { getBrowserVersionMap } = require('./utils');
 
 // Packages required dynamically via browserify configuration in dependencies
 // Required for LavaMoat policy generation
 require('loose-envify');
+require('globalthis');
 require('@babel/plugin-proposal-object-rest-spread');
 require('@babel/plugin-transform-runtime');
 require('@babel/plugin-proposal-class-properties');
@@ -30,16 +33,20 @@ require('@babel/plugin-proposal-optional-chaining');
 require('@babel/plugin-proposal-nullish-coalescing-operator');
 require('@babel/preset-env');
 require('@babel/preset-react');
+require('@babel/preset-typescript');
 require('@babel/core');
 // ESLint-related
 require('@babel/eslint-parser');
 require('@babel/eslint-plugin');
 require('@metamask/eslint-config');
 require('@metamask/eslint-config-nodejs');
+require('@typescript-eslint/parser');
 require('eslint');
 require('eslint-config-prettier');
 require('eslint-import-resolver-node');
+require('eslint-import-resolver-typescript');
 require('eslint-plugin-import');
+require('eslint-plugin-jsdoc');
 require('eslint-plugin-node');
 require('eslint-plugin-prettier');
 require('eslint-plugin-react');
@@ -52,14 +59,16 @@ function defineAndRunBuildTasks() {
     buildType,
     entryTask,
     isLavaMoat,
+    policyOnly,
     shouldIncludeLockdown,
     shouldLintFenceFiles,
     skipStats,
+    version,
   } = parseArgv();
 
   const browserPlatforms = ['chrome', 'mises'];
 
-  const browserVersionMap = getBrowserVersionMap(browserPlatforms);
+  const browserVersionMap = getBrowserVersionMap(browserPlatforms, version);
 
   const ignoredFiles = getIgnoredFiles(buildType);
 
@@ -84,13 +93,16 @@ function defineAndRunBuildTasks() {
     ignoredFiles,
     isLavaMoat,
     livereload,
+    policyOnly,
     shouldLintFenceFiles,
+    version,
   });
 
   const { clean, reload, zip } = createEtcTasks({
     livereload,
     browserPlatforms,
     buildType,
+    version,
   });
 
   // build for development (livereload)
@@ -134,6 +146,9 @@ function defineAndRunBuildTasks() {
     ),
   );
 
+  // build just production scripts, for LavaMoat policy generation purposes
+  createTask('scripts:prod', scriptTasks.prod);
+
   // build for CI testing
   createTask(
     'test',
@@ -155,8 +170,10 @@ function defineAndRunBuildTasks() {
 function parseArgv() {
   const NamedArgs = {
     BuildType: 'build-type',
+    BuildVersion: 'build-version',
     LintFenceFiles: 'lint-fence-files',
     Lockdown: 'lockdown',
+    PolicyOnly: 'policy-only',
     SkipStats: 'skip-stats',
   };
 
@@ -164,13 +181,16 @@ function parseArgv() {
     boolean: [
       NamedArgs.LintFenceFiles,
       NamedArgs.Lockdown,
+      NamedArgs.PolicyOnly,
       NamedArgs.SkipStats,
     ],
-    string: [NamedArgs.BuildType],
+    string: [NamedArgs.BuildType, NamedArgs.BuildVersion],
     default: {
       [NamedArgs.BuildType]: BuildType.main,
+      [NamedArgs.BuildVersion]: '0',
       [NamedArgs.LintFenceFiles]: true,
       [NamedArgs.Lockdown]: true,
+      [NamedArgs.PolicyOnly]: false,
       [NamedArgs.SkipStats]: false,
     },
   });
@@ -191,6 +211,14 @@ function parseArgv() {
     throw new Error(`MetaMask build: Invalid build type: "${buildType}"`);
   }
 
+  const rawBuildVersion = argv[NamedArgs.BuildVersion];
+  const buildVersion = Number.parseInt(rawBuildVersion, 10);
+  if (rawBuildVersion.match(/^\d+$/u) === null || Number.isNaN(buildVersion)) {
+    throw new Error(
+      `MetaMask build: Invalid build version: "${rawBuildVersion}"`,
+    );
+  }
+
   // Manually default this to `false` for dev builds only.
   const shouldLintFenceFiles = process.argv.includes(
     `--${NamedArgs.LintFenceFiles}`,
@@ -198,20 +226,26 @@ function parseArgv() {
     ? argv[NamedArgs.LintFenceFiles]
     : !/dev/iu.test(entryTask);
 
+  const policyOnly = argv[NamedArgs.PolicyOnly];
+
+  const version = getVersion(buildType, buildVersion);
+
   return {
     buildType,
     entryTask,
     isLavaMoat: process.argv[0].includes('lavamoat'),
+    policyOnly,
     shouldIncludeLockdown: argv[NamedArgs.Lockdown],
     shouldLintFenceFiles,
     skipStats: argv[NamedArgs.SkipStats],
+    version,
   };
 }
 
 /**
  * Gets the files to be ignored by the current build, if any.
  *
- * @param {string} buildType - The type of the current build.
+ * @param {string} currentBuildType - The type of the current build.
  * @returns {string[] | null} The array of files to be ignored by the current
  * build, or `null` if no files are to be ignored.
  */

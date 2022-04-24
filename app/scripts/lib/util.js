@@ -1,4 +1,5 @@
-import extension from 'extensionizer';
+import browser from 'webextension-polyfill';
+
 import { stripHexPrefix } from 'ethereumjs-util';
 import BN from 'bn.js';
 import { memoize } from 'lodash';
@@ -54,7 +55,6 @@ const getEnvironmentType = (url = window.location.href) =>
  * Returns the platform (browser) where the extension is running.
  *
  * @returns {string} the platform ENUM
- *
  */
 const getPlatform = () => {
   const { navigator } = window;
@@ -77,7 +77,6 @@ const getPlatform = () => {
  *
  * @param {string} inputHex - A number represented as a hex string
  * @returns {Object} A BN object
- *
  */
 function hexToBn(inputHex) {
   return new BN(stripHexPrefix(inputHex), 16);
@@ -90,7 +89,6 @@ function hexToBn(inputHex) {
  * @param {number|string} numerator - The numerator of the fraction multiplier
  * @param {number|string} denominator - The denominator of the fraction multiplier
  * @returns {BN} The product of the multiplication
- *
  */
 function BnMultiplyByFraction(targetBN, numerator, denominator) {
   const numBN = new BN(numerator);
@@ -101,10 +99,11 @@ function BnMultiplyByFraction(targetBN, numerator, denominator) {
 /**
  * Returns an Error if extension.runtime.lastError is present
  * this is a workaround for the non-standard error object that's used
+ *
  * @returns {Error|undefined}
  */
 function checkForError() {
-  const { lastError } = extension.runtime;
+  const { lastError } = browser.runtime;
   if (!lastError) {
     return undefined;
   }
@@ -142,8 +141,7 @@ const addHexPrefix = (str) => {
  * Converts a BN object to a hex string with a '0x' prefix
  *
  * @param {BN} inputBn - The BN to convert to a hex string
- * @returns {string} - A '0x' prefixed hex string
- *
+ * @returns {string} A '0x' prefixed hex string
  */
 function bnToHex(inputBn) {
   return addHexPrefix(inputBn.toString(16));

@@ -1,5 +1,5 @@
 const deepFreeze = require('deep-freeze-strict');
-const { BuildType } = require('../utils');
+const { BuildType } = require('../../lib/build-type');
 const {
   createRemoveFencedCodeTransform,
   removeFencedCode,
@@ -608,6 +608,17 @@ describe('build/transforms/remove-fenced-code', () => {
           ),
         ).toThrow(expectedError);
       });
+    });
+
+    it('ignores files with inline source maps', () => {
+      // This is so that there isn't an unnecessary second execution of
+      // removeFencedCode with a transpiled version of the same file
+      const input = getTestData().validInputs.extraContentWithFences.concat(
+        '\n//# sourceMappingURL=as32e32wcwc2234f2ew32cnin4243f4nv9nsdoivnxzoivnd',
+      );
+      expect(
+        removeFencedCode(mockFileName, BuildType.flask, input),
+      ).toStrictEqual([input, false]);
     });
 
     // We can't do this until there's more than one command

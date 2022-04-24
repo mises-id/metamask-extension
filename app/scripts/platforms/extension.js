@@ -1,4 +1,5 @@
-import extension from 'extensionizer';
+import browser from 'webextension-polyfill';
+
 import { getBlockExplorerLink } from '@metamask/etherscan-link';
 import { getEnvironmentType, checkForError } from '../lib/util';
 import { ENVIRONMENT_TYPE_BACKGROUND } from '../../../shared/constants/app';
@@ -10,12 +11,12 @@ export default class ExtensionPlatform {
   // Public
   //
   reload() {
-    extension.runtime.reload();
+    browser.runtime.reload();
   }
 
   openTab(options) {
     return new Promise((resolve, reject) => {
-      extension.tabs.create(options, (newTab) => {
+      browser.tabs.create(options).then((newTab) => {
         const error = checkForError();
         if (error) {
           return reject(error);
@@ -28,13 +29,16 @@ export default class ExtensionPlatform {
   moveTab(tabId, options) {
     console.log('moveTab', tabId, options);
     return new Promise((resolve, reject) => {
-      extension.tabs.move(tabId, options, (newTab) => {
-        const error = checkForError();
-        if (error) {
-          return reject(error);
-        }
-        return resolve(newTab);
-      });
+      browser.tabs.move(
+        tabId,
+        options.then((newTab) => {
+          const error = checkForError();
+          if (error) {
+            return reject(error);
+          }
+          return resolve(newTab);
+        }),
+      );
     });
   }
 
@@ -43,39 +47,35 @@ export default class ExtensionPlatform {
     return new Promise((resolve, reject) => {
       if (isMobile()) {
         const { url, openerTabId, index } = options;
-        extension.tabs.create(
-          {
-            url,
-            openerTabId,
-            index,
-          },
-          (newWindow) => {
-            const error = checkForError();
-            if (error) {
-              return reject(error);
-            }
-            return resolve(newWindow);
-          },
-        );
+        this.openTab({
+          url,
+          openerTabId,
+          index,
+        }).then((newWindow) => {
+          const error = checkForError();
+          if (error) {
+            return reject(error);
+          }
+          return resolve(newWindow);
+        });
       } else {
         const { url, type, width, height, left, top } = options;
-        extension.windows.create(
-          {
+        browser.windows
+          .create({
             url,
             type,
             width,
             height,
             left,
             top,
-          },
-          (newWindow) => {
+          })
+          .then((newWindow) => {
             const error = checkForError();
             if (error) {
               return reject(error);
             }
             return resolve(newWindow);
-          },
-        );
+          });
       }
     });
   }
@@ -85,13 +85,14 @@ export default class ExtensionPlatform {
       if (isMobile()) {
         return resolve();
       }
-      extension.windows.update(windowId, { focused: true }, () => {
+      browser.windows.update(windowId, { focused: true }).then(() => {
         const error = checkForError();
         if (error) {
           return reject(error);
         }
         return resolve();
       });
+      return resolve();
     });
   }
 
@@ -100,19 +101,20 @@ export default class ExtensionPlatform {
       if (isMobile()) {
         return resolve();
       }
-      extension.windows.update(windowId, { left, top }, () => {
+      browser.windows.update(windowId, { left, top }).then(() => {
         const error = checkForError();
         if (error) {
           return reject(error);
         }
         return resolve();
       });
+      return resolve();
     });
   }
 
   getLastFocusedWindow() {
     return new Promise((resolve, reject) => {
-      extension.windows.getLastFocused((windowObject) => {
+      browser.windows.getLastFocused().then((windowObject) => {
         const error = checkForError();
         if (error) {
           return reject(error);
@@ -127,16 +129,16 @@ export default class ExtensionPlatform {
       return this.getActiveTabs().then((windowDetails) => {
         console.log(windowDetails, id, 'closeCurrentWindow');
         const closeId = windowDetails[0].id;
-        extension.tabs.get(closeId, (e) => {
+        browser.tabs.get(closeId).then((e) => {
           if (e && closeId === id) {
             console.log(id, 'closeCurrentWindow=closeCurrentWindow');
-            extension.tabs.remove(id);
+            browser.tabs.remove(id);
           }
         });
       });
     }
-    return extension.windows.getCurrent((windowDetails) => {
-      return extension.windows.remove(windowDetails.id);
+    return browser.windows.getCurrent().then((windowDetails) => {
+      return browser.windows.remove(windowDetails.id);
     });
   }
 
@@ -144,27 +146,26 @@ export default class ExtensionPlatform {
     const {
       version,
       version_name: versionName,
-    } = extension.runtime.getManifest();
+    } = browser.runtime.getManifest();
 
     const versionParts = version.split('.');
     if (versionName) {
-      // On Chrome, the build type is stored as `version_name` in the manifest, and the fourth part
-      // of the version is the build version.
-      const buildType = versionName;
       if (versionParts.length < 4) {
         throw new Error(`Version missing build number: '${version}'`);
       }
-      const [major, minor, patch, buildVersion] = versionParts;
-
-      return `${major}.${minor}.${patch}-${buildType}.${buildVersion}`;
-    } else if (versionParts.length === 4) {
+      // On Chrome, a more descriptive representation of the version is stored
+      // in the `version_name` field for display purposes.
+      return versionName;
+    } else if (versionParts.length !== 3) {
+      throw new Error(`Invalid version: ${version}`);
+    } else if (versionParts[2].match(/[^\d]/u)) {
       // On Firefox, the build type and build version are in the fourth part of the version.
-      const [major, minor, patch, prerelease] = versionParts;
-      const matches = prerelease.match(/^(\w+)(\d)+$/u);
+      const [major, minor, patchAndPrerelease] = versionParts;
+      const matches = patchAndPrerelease.match(/^(\d+)([A-Za-z]+)(\d)+$/u);
       if (matches === null) {
         throw new Error(`Version contains invalid prerelease: ${version}`);
       }
-      const [, buildType, buildVersion] = matches;
+      const [, patch, buildType, buildVersion] = matches;
       return `${major}.${minor}.${patch}-${buildType}.${buildVersion}`;
     }
 
@@ -179,7 +180,7 @@ export default class ExtensionPlatform {
     keepWindowOpen = false,
     url = 'home.html',
   ) {
-    let extensionURL = extension.runtime.getURL(url);
+    let extensionURL = browser.runtime.getURL(url);
 
     if (route) {
       extensionURL += `#${route}`;
@@ -200,9 +201,9 @@ export default class ExtensionPlatform {
 
   getPlatformInfo(cb) {
     try {
-      extension.runtime.getPlatformInfo((platform) => {
-        cb(null, platform);
-      });
+      const platformInfo = browser.runtime.getPlatformInfo();
+      cb(platformInfo);
+      return;
     } catch (e) {
       cb(e);
       // eslint-disable-next-line no-useless-return
@@ -228,15 +229,15 @@ export default class ExtensionPlatform {
 
   addOnRemovedListener(listener) {
     if (isMobile()) {
-      extension.tabs.onRemoved.addListener(listener);
+      browser.tabs.onRemoved.addListener(listener);
     } else {
-      extension.windows.onRemoved.addListener(listener);
+      browser.windows.onRemoved.addListener(listener);
     }
   }
 
   getAllWindows() {
     return new Promise((resolve, reject) => {
-      extension.windows.getAll((windows) => {
+      browser.windows.getAll().then((windows) => {
         const error = checkForError();
         if (error) {
           return reject(error);
@@ -248,7 +249,7 @@ export default class ExtensionPlatform {
 
   getActiveTabs() {
     return new Promise((resolve, reject) => {
-      extension.tabs.query({ active: true }, (tabs) => {
+      browser.tabs.query({ active: true }).then((tabs) => {
         const error = checkForError();
         if (error) {
           return reject(error);
@@ -260,7 +261,7 @@ export default class ExtensionPlatform {
 
   getTabs(options) {
     return new Promise((resolve, reject) => {
-      extension.tabs.query(options, (tabs) => {
+      browser.tabs.query(options).then((tabs) => {
         const error = checkForError();
         if (error) {
           return reject(error);
@@ -272,7 +273,7 @@ export default class ExtensionPlatform {
 
   currentTab() {
     return new Promise((resolve, reject) => {
-      extension.tabs.getCurrent((tab) => {
+      browser.tabs.getCurrent().then((tab) => {
         const err = checkForError();
         if (err) {
           reject(err);
@@ -286,24 +287,20 @@ export default class ExtensionPlatform {
   switchToTab(tabId) {
     console.log('switchToTab', tabId);
     return new Promise((resolve, reject) => {
-      extension.tabs.update(
-        tabId,
-        { active: true, highlighted: true },
-        (tab) => {
-          const err = checkForError();
-          if (err) {
-            reject(err);
-          } else {
-            resolve(tab);
-          }
-        },
-      );
+      browser.tabs.update(tabId, { highlighted: true }).then((tab) => {
+        const err = checkForError();
+        if (err) {
+          reject(err);
+        } else {
+          resolve(tab);
+        }
+      });
     });
   }
 
   closeTab(tabId) {
     return new Promise((resolve, reject) => {
-      extension.tabs.remove(tabId, () => {
+      browser.tabs.remove(tabId).then(() => {
         const err = checkForError();
         if (err) {
           reject(err);
@@ -337,23 +334,23 @@ export default class ExtensionPlatform {
   }
 
   _showNotification(title, message, url) {
-    extension.notifications.create(url, {
+    browser.notifications.create(url, {
       type: 'basic',
       title,
-      iconUrl: extension.extension.getURL('../../images/icon-64.png'),
+      iconUrl: browser.runtime.getURL('../../images/icon-64.png'),
       message,
     });
   }
 
   _subscribeToNotificationClicked() {
-    if (!extension.notifications.onClicked.hasListener(this._viewOnEtherscan)) {
-      extension.notifications.onClicked.addListener(this._viewOnEtherscan);
+    if (!browser.notifications.onClicked.hasListener(this._viewOnEtherscan)) {
+      browser.notifications.onClicked.addListener(this._viewOnEtherscan);
     }
   }
 
   _viewOnEtherscan(url) {
     if (url.startsWith('https://')) {
-      extension.tabs.create({ url });
+      browser.tabs.create({ url });
     }
   }
 }

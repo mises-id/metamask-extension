@@ -12,13 +12,14 @@ import {
 } from '../../../selectors';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import TransactionListItem from '../transaction-list-item';
+import SmartTransactionListItem from '../transaction-list-item/smart-transaction-list-item.component';
 import Button from '../../ui/button';
 import { TOKEN_CATEGORY_HASH } from '../../../helpers/constants/transactions';
 import { SWAPS_CHAINID_CONTRACT_ADDRESS_MAP } from '../../../../shared/constants/swaps';
 import { TRANSACTION_TYPES } from '../../../../shared/constants/transaction';
-import { isEqualCaseInsensitive } from '../../../helpers/utils/util';
-import { recentTransactions } from '../../../store/actions';
+import { isEqualCaseInsensitive } from '../../../../shared/modules/string-utils';
 import { MISESNETWORK } from '../../../../shared/constants/network';
+import { recentTransactions } from '../../../store/actions';
 
 const PAGE_INCREMENT = 10;
 
@@ -118,13 +119,14 @@ export default function TransactionList({
     () => setLimit((prev) => prev + PAGE_INCREMENT),
     [],
   );
+  // eslint-disable-next-line
   let [misesCompletedTransactions, setmisesCompletedTransactions] = useState(
     [],
   );
   if (misesCompletedTransactions.length) {
     completedTransactions = misesCompletedTransactions;
   }
-  const pendingLength = pendingTransactions.length;
+  // const pendingLength = pendingTransactions.length;
   const [loading, setloading] = useState('');
   const unique = (arr) => {
     const uniqueArr = [];
@@ -176,18 +178,27 @@ export default function TransactionList({
   return (
     <div className="transaction-list">
       <div className="transaction-list__transactions">
-        {pendingLength > 0 && (
+        {pendingTransactions.length > 0 && (
           <div className="transaction-list__pending-transactions">
             <div className="transaction-list__header">
               {`${t('queue')} (${pendingTransactions.length})`}
             </div>
-            {pendingTransactions.map((transactionGroup, index) => (
-              <TransactionListItem
-                isEarliestNonce={index === 0}
-                transactionGroup={transactionGroup}
-                key={`${transactionGroup.nonce}:${index}`}
-              />
-            ))}
+            {pendingTransactions.map((transactionGroup, index) =>
+              transactionGroup.initialTransaction.transactionType ===
+              TRANSACTION_TYPES.SMART ? (
+                <SmartTransactionListItem
+                  isEarliestNonce={index === 0}
+                  smartTransaction={transactionGroup.initialTransaction}
+                  key={`${transactionGroup.nonce}:${index}`}
+                />
+              ) : (
+                <TransactionListItem
+                  isEarliestNonce={index === 0}
+                  transactionGroup={transactionGroup}
+                  key={`${transactionGroup.nonce}:${index}`}
+                />
+              ),
+            )}
           </div>
         )}
         {loading === 'loading' && (
@@ -204,18 +215,26 @@ export default function TransactionList({
           </div>
         )}
         <div className="transaction-list__completed-transactions">
-          {pendingLength > 0 ? (
+          {pendingTransactions.length > 0 ? (
             <div className="transaction-list__header">{t('history')}</div>
           ) : null}
           {completedTransactions.length > 0 ? (
             completedTransactions
               .slice(0, limit)
-              .map((transactionGroup, index) => (
-                <TransactionListItem
-                  transactionGroup={transactionGroup}
-                  key={`${transactionGroup.nonce}:${limit + index - 10}`}
-                />
-              ))
+              .map((transactionGroup, index) =>
+                transactionGroup.initialTransaction?.transactionType ===
+                'smart' ? (
+                  <SmartTransactionListItem
+                    smartTransaction={transactionGroup.initialTransaction}
+                    key={`${transactionGroup.nonce}:${index}`}
+                  />
+                ) : (
+                  <TransactionListItem
+                    transactionGroup={transactionGroup}
+                    key={`${transactionGroup.nonce}:${limit + index - 10}`}
+                  />
+                ),
+              )
           ) : (
             <div className="transaction-list__empty">
               <div className="transaction-list__empty-text">

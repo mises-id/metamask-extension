@@ -8,12 +8,11 @@ import {
   getProvider,
 } from '../../../selectors';
 import {
-  getIsAssetSendable,
   getIsBalanceInsufficient,
   getSendTo,
   getSendAsset,
+  getAssetError,
 } from '../../../ducks/send';
-
 import * as actions from '../../../store/actions';
 import SendContent from './send-content.component';
 
@@ -21,7 +20,6 @@ function mapStateToProps(state) {
   const ownedAccounts = accountsWithSendEtherInfoSelector(state);
   const to = getSendTo(state);
   return {
-    isAssetSendable: getIsAssetSendable(state),
     isOwnedAccount: Boolean(
       ownedAccounts.find(
         ({ address }) => address.toLowerCase() === to.toLowerCase(),
@@ -37,6 +35,7 @@ function mapStateToProps(state) {
     getIsBalanceInsufficient: getIsBalanceInsufficient(state),
     asset: getSendAsset(state),
     provider: getProvider(state),
+    assetError: getAssetError(state),
   };
 }
 

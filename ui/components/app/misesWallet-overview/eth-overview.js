@@ -10,10 +10,6 @@ import {
   SEND_ROUTE,
   // BUILD_QUOTE_ROUTE,
 } from '../../../helpers/constants/routes';
-import {
-  useMetricEvent,
-  // useNewMetricEvent,
-} from '../../../hooks/useMetricEvent';
 import Tooltip from '../../ui/tooltip';
 import UserPreferencedCurrencyDisplay from '../mises-user-preferenced-currency-display';
 import { PRIMARY, SECONDARY } from '../../../helpers/constants/common';
@@ -35,18 +31,14 @@ import SendIcon from '../../ui/icon/overview-send-icon.component';
 // import { setSwapsFromToken } from '../../../ducks/swaps/swaps';
 import IconButton from '../../ui/icon-button';
 // import { isHardwareKeyring } from '../../../helpers/utils/hardware';
+import { MetaMetricsContext } from '../../../contexts/metametrics';
 import MisesWalletOverview from './wallet-overview';
 
 const MisesEthOverview = ({ className }) => {
   const dispatch = useDispatch();
   const t = useContext(I18nContext);
-  const sendEvent = useMetricEvent({
-    eventOpts: {
-      category: 'Navigation',
-      action: 'Home',
-      name: 'Clicked Send: Eth',
-    },
-  });
+
+  const trackEvent = useContext(MetaMetricsContext);
   // const depositEvent = useMetricEvent({
   //   eventOpts: {
   //     category: 'Navigation',
@@ -170,7 +162,14 @@ const MisesEthOverview = ({ className }) => {
             Icon={SendIcon}
             label={t('send')}
             onClick={() => {
-              sendEvent();
+              trackEvent({
+                event: 'Clicked Send: Eth',
+                category: 'Navigation',
+                properties: {
+                  action: 'Home',
+                  legacy_event: true,
+                },
+              });
               history.push(SEND_ROUTE);
             }}
           />

@@ -34,7 +34,7 @@ const metamaskrc = require('rc')('metamask', {
   INFURA_PROD_PROJECT_ID: process.env.INFURA_PROD_PROJECT_ID,
   ONBOARDING_V2: process.env.ONBOARDING_V2,
   COLLECTIBLES_V1: process.env.COLLECTIBLES_V1,
-  EIP_1559_V2: process.env.EIP_1559_V2,
+  TOKEN_DETECTION_V2: process.env.TOKEN_DETECTION_V2,
   SEGMENT_HOST: process.env.SEGMENT_HOST,
   SEGMENT_WRITE_KEY: process.env.SEGMENT_WRITE_KEY,
   SEGMENT_BETA_WRITE_KEY: process.env.SEGMENT_BETA_WRITE_KEY,
@@ -46,7 +46,7 @@ const metamaskrc = require('rc')('metamask', {
 });
 
 const { streamFlatMap } = require('../stream-flat-map.js');
-const { version } = require('../../package.json');
+const { BuildType } = require('../lib/build-type');
 
 const {
   createTask,
@@ -57,7 +57,6 @@ const {
 const {
   createRemoveFencedCodeTransform,
 } = require('./transforms/remove-fenced-code');
-const { BuildType } = require('./utils');
 
 /**
  * The build environment. This describes the environment this build was produced in.
@@ -117,7 +116,7 @@ function getInfuraProjectId({ buildType, environment, testing }) {
  *
  * @param {object} options - The Segment write key options.
  * @param {BuildType} options.buildType - The current build type.
- * @param {keyof ENVIRONMENT} options.enviroment - The current build environment.
+ * @param {keyof ENVIRONMENT} options.environment - The current build environment.
  * @returns {string} The Segment write key.
  */
 function getSegmentWriteKey({ buildType, environment }) {
@@ -134,6 +133,10 @@ function getSegmentWriteKey({ buildType, environment }) {
   throw new Error(`Invalid build type: '${buildType}'`);
 }
 
+const noopWriteStream = through.obj((_file, _fileEncoding, callback) =>
+  callback(),
+);
+
 module.exports = createScriptTasks;
 
 function createScriptTasks({
@@ -143,6 +146,8 @@ function createScriptTasks({
   isLavaMoat,
   livereload,
   shouldLintFenceFiles,
+  policyOnly,
+  version,
 }) {
   // internal tasks
   const core = {
@@ -185,8 +190,10 @@ function createScriptTasks({
           return `./app/scripts/${label}.js`;
         }),
         ignoredFiles,
+        policyOnly,
         shouldLintFenceFiles,
         testing,
+        version,
       }),
     );
 
@@ -200,18 +207,18 @@ function createScriptTasks({
     // this can run whenever
     const disableConsoleSubtask = createTask(
       `${taskPrefix}:disable-console`,
-      createTaskForBundleDisableConsole({ devMode }),
+      createTaskForBundleDisableConsole({ devMode, testing }),
     );
 
     // this can run whenever
     const installSentrySubtask = createTask(
       `${taskPrefix}:sentry`,
-      createTaskForBundleSentry({ devMode }),
+      createTaskForBundleSentry({ devMode, testing }),
     );
 
     const phishingDetectSubtask = createTask(
       `${taskPrefix}:phishing-detect`,
-      createTaskForBundlePhishingDetect({ devMode }),
+      createTaskForBundlePhishingDetect({ devMode, testing }),
     );
 
     // task for initiating browser livereload
@@ -241,6 +248,7 @@ function createScriptTasks({
       runInChildProcess(subtask, {
         buildType,
         isLavaMoat,
+        policyOnly,
         shouldLintFenceFiles,
       }),
     );
@@ -248,7 +256,7 @@ function createScriptTasks({
     return composeParallel(initiateLiveReload, ...allSubtasks);
   }
 
-  function createTaskForBundleDisableConsole({ devMode }) {
+  function createTaskForBundleDisableConsole({ devMode, testing }) {
     const label = 'disable-console';
     return createNormalBundle({
       browserPlatforms,
@@ -258,11 +266,14 @@ function createScriptTasks({
       entryFilepath: `./app/scripts/${label}.js`,
       ignoredFiles,
       label,
+      testing,
+      policyOnly,
       shouldLintFenceFiles,
+      version,
     });
   }
 
-  function createTaskForBundleSentry({ devMode }) {
+  function createTaskForBundleSentry({ devMode, testing }) {
     const label = 'sentry-install';
     return createNormalBundle({
       browserPlatforms,
@@ -272,11 +283,14 @@ function createScriptTasks({
       entryFilepath: `./app/scripts/${label}.js`,
       ignoredFiles,
       label,
+      testing,
+      policyOnly,
       shouldLintFenceFiles,
+      version,
     });
   }
 
-  function createTaskForBundlePhishingDetect({ devMode }) {
+  function createTaskForBundlePhishingDetect({ devMode, testing }) {
     const label = 'phishing-detect';
     return createNormalBundle({
       buildType,
@@ -286,7 +300,10 @@ function createScriptTasks({
       entryFilepath: `./app/scripts/${label}.js`,
       ignoredFiles,
       label,
+      testing,
+      policyOnly,
       shouldLintFenceFiles,
+      version,
     });
   }
 
@@ -303,8 +320,10 @@ function createScriptTasks({
         entryFilepath: `./app/scripts/${inpage}.js`,
         label: inpage,
         ignoredFiles,
+        policyOnly,
         shouldLintFenceFiles,
         testing,
+        version,
       }),
       createNormalBundle({
         buildType,
@@ -314,8 +333,10 @@ function createScriptTasks({
         entryFilepath: `./app/scripts/${contentscript}.js`,
         label: contentscript,
         ignoredFiles,
+        policyOnly,
         shouldLintFenceFiles,
         testing,
+        version,
       }),
     );
   }
@@ -327,8 +348,10 @@ function createFactoredBuild({
   devMode,
   entryFiles,
   ignoredFiles,
+  policyOnly,
   shouldLintFenceFiles,
   testing,
+  version,
 }) {
   return async function () {
     // create bundler setup and apply defaults
@@ -340,15 +363,22 @@ function createFactoredBuild({
     const reloadOnChange = Boolean(devMode);
     const minify = Boolean(devMode) === false;
 
-    const envVars = getEnvironmentVariables({ buildType, devMode, testing });
+    const envVars = getEnvironmentVariables({
+      buildType,
+      devMode,
+      testing,
+      version,
+    });
     setupBundlerDefaults(buildConfiguration, {
       buildType,
       devMode,
       envVars,
       ignoredFiles,
+      policyOnly,
       minify,
       reloadOnChange,
       shouldLintFenceFiles,
+      testing,
     });
 
     // set bundle entries
@@ -417,17 +447,24 @@ function createFactoredBuild({
       // setup bundle destination
       browserPlatforms.forEach((platform) => {
         const dest = `./dist/${platform}/`;
-        pipeline.get('dest').push(gulp.dest(dest));
+        const destination = policyOnly ? noopWriteStream : gulp.dest(dest);
+        pipeline.get('dest').push(destination);
       });
     });
 
     // wait for bundle completion for postprocessing
     events.on('bundleDone', () => {
+      // Skip HTML generation if nothing is to be written to disk
+      if (policyOnly) {
+        return;
+      }
       const commonSet = sizeGroupMap.get('common');
       // create entry points for each file
       for (const [groupLabel, groupSet] of sizeGroupMap.entries()) {
         // skip "common" group, they are added to all other groups
-        if (groupSet === commonSet) continue;
+        if (groupSet === commonSet) {
+          continue;
+        }
 
         switch (groupLabel) {
           case 'ui': {
@@ -483,7 +520,7 @@ function createFactoredBuild({
       }
     });
 
-    await bundleIt(buildConfiguration);
+    await bundleIt(buildConfiguration, { reloadOnChange });
   };
 }
 
@@ -496,9 +533,11 @@ function createNormalBundle({
   extraEntries = [],
   ignoredFiles,
   label,
+  policyOnly,
   modulesToExpose,
   shouldLintFenceFiles,
   testing,
+  version,
 }) {
   return async function () {
     // create bundler setup and apply defaults
@@ -510,15 +549,22 @@ function createNormalBundle({
     const reloadOnChange = Boolean(devMode);
     const minify = Boolean(devMode) === false;
 
-    const envVars = getEnvironmentVariables({ buildType, devMode, testing });
+    const envVars = getEnvironmentVariables({
+      buildType,
+      devMode,
+      testing,
+      version,
+    });
     setupBundlerDefaults(buildConfiguration, {
       buildType,
       devMode,
       envVars,
       ignoredFiles,
+      policyOnly,
       minify,
       reloadOnChange,
       shouldLintFenceFiles,
+      testing,
     });
 
     // set bundle entries
@@ -540,11 +586,12 @@ function createNormalBundle({
       // setup bundle destination
       browserPlatforms.forEach((platform) => {
         const dest = `./dist/${platform}/`;
-        pipeline.get('dest').push(gulp.dest(dest));
+        const destination = policyOnly ? noopWriteStream : gulp.dest(dest);
+        pipeline.get('dest').push(destination);
       });
     });
 
-    await bundleIt(buildConfiguration);
+    await bundleIt(buildConfiguration, { reloadOnChange });
   };
 }
 
@@ -570,12 +617,15 @@ function setupBundlerDefaults(
     devMode,
     envVars,
     ignoredFiles,
+    policyOnly,
     minify,
     reloadOnChange,
     shouldLintFenceFiles,
+    testing,
   },
 ) {
   const { bundlerOpts } = buildConfiguration;
+  const extensions = ['.js', '.ts', '.tsx'];
 
   Object.assign(bundlerOpts, {
     // Source transforms
@@ -583,10 +633,16 @@ function setupBundlerDefaults(
       // Remove code that should be excluded from builds of the current type
       createRemoveFencedCodeTransform(buildType, shouldLintFenceFiles),
       // Transpile top-level code
-      babelify,
+      [
+        babelify,
+        // Run TypeScript files through Babel
+        { extensions },
+      ],
       // Inline `fs.readFileSync` files
       brfs,
     ],
+    // Look for TypeScript files when walking the dependency tree
+    extensions,
     // Use entryFilepath for moduleIds, easier to determine origin file
     fullPaths: devMode,
     // For sourcemaps
@@ -594,8 +650,9 @@ function setupBundlerDefaults(
   });
 
   // Ensure react-devtools are not included in non-dev builds
-  if (!devMode) {
+  if (!devMode || testing) {
     bundlerOpts.manualIgnore.push('react-devtools');
+    bundlerOpts.manualIgnore.push('remote-redux-devtools');
   }
 
   // Inject environment variables via node-style `process.env`
@@ -613,12 +670,14 @@ function setupBundlerDefaults(
     setupReloadOnChange(buildConfiguration);
   }
 
-  if (minify) {
-    setupMinification(buildConfiguration);
-  }
+  if (!policyOnly) {
+    if (minify) {
+      setupMinification(buildConfiguration);
+    }
 
-  // Setup source maps
-  setupSourcemaps(buildConfiguration, { devMode });
+    // Setup source maps
+    setupSourcemaps(buildConfiguration, { devMode });
+  }
 }
 
 function setupReloadOnChange({ bundlerOpts, events }) {
@@ -687,7 +746,7 @@ function setupSourcemaps(buildConfiguration, { devMode }) {
   });
 }
 
-async function bundleIt(buildConfiguration) {
+async function bundleIt(buildConfiguration, { reloadOnChange }) {
   const { label, bundlerOpts, events } = buildConfiguration;
   const bundler = browserify(bundlerOpts);
 
@@ -726,6 +785,13 @@ async function bundleIt(buildConfiguration) {
       [],
     ]);
     const bundleStream = bundler.bundle();
+    if (!reloadOnChange) {
+      bundleStream.on('error', (error) => {
+        console.error('Bundling failed! See details below.');
+        console.error(error.stack || error);
+        process.exit(1);
+      });
+    }
     // trigger build pipeline instrumentations
     events.emit('configurePipeline', { pipeline, bundleStream });
     // start bundle, send into pipeline
@@ -740,7 +806,7 @@ async function bundleIt(buildConfiguration) {
   }
 }
 
-function getEnvironmentVariables({ buildType, devMode, testing }) {
+function getEnvironmentVariables({ buildType, devMode, testing, version }) {
   const environment = getEnvironment({ devMode, testing });
   if (environment === ENVIRONMENT.PRODUCTION && !process.env.SENTRY_DSN) {
     throw new Error('Missing SENTRY_DSN environment variable');
@@ -751,7 +817,7 @@ function getEnvironmentVariables({ buildType, devMode, testing }) {
     METAMASK_VERSION: version,
     METAMASK_BUILD_TYPE: buildType,
     NODE_ENV: devMode ? ENVIRONMENT.DEVELOPMENT : ENVIRONMENT.PRODUCTION,
-    IN_TEST: testing ? 'true' : false,
+    IN_TEST: testing,
     PUBNUB_SUB_KEY: process.env.PUBNUB_SUB_KEY || '',
     PUBNUB_PUB_KEY: process.env.PUBNUB_PUB_KEY || '',
     CONF: devMode ? metamaskrc : {},
@@ -763,7 +829,7 @@ function getEnvironmentVariables({ buildType, devMode, testing }) {
     SWAPS_USE_DEV_APIS: process.env.SWAPS_USE_DEV_APIS === '1',
     ONBOARDING_V2: metamaskrc.ONBOARDING_V2 === '1',
     COLLECTIBLES_V1: metamaskrc.COLLECTIBLES_V1 === '1',
-    EIP_1559_V2: metamaskrc.EIP_1559_V2 === '1',
+    TOKEN_DETECTION_V2: metamaskrc.TOKEN_DETECTION_V2 === '1',
   };
 }
 

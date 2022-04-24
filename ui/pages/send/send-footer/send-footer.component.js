@@ -35,7 +35,7 @@ export default class SendFooter extends Component {
 
   static contextTypes = {
     t: PropTypes.func,
-    metricsEvent: PropTypes.func,
+    trackEvent: PropTypes.func,
   };
 
   onCancel() {
@@ -48,7 +48,9 @@ export default class SendFooter extends Component {
       sendStage,
     } = this.props;
 
-    if (draftTransactionID) cancelTx({ id: draftTransactionID });
+    if (draftTransactionID) {
+      cancelTx({ id: draftTransactionID });
+    }
     resetSendState();
 
     const nextRoute =
@@ -104,7 +106,7 @@ export default class SendFooter extends Component {
 
   componentDidUpdate(prevProps) {
     const { sendErrors } = this.props;
-    const { metricsEvent } = this.context;
+    const { trackEvent } = this.context;
     if (
       Object.keys(sendErrors).length > 0 &&
       isEqual(sendErrors, prevProps.sendErrors) === false
@@ -112,13 +114,12 @@ export default class SendFooter extends Component {
       const errorField = Object.keys(sendErrors).find((key) => sendErrors[key]);
       const errorMessage = sendErrors[errorField];
 
-      metricsEvent({
-        eventOpts: {
-          category: 'Transactions',
+      trackEvent({
+        category: 'Transactions',
+        event: 'Error',
+        properties: {
           action: 'Edit Screen',
-          name: 'Error',
-        },
-        customVariables: {
+          legacy_event: true,
           errorField,
           errorMessage,
         },

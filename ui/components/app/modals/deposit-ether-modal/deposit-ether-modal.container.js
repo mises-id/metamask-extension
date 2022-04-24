@@ -10,6 +10,8 @@ import {
   getIsMainnet,
   getCurrentChainId,
   getSelectedAddress,
+  getIsBuyableTransakChain,
+  getIsBuyableMoonPayChain,
 } from '../../../../selectors/selectors';
 import DepositEtherModal from './deposit-ether-modal.component';
 
@@ -19,6 +21,8 @@ function mapStateToProps(state) {
     isTestnet: getIsTestnet(state),
     isMainnet: getIsMainnet(state),
     address: getSelectedAddress(state),
+    isBuyableTransakChain: getIsBuyableTransakChain(state),
+    isBuyableMoonPayChain: getIsBuyableMoonPayChain(state),
   };
 }
 
@@ -27,8 +31,11 @@ function mapDispatchToProps(dispatch) {
     toWyre: (address) => {
       dispatch(buyEth({ service: 'wyre', address }));
     },
-    toTransak: (address) => {
-      dispatch(buyEth({ service: 'transak', address }));
+    toTransak: (address, chainId) => {
+      dispatch(buyEth({ service: 'transak', address, chainId }));
+    },
+    toMoonPay: (address, chainId) => {
+      dispatch(buyEth({ service: 'moonpay', address, chainId }));
     },
     hideModal: () => {
       dispatch(hideModal());

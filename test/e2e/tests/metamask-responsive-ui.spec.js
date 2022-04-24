@@ -1,5 +1,5 @@
 const { strict: assert } = require('assert');
-const { withFixtures, tinyDelayMs } = require('../helpers');
+const { convertToHexValue, withFixtures, tinyDelayMs } = require('../helpers');
 const enLocaleMessages = require('../../../app/_locales/en/messages.json');
 
 describe('Metamask Responsive UI', function () {
@@ -164,29 +164,24 @@ describe('Metamask Responsive UI', function () {
 
         // Import Secret Recovery Phrase
         const restoreSeedLink = await driver.findClickableElement(
-          '.unlock-page__link--import',
+          '.unlock-page__link',
         );
-        assert.equal(
-          await restoreSeedLink.getText(),
-          'import using Secret Recovery Phrase',
-        );
+        assert.equal(await restoreSeedLink.getText(), 'Forgot password?');
         await restoreSeedLink.click();
 
-        await driver.clickElement('.import-account__checkbox-container');
-
-        await driver.fill('.import-account__secret-phrase', testSeedPhrase);
+        await driver.pasteIntoField(
+          '[data-testid="import-srp__srp-word-0"]',
+          testSeedPhrase,
+        );
 
         await driver.fill('#password', 'correct horse battery staple');
         await driver.fill('#confirm-password', 'correct horse battery staple');
-        await driver.clickElement({
-          text: enLocaleMessages.restore.message,
-          tag: 'button',
-        });
+        await driver.press('#confirm-password', driver.Key.ENTER);
 
         // balance renders
         await driver.waitForSelector({
           css: '[data-testid="eth-overview__primary-currency"]',
-          text: '100 ETH',
+          text: '1000 ETH',
         });
       },
     );
@@ -199,7 +194,7 @@ describe('Metamask Responsive UI', function () {
         {
           secretKey:
             '0x7C9529A67102755B7E6102D6D950AC5D5863C98713805CEC576B945B15B71EAC',
-          balance: 25000000000000000000,
+          balance: convertToHexValue(25000000000000000000),
         },
       ],
     };
@@ -226,7 +221,7 @@ describe('Metamask Responsive UI', function () {
 
         const inputAmount = await driver.fill('.unit-input__input', '1');
 
-        const inputValue = await inputAmount.getAttribute('value');
+        const inputValue = await inputAmount.getProperty('value');
         assert.equal(inputValue, '1');
 
         // confirming transcation

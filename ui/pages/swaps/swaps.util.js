@@ -3,13 +3,13 @@ import BigNumber from 'bignumber.js';
 import abi from 'human-standard-token-abi';
 import {
   SWAPS_CHAINID_DEFAULT_TOKEN_MAP,
-  METASWAP_CHAINID_API_HOST_MAP,
   ALLOWED_CONTRACT_ADDRESSES,
   SWAPS_WRAPPED_TOKENS_ADDRESSES,
   ETHEREUM,
   POLYGON,
   BSC,
   RINKEBY,
+  AVALANCHE,
   SWAPS_API_V2_BASE_URL,
   SWAPS_DEV_API_V2_BASE_URL,
   GAS_API_BASE_URL,
@@ -27,6 +27,8 @@ import {
   POLYGON_CHAIN_ID,
   LOCALHOST_CHAIN_ID,
   RINKEBY_CHAIN_ID,
+  ETH_SYMBOL,
+  AVALANCHE_CHAIN_ID,
 } from '../../../shared/constants/network';
 import { SECOND } from '../../../shared/constants/time';
 import {
@@ -53,11 +55,12 @@ const TOKEN_TRANSFER_LOG_TOPIC_HASH =
   '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
 const CACHE_REFRESH_FIVE_MINUTES = 300000;
+const USD_CURRENCY_CODE = 'usd';
 
 const clientIdHeader = { 'X-Client-Id': SWAPS_CLIENT_ID };
 
 /**
- * @param {string} type Type of an API call, e.g. "tokens"
+ * @param {string} type - Type of an API call, e.g. "tokens"
  * @param {string} chainId
  * @returns string
  */
@@ -79,14 +82,12 @@ const getBaseUrlForNewSwapsApi = (type, chainId) => {
   return `${v2ApiBaseUrl}/networks/${chainIdDecimal}`;
 };
 
-export const getBaseApi = function (
-  type,
-  chainId = MAINNET_CHAIN_ID,
-  useNewSwapsApi = false,
-) {
-  const baseUrl = useNewSwapsApi
-    ? getBaseUrlForNewSwapsApi(type, chainId)
-    : METASWAP_CHAINID_API_HOST_MAP[chainId];
+const TEST_CHAIN_IDS = [RINKEBY_CHAIN_ID, LOCALHOST_CHAIN_ID];
+
+export const getBaseApi = function (type, chainId = MAINNET_CHAIN_ID) {
+  // eslint-disable-next-line no-param-reassign
+  chainId = TEST_CHAIN_IDS.includes(chainId) ? MAINNET_CHAIN_ID : chainId;
+  const baseUrl = getBaseUrlForNewSwapsApi(type, chainId);
   const chainIdDecimal = chainId && parseInt(chainId, 16);
   if (!baseUrl) {
     throw new Error(`Swaps API calls are disabled for chainId: ${chainId}`);
@@ -300,7 +301,7 @@ export async function fetchTradesInfo(
     fromAddress,
     exchangeList,
   },
-  { chainId, useNewSwapsApi },
+  { chainId },
 ) {
   const urlParams = {
     destinationToken,
@@ -319,11 +320,7 @@ export async function fetchTradesInfo(
   }
 
   const queryString = new URLSearchParams(urlParams).toString();
-  const tradeURL = `${getBaseApi(
-    'trade',
-    chainId,
-    useNewSwapsApi,
-  )}${queryString}`;
+  const tradeURL = `${getBaseApi('trade', chainId)}${queryString}`;
   const tradesResponse = await fetchWithCache(
     tradeURL,
     { method: 'GET', headers: clientIdHeader },
@@ -367,8 +364,8 @@ export async function fetchTradesInfo(
   return newQuotes;
 }
 
-export async function fetchToken(contractAddress, chainId, useNewSwapsApi) {
-  const tokenUrl = getBaseApi('token', chainId, useNewSwapsApi);
+export async function fetchToken(contractAddress, chainId) {
+  const tokenUrl = getBaseApi('token', chainId);
   const token = await fetchWithCache(
     `${tokenUrl}?address=${contractAddress}`,
     { method: 'GET', headers: clientIdHeader },
@@ -377,8 +374,8 @@ export async function fetchToken(contractAddress, chainId, useNewSwapsApi) {
   return token;
 }
 
-export async function fetchTokens(chainId, useNewSwapsApi) {
-  const tokensUrl = getBaseApi('tokens', chainId, useNewSwapsApi);
+export async function fetchTokens(chainId) {
+  const tokensUrl = getBaseApi('tokens', chainId);
   const tokens = await fetchWithCache(
     tokensUrl,
     { method: 'GET', headers: clientIdHeader },
@@ -399,12 +396,8 @@ export async function fetchTokens(chainId, useNewSwapsApi) {
   return filteredTokens;
 }
 
-export async function fetchAggregatorMetadata(chainId, useNewSwapsApi) {
-  const aggregatorMetadataUrl = getBaseApi(
-    'aggregatorMetadata',
-    chainId,
-    useNewSwapsApi,
-  );
+export async function fetchAggregatorMetadata(chainId) {
+  const aggregatorMetadataUrl = getBaseApi('aggregatorMetadata', chainId);
   const aggregators = await fetchWithCache(
     aggregatorMetadataUrl,
     { method: 'GET', headers: clientIdHeader },
@@ -425,8 +418,8 @@ export async function fetchAggregatorMetadata(chainId, useNewSwapsApi) {
   return filteredAggregators;
 }
 
-export async function fetchTopAssets(chainId, useNewSwapsApi) {
-  const topAssetsUrl = getBaseApi('topAssets', chainId, useNewSwapsApi);
+export async function fetchTopAssets(chainId) {
+  const topAssetsUrl = getBaseApi('topAssets', chainId);
   const response = await fetchWithCache(
     topAssetsUrl,
     { method: 'GET', headers: clientIdHeader },
@@ -473,8 +466,8 @@ export async function fetchTokenBalance(address, userAddress) {
   return usersToken;
 }
 
-export async function fetchSwapsGasPrices(chainId, useNewSwapsApi) {
-  const gasPricesUrl = getBaseApi('gasPrices', chainId, useNewSwapsApi);
+export async function fetchSwapsGasPrices(chainId) {
+  const gasPricesUrl = getBaseApi('gasPrices', chainId);
   const response = await fetchWithCache(
     gasPricesUrl,
     { method: 'GET', headers: clientIdHeader },
@@ -502,6 +495,47 @@ export async function fetchSwapsGasPrices(chainId, useNewSwapsApi) {
     fast,
   };
 }
+
+export const getFeeForSmartTransaction = ({
+  chainId,
+  currentCurrency,
+  conversionRate,
+  nativeCurrencySymbol,
+  feeInWeiDec,
+}) => {
+  const feeInWeiHex = decimalToHex(feeInWeiDec);
+  const ethFee = getValueFromWeiHex({
+    value: feeInWeiHex,
+    toDenomination: ETH_SYMBOL,
+    numberOfDecimals: 5,
+  });
+  const rawNetworkFees = getValueFromWeiHex({
+    value: feeInWeiHex,
+    toCurrency: currentCurrency,
+    conversionRate,
+    numberOfDecimals: 2,
+  });
+  let feeInUsd;
+  if (currentCurrency === USD_CURRENCY_CODE) {
+    feeInUsd = rawNetworkFees;
+  } else {
+    feeInUsd = getValueFromWeiHex({
+      value: feeInWeiHex,
+      toCurrency: USD_CURRENCY_CODE,
+      conversionRate,
+      numberOfDecimals: 2,
+    });
+  }
+  const formattedNetworkFee = formatCurrency(rawNetworkFees, currentCurrency);
+  const chainCurrencySymbolToUse =
+    nativeCurrencySymbol || SWAPS_CHAINID_DEFAULT_TOKEN_MAP[chainId].symbol;
+  return {
+    feeInUsd,
+    feeInFiat: formattedNetworkFee,
+    feeInEth: `${ethFee} ${chainCurrencySymbolToUse}`,
+    rawEthFee: ethFee,
+  };
+};
 
 export function getRenderableNetworkFeesForQuote({
   tradeGas,
@@ -544,11 +578,24 @@ export function getRenderableNetworkFeesForQuote({
   });
   const formattedNetworkFee = formatCurrency(rawNetworkFees, currentCurrency);
 
+  let feeInUsd;
+  if (currentCurrency === USD_CURRENCY_CODE) {
+    feeInUsd = rawNetworkFees;
+  } else {
+    feeInUsd = getValueFromWeiHex({
+      value: totalWeiCost,
+      toCurrency: USD_CURRENCY_CODE,
+      conversionRate,
+      numberOfDecimals: 2,
+    });
+  }
+
   const chainCurrencySymbolToUse =
     nativeCurrencySymbol || SWAPS_CHAINID_DEFAULT_TOKEN_MAP[chainId].symbol;
 
   return {
     rawNetworkFees,
+    feeInUsd,
     rawEthFee: ethFee,
     feeInFiat: formattedNetworkFee,
     feeInEth: `${ethFee} ${chainCurrencySymbolToUse}`,
@@ -564,6 +611,8 @@ export function quotesToRenderableData(
   approveGas,
   tokenConversionRates,
   chainId,
+  smartTransactionEstimatedGas,
+  nativeCurrencySymbol,
 ) {
   return Object.values(quotes).map((quote) => {
     const {
@@ -588,11 +637,16 @@ export function quotesToRenderableData(
       destinationTokenInfo.decimals,
     ).toPrecision(8);
 
-    const {
+    let feeInFiat = null;
+    let feeInEth = null;
+    let rawNetworkFees = null;
+    let rawEthFee = null;
+
+    ({
       feeInFiat,
+      feeInEth,
       rawNetworkFees,
       rawEthFee,
-      feeInEth,
     } = getRenderableNetworkFeesForQuote({
       tradeGas: gasEstimateWithRefund || decimalToHex(averageGas || 800000),
       approveGas,
@@ -603,7 +657,17 @@ export function quotesToRenderableData(
       sourceSymbol: sourceTokenInfo.symbol,
       sourceAmount,
       chainId,
-    });
+    }));
+
+    if (smartTransactionEstimatedGas) {
+      ({ feeInFiat, feeInEth } = getFeeForSmartTransaction({
+        chainId,
+        currentCurrency,
+        conversionRate,
+        nativeCurrencySymbol,
+        estimatedFeeInWeiDec: smartTransactionEstimatedGas.feeEstimate,
+      }));
+    }
 
     const slippageMultiplier = new BigNumber(100 - slippage).div(100);
     const minimumAmountReceived = new BigNumber(destinationValue)
@@ -774,7 +838,6 @@ export function formatSwapsValueForDisplay(destinationAmount) {
  * Checks whether a contract address is valid before swapping tokens.
  *
  * @param {string} contractAddress - E.g. "0x881d40237659c251811cec9c364ef91dc08d300c" for mainnet
- * @param {object} swapMetaData - We check the following 2 fields, e.g. { token_from: "ETH", token_to: "WETH" }
  * @param {string} chainId - The hex encoded chain ID to check
  * @returns {boolean} Whether a contract address is valid or not
  */
@@ -807,6 +870,8 @@ export const getNetworkNameByChainId = (chainId) => {
       return POLYGON;
     case RINKEBY_CHAIN_ID:
       return RINKEBY;
+    case AVALANCHE_CHAIN_ID:
+      return AVALANCHE;
     default:
       return '';
   }
@@ -814,9 +879,10 @@ export const getNetworkNameByChainId = (chainId) => {
 
 /**
  * It returns info about if Swaps are enabled and if we should use our new APIs for it.
+ *
  * @param {object} swapsFeatureFlags
  * @param {string} chainId
- * @returns object with 2 items: "swapsFeatureIsLive" and "useNewSwapsApi"
+ * @returns object with 2 items: "swapsFeatureIsLive"
  */
 export const getSwapsLivenessForNetwork = (swapsFeatureFlags = {}, chainId) => {
   const networkName = getNetworkNameByChainId(chainId);
@@ -824,14 +890,12 @@ export const getSwapsLivenessForNetwork = (swapsFeatureFlags = {}, chainId) => {
   if ([LOCALHOST_CHAIN_ID, RINKEBY_CHAIN_ID].includes(chainId)) {
     return {
       swapsFeatureIsLive: true,
-      useNewSwapsApi: false,
     };
   }
   // If a network name is not found in the list of feature flags, disable Swaps.
   if (!swapsFeatureFlags[networkName]) {
     return {
       swapsFeatureIsLive: false,
-      useNewSwapsApi: false,
     };
   }
   const isNetworkEnabledForNewApi =
@@ -839,12 +903,10 @@ export const getSwapsLivenessForNetwork = (swapsFeatureFlags = {}, chainId) => {
   if (isNetworkEnabledForNewApi) {
     return {
       swapsFeatureIsLive: true,
-      useNewSwapsApi: true,
     };
   }
   return {
     swapsFeatureIsLive: swapsFeatureFlags[networkName].fallback_to_v1,
-    useNewSwapsApi: false,
   };
 };
 
@@ -853,6 +915,40 @@ export const getSwapsLivenessForNetwork = (swapsFeatureFlags = {}, chainId) => {
  * @returns number
  */
 export const countDecimals = (value) => {
-  if (!value || Math.floor(value) === value) return 0;
+  if (!value || Math.floor(value) === value) {
+    return 0;
+  }
   return value.toString().split('.')[1]?.length || 0;
+};
+
+export const showRemainingTimeInMinAndSec = (remainingTimeInSec) => {
+  if (!Number.isInteger(remainingTimeInSec)) {
+    return '0:00';
+  }
+  const minutes = Math.floor(remainingTimeInSec / 60);
+  const seconds = remainingTimeInSec % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
+export const stxErrorTypes = {
+  UNAVAILABLE: 'unavailable',
+  NOT_ENOUGH_FUNDS: 'not_enough_funds',
+  REGULAR_TX_PENDING: 'regular_tx_pending',
+};
+
+export const getTranslatedStxErrorMessage = (errorType, t) => {
+  switch (errorType) {
+    case stxErrorTypes.UNAVAILABLE:
+    case stxErrorTypes.REGULAR_TX_PENDING:
+      return t('stxErrorUnavailable');
+    case stxErrorTypes.NOT_ENOUGH_FUNDS:
+      return t('stxErrorNotEnoughFunds');
+    default:
+      return t('stxErrorUnavailable');
+  }
+};
+
+export const parseSmartTransactionsError = (errorMessage) => {
+  const errorJson = errorMessage.slice(12);
+  return JSON.parse(errorJson.trim());
 };

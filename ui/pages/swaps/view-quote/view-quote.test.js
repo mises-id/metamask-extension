@@ -63,11 +63,8 @@ describe('ViewQuote', () => {
     expect(
       getByTestId('main-quote-summary__exchange-rate-container'),
     ).toMatchSnapshot();
-    expect(
-      getByTestId('fee-card__savings-and-quotes-header'),
-    ).toMatchSnapshot();
-    expect(getByTestId('fee-card__row-header')).toMatchSnapshot();
-    expect(getByText('Back')).toBeInTheDocument();
+    expect(getByText('Estimated gas fee')).toBeInTheDocument();
+    expect(getByText('Max fee')).toBeInTheDocument();
     expect(getByText('Swap')).toBeInTheDocument();
   });
 
@@ -89,13 +86,9 @@ describe('ViewQuote', () => {
     expect(
       getByTestId('main-quote-summary__exchange-rate-container'),
     ).toMatchSnapshot();
-    expect(
-      getByTestId('fee-card__savings-and-quotes-header'),
-    ).toMatchSnapshot();
     expect(getByText('Estimated gas fee')).toBeInTheDocument();
-    expect(getByText('0.01044 ETH')).toBeInTheDocument();
+    expect(getByText('0.00544 ETH')).toBeInTheDocument();
     expect(getByText('Max fee')).toBeInTheDocument();
-    expect(getByText('Back')).toBeInTheDocument();
     expect(getByText('Swap')).toBeInTheDocument();
   });
 });

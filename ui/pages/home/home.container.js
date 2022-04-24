@@ -18,9 +18,11 @@ import {
   getNewNetworkAdded,
   hasUnsignedQRHardwareTransaction,
   hasUnsignedQRHardwareMessage,
+  getNewCollectibleAddedMessage,
 } from '../../selectors';
 
 import {
+  closeNotificationPopup,
   restoreFromThreeBox,
   turnThreeBoxSyncingOn,
   getThreeBoxLastUpdated,
@@ -34,6 +36,10 @@ import {
   setNewNetworkAdded,
   closePopUp,
   getPopupId,
+  setNewCollectibleAddedMessage,
+  ///: BEGIN:ONLY_INCLUDE_IN(flask)
+  removeSnapError,
+  ///: END:ONLY_INCLUDE_IN
 } from '../../store/actions';
 import { setThreeBoxLastUpdated, hideWhatsNewPopup } from '../../ducks/app/app';
 import { getWeb3ShimUsageAlertEnabledness } from '../../ducks/metamask/metamask';
@@ -62,6 +68,8 @@ const mapStateToProps = (state) => {
     defaultHomeActiveTabName,
     swapsState,
     dismissSeedBackUpReminder,
+    firstTimeFlowType,
+    completedOnboarding,
   } = metamask;
   const accountBalance = getCurrentEthBalance(state);
   const { forgottenPassword, threeBoxLastUpdated } = appState;
@@ -75,9 +83,7 @@ const mapStateToProps = (state) => {
 
   const firstPermissionsRequest = getFirstPermissionRequest(state);
   const firstPermissionsRequestId =
-    firstPermissionsRequest && firstPermissionsRequest.metadata
-      ? firstPermissionsRequest.metadata.id
-      : null;
+    firstPermissionsRequest?.metadata.id || null;
 
   const originOfCurrentTab = getOriginOfCurrentTab(state);
   const shouldShowWeb3ShimUsageNotification =
@@ -110,6 +116,8 @@ const mapStateToProps = (state) => {
     totalUnapprovedCount,
     connectedStatusPopoverHasBeenShown,
     defaultHomeActiveTabName,
+    firstTimeFlowType,
+    completedOnboarding,
     haveSwapsQuotes: Boolean(Object.values(swapsState.quotes || {}).length),
     swapsFetchParams: swapsState.fetchParams,
     showAwaitingSwapScreen: swapsState.routeState === 'awaiting',
@@ -119,16 +127,22 @@ const mapStateToProps = (state) => {
     pendingConfirmations,
     infuraBlocked: getInfuraBlocked(state),
     notificationsToShow: getSortedNotificationsToShow(state).length > 0,
+    ///: BEGIN:ONLY_INCLUDE_IN(flask)
+    errorsToShow: metamask.snapErrors,
+    shouldShowErrors: Object.entries(metamask.snapErrors || []).length > 0,
+    ///: END:ONLY_INCLUDE_IN
     showWhatsNewPopup: getShowWhatsNewPopup(state),
     showRecoveryPhraseReminder: getShowRecoveryPhraseReminder(state),
     seedPhraseBackedUp,
     newNetworkAdded: getNewNetworkAdded(state),
     isSigningQRHardwareTransaction,
     provider: state.metamask.provider,
+    newCollectibleAddedMessage: getNewCollectibleAddedMessage(state),
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
+  closeNotificationPopup: () => closeNotificationPopup(),
   turnThreeBoxSyncingOn: () => dispatch(turnThreeBoxSyncingOn()),
   setupThreeBox: () => {
     dispatch(getThreeBoxLastUpdated()).then((lastUpdated) => {
@@ -140,6 +154,9 @@ const mapDispatchToProps = (dispatch) => ({
       }
     });
   },
+  ///: BEGIN:ONLY_INCLUDE_IN(flask)
+  removeSnapError: async (id) => await removeSnapError(id),
+  ///: END:ONLY_INCLUDE_IN
   restoreFromThreeBox: (address) => dispatch(restoreFromThreeBox(address)),
   setShowRestorePromptToFalse: () => dispatch(setShowRestorePromptToFalse()),
   setConnectedStatusPopoverHasBeenShown: () =>
@@ -159,6 +176,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   closePopUp,
   getPopupId,
+  setNewCollectibleAddedMessage: (message) => {
+    dispatch(setNewCollectibleAddedMessage(message));
+  },
 });
 
 export default compose(

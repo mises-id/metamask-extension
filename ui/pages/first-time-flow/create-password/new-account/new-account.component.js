@@ -10,7 +10,7 @@ import MetaFoxLogo from '../../../../components/ui/metafox-logo';
 
 export default class NewAccount extends PureComponent {
   static contextTypes = {
-    metricsEvent: PropTypes.func,
+    trackEvent: PropTypes.func,
     t: PropTypes.func,
   };
 
@@ -101,11 +101,12 @@ export default class NewAccount extends PureComponent {
     try {
       await onSubmit(password);
 
-      this.context.metricsEvent({
-        eventOpts: {
-          category: 'Onboarding',
+      this.context.trackEvent({
+        category: 'Onboarding',
+        event: 'Submit Password',
+        properties: {
           action: 'Create Password',
-          name: 'Submit Password',
+          legacy_event: true,
         },
       });
 
@@ -116,11 +117,12 @@ export default class NewAccount extends PureComponent {
   };
 
   toggleTermsCheck = () => {
-    this.context.metricsEvent({
-      eventOpts: {
-        category: 'Onboarding',
+    this.context.trackEvent({
+      category: 'Onboarding',
+      event: 'Check ToS',
+      properties: {
         action: 'Create Password',
-        name: 'Check ToS',
+        legacy_event: true,
       },
     });
 
@@ -152,11 +154,12 @@ export default class NewAccount extends PureComponent {
             className="first-time-flow__back"
             onClick={(e) => {
               e.preventDefault();
-              this.context.metricsEvent({
-                eventOpts: {
-                  category: 'Onboarding',
+              this.context.trackEvent({
+                category: 'Onboarding',
+                event: 'Go Back from Onboarding Create',
+                properties: {
                   action: 'Create Password',
-                  name: 'Go Back from Onboarding Create',
+                  legacy_event: true,
                 },
               });
               this.props.history.push(INITIALIZE_SELECT_ACTION_ROUTE);

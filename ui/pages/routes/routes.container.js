@@ -5,7 +5,7 @@ import {
   getNetworkIdentifier,
   getPreferences,
   isNetworkLoading,
-  submittedPendingTransactionsSelector,
+  getTheme,
 } from '../../selectors';
 import {
   lockMetamask,
@@ -15,6 +15,7 @@ import {
 } from '../../store/actions';
 import { pageChanged } from '../../ducks/history/history';
 import { prepareToLeaveSwaps } from '../../ducks/swaps/swaps';
+import { getSendStage } from '../../ducks/send';
 import Routes from './routes.component';
 
 function mapStateToProps(state) {
@@ -29,15 +30,16 @@ function mapStateToProps(state) {
     isLoading,
     loadingMessage,
     isUnlocked: state.metamask.isUnlocked,
-    submittedPendingTransactions: submittedPendingTransactionsSelector(state),
     isNetworkLoading: isNetworkLoading(state),
-    provider: state.metamask.provider,
-    frequentRpcListDetail: state.metamask.frequentRpcListDetail || [],
     currentCurrency: state.metamask.currentCurrency,
     isMouseUser: state.appState.isMouseUser,
-    providerId: getNetworkIdentifier(state),
     autoLockTimeLimit,
-    browserEnvironment: state.metamask.browserEnvironment,
+    browserEnvironmentOs: state.metamask.browserEnvironment?.os,
+    browserEnvironmentContainter: state.metamask.browserEnvironment?.browser,
+    providerId: getNetworkIdentifier(state),
+    providerType: state.metamask.provider?.type,
+    theme: getTheme(state),
+    sendStage: getSendStage(state),
   };
 }
 

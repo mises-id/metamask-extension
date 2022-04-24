@@ -15,7 +15,7 @@ import Card from '.';
 const sizeOptions = [undefined, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export default {
-  title: 'UI/Card',
+  title: 'Components/UI/Card',
   id: __filename,
   component: Card,
   parameters: {
@@ -162,8 +162,8 @@ DefaultStory.args = {
   padding: 4,
   border: true,
   borderWidth: 1,
-  borderColor: COLORS.UI2,
+  borderColor: COLORS.BORDER_DEFAULT,
   borderStyle: BORDER_STYLE.SOLID,
-  backgroundColor: COLORS.WHITE,
+  backgroundColor: COLORS.BACKGROUND_DEFAULT,
   display: DISPLAY.BLOCK,
 };

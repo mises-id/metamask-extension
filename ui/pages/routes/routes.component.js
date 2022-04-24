@@ -34,6 +34,7 @@ import UnlockPage from '../unlock-page';
 import Alerts from '../../components/app/alerts';
 import Asset from '../asset';
 import OnboardingAppHeader from '../onboarding-flow/onboarding-app-header/onboarding-app-header';
+import TokenDetailsPage from '../token-details';
 
 import {
   IMPORT_TOKEN_ROUTE,
@@ -59,6 +60,7 @@ import {
   ONBOARDING_ROUTE,
   ADD_COLLECTIBLE_ROUTE,
   MISES_SEND_CONFIRM_ROUTE,
+  TOKEN_DETAILS,
 } from '../../helpers/constants/routes';
 
 import {
@@ -69,6 +71,7 @@ import { getEnvironmentType } from '../../../app/scripts/lib/util';
 import ConfirmationPage from '../confirmation';
 import OnboardingFlow from '../onboarding-flow/onboarding-flow';
 import QRHardwarePopover from '../../components/app/qr-hardware-popover';
+import { SEND_STAGES } from '../../ducks/send';
 
 export default class Routes extends Component {
   static propTypes = {
@@ -79,8 +82,6 @@ export default class Routes extends Component {
     alertMessage: PropTypes.string,
     textDirection: PropTypes.string,
     isNetworkLoading: PropTypes.bool,
-    provider: PropTypes.object,
-    frequentRpcListDetail: PropTypes.array,
     alertOpen: PropTypes.bool,
     isUnlocked: PropTypes.bool,
     setLastActiveTime: PropTypes.func,
@@ -90,10 +91,14 @@ export default class Routes extends Component {
     isMouseUser: PropTypes.bool,
     setMouseUserState: PropTypes.func,
     providerId: PropTypes.string,
+    providerType: PropTypes.string,
     autoLockTimeLimit: PropTypes.number,
     pageChanged: PropTypes.func.isRequired,
     prepareToLeaveSwaps: PropTypes.func,
-    browserEnvironment: PropTypes.object,
+    browserEnvironmentOs: PropTypes.string,
+    browserEnvironmentBrowser: PropTypes.string,
+    theme: PropTypes.string,
+    sendStage: PropTypes.string,
   };
 
   static contextTypes = {
@@ -101,12 +106,20 @@ export default class Routes extends Component {
     metricsEvent: PropTypes.func,
   };
 
+  componentDidUpdate(prevProps) {
+    const { theme } = this.props;
+    if (theme !== prevProps.theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }
+
   UNSAFE_componentWillMount() {
     const {
       currentCurrency,
       pageChanged,
       setCurrentCurrencyToUSD,
       history,
+      theme,
     } = this.props;
     if (!currentCurrency) {
       setCurrentCurrencyToUSD();
@@ -117,6 +130,7 @@ export default class Routes extends Component {
         pageChanged(locationObj.pathname);
       }
     });
+    document.documentElement.setAttribute('data-theme', theme);
   }
 
   renderRoutes() {
@@ -159,6 +173,11 @@ export default class Routes extends Component {
           component={MisesSendScreen}
           exact
         />
+        <Authenticated
+          path={`${TOKEN_DETAILS}/:address/`}
+          component={TokenDetailsPage}
+          exact
+        />
         <Authenticated path={SWAPS_ROUTE} component={Swaps} />
         <Authenticated
           path={IMPORT_TOKEN_ROUTE}
@@ -191,7 +210,8 @@ export default class Routes extends Component {
           path={`${CONNECT_ROUTE}/:id`}
           component={PermissionsConnect}
         />
-        <Authenticated path={`${ASSET_ROUTE}/:asset`} component={Asset} />
+        <Authenticated path={`${ASSET_ROUTE}/:asset/:id`} component={Asset} />
+        <Authenticated path={`${ASSET_ROUTE}/:asset/`} component={Asset} />
         <Authenticated path={DEFAULT_ROUTE} component={Home} />
       </Switch>
     );
@@ -225,6 +245,10 @@ export default class Routes extends Component {
         exact: false,
       }),
     );
+  }
+
+  onEditTransactionPage() {
+    return this.props.sendStage === SEND_STAGES.EDIT;
   }
 
   onSwapsPage() {
@@ -293,6 +317,13 @@ export default class Routes extends Component {
     );
   }
 
+  onAppHeaderClick = async () => {
+    const { prepareToLeaveSwaps } = this.props;
+    if (this.onSwapsPage()) {
+      await prepareToLeaveSwaps();
+    }
+  };
+
   render() {
     const {
       isLoading,
@@ -301,19 +332,15 @@ export default class Routes extends Component {
       textDirection,
       loadingMessage,
       isNetworkLoading,
-      provider,
-      frequentRpcListDetail,
       setMouseUserState,
       isMouseUser,
-      prepareToLeaveSwaps,
-      browserEnvironment,
+      browserEnvironmentOs: os,
+      browserEnvironmentBrowser: browser,
     } = this.props;
     const loadMessage =
       loadingMessage || isNetworkLoading
         ? this.getConnectingLabel(loadingMessage)
         : null;
-
-    const { os, browser } = browserEnvironment;
     return (
       <div
         className={classnames('app', {
@@ -336,13 +363,10 @@ export default class Routes extends Component {
           <AppHeader
             hideNetworkIndicator={this.onInitializationUnlockPage()}
             disableNetworkIndicator={this.onSwapsPage()}
-            onClick={async () => {
-              if (this.onSwapsPage()) {
-                await prepareToLeaveSwaps();
-              }
-            }}
+            onClick={this.onAppHeaderClick}
             disabled={
               this.onConfirmPage() ||
+              this.onEditTransactionPage() ||
               (this.onSwapsPage() && !this.onSwapsBuildQuotePage())
             }
           />
@@ -350,10 +374,7 @@ export default class Routes extends Component {
         {process.env.ONBOARDING_V2 && this.showOnboardingHeader() && (
           <OnboardingAppHeader />
         )}
-        <NetworkDropdown
-          provider={provider}
-          frequentRpcListDetail={frequentRpcListDetail}
-        />
+        <NetworkDropdown />
         <AccountMenu />
         <div className="main-container-wrapper">
           {isLoading ? <Loading loadingMessage={loadMessage} /> : null}
@@ -383,9 +404,9 @@ export default class Routes extends Component {
     if (loadingMessage) {
       return loadingMessage;
     }
-    const { provider, providerId } = this.props;
+    const { providerType, providerId } = this.props;
 
-    switch (provider.type) {
+    switch (providerType) {
       case 'mainnet':
         return this.context.t('connectingToMainnet');
       case 'ropsten':
@@ -398,23 +419,6 @@ export default class Routes extends Component {
         return this.context.t('connectingToGoerli');
       default:
         return this.context.t('connectingTo', [providerId]);
-    }
-  }
-
-  getNetworkName() {
-    switch (this.props.provider.type) {
-      case 'mainnet':
-        return this.context.t('mainnet');
-      case 'ropsten':
-        return this.context.t('ropsten');
-      case 'kovan':
-        return this.context.t('kovan');
-      case 'rinkeby':
-        return this.context.t('rinkeby');
-      case 'goerli':
-        return this.context.t('goerli');
-      default:
-        return this.context.t('unknownNetwork');
     }
   }
 }

@@ -14,12 +14,106 @@ import {
   FLEX_WRAP,
 } from '../../../helpers/constants/design-system';
 
-const ValidSize = PropTypes.oneOf([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+const ValidSize = PropTypes.oneOf([
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  'auto',
+]);
+
+export const ValidBackgroundColors = [
+  COLORS.BACKGROUND_DEFAULT,
+  COLORS.BACKGROUND_ALTERNATIVE,
+  COLORS.OVERLAY_DEFAULT,
+  COLORS.PRIMARY_DEFAULT,
+  COLORS.PRIMARY_ALTERNATIVE,
+  COLORS.PRIMARY_MUTED,
+  COLORS.PRIMARY_DISABLED,
+  COLORS.SECONDARY_DEFAULT,
+  COLORS.SECONDARY_ALTERNATIVE,
+  COLORS.SECONDARY_MUTED,
+  COLORS.SECONDARY_DISABLED,
+  COLORS.ERROR_DEFAULT,
+  COLORS.ERROR_ALTERNATIVE,
+  COLORS.ERROR_MUTED,
+  COLORS.ERROR_DISABLED,
+  COLORS.WARNING_DEFAULT,
+  COLORS.WARNING_ALTERNATIVE,
+  COLORS.WARNING_MUTED,
+  COLORS.WARNING_DISABLED,
+  COLORS.SUCCESS_DEFAULT,
+  COLORS.SUCCESS_ALTERNATIVE,
+  COLORS.SUCCESS_MUTED,
+  COLORS.SUCCESS_DISABLED,
+  COLORS.INFO_DEFAULT,
+  COLORS.INFO_ALTERNATIVE,
+  COLORS.INFO_MUTED,
+  COLORS.INFO_DISABLED,
+  COLORS.MAINNET,
+  COLORS.ROPSTEN,
+  COLORS.KOVAN,
+  COLORS.RINKEBY,
+  COLORS.GOERLI,
+  COLORS.TRANSPARENT,
+  COLORS.LOCALHOST,
+];
+
+export const ValidBorderColors = [
+  COLORS.BORDER_DEFAULT,
+  COLORS.BORDER_MUTED,
+  COLORS.PRIMARY_DEFAULT,
+  COLORS.PRIMARY_ALTERNATIVE,
+  COLORS.PRIMARY_MUTED,
+  COLORS.PRIMARY_DISABLED,
+  COLORS.SECONDARY_DEFAULT,
+  COLORS.SECONDARY_ALTERNATIVE,
+  COLORS.SECONDARY_MUTED,
+  COLORS.SECONDARY_DISABLED,
+  COLORS.ERROR_DEFAULT,
+  COLORS.ERROR_ALTERNATIVE,
+  COLORS.ERROR_MUTED,
+  COLORS.ERROR_DISABLED,
+  COLORS.WARNING_DEFAULT,
+  COLORS.WARNING_ALTERNATIVE,
+  COLORS.WARNING_MUTED,
+  COLORS.WARNING_DISABLED,
+  COLORS.SUCCESS_DEFAULT,
+  COLORS.SUCCESS_ALTERNATIVE,
+  COLORS.SUCCESS_MUTED,
+  COLORS.SUCCESS_DISABLED,
+  COLORS.INFO_DEFAULT,
+  COLORS.INFO_ALTERNATIVE,
+  COLORS.INFO_MUTED,
+  COLORS.INFO_DISABLED,
+  COLORS.MAINNET,
+  COLORS.ROPSTEN,
+  COLORS.KOVAN,
+  COLORS.RINKEBY,
+  COLORS.GOERLI,
+  COLORS.TRANSPARENT,
+  COLORS.LOCALHOST,
+];
+
 const ArrayOfValidSizes = PropTypes.arrayOf(ValidSize);
 export const MultipleSizes = PropTypes.oneOfType([
   ValidSize,
   ArrayOfValidSizes,
 ]);
+
+function isValidValue(type, value) {
+  // for now only margin type can have 'auto'
+  return typeof value === 'number' || (type === 'margin' && value === 'auto');
+}
 
 function generateSizeClasses(baseClass, type, main, top, right, bottom, left) {
   const arr = Array.isArray(main) ? main : [];
@@ -35,12 +129,13 @@ function generateSizeClasses(baseClass, type, main, top, right, bottom, left) {
   const isAllFour = arr.length === 4;
   const hasAtLeastTwo = arr.length >= 2;
   const hasAtLeastThree = arr.length >= 3;
+
   return {
-    [`${baseClass}--${type}-${singleDigit}`]: singleDigit !== undefined,
-    [`${baseClass}--${type}-top-${top}`]: typeof top === 'number',
-    [`${baseClass}--${type}-right-${right}`]: typeof right === 'number',
-    [`${baseClass}--${type}-bottom-${bottom}`]: typeof bottom === 'number',
-    [`${baseClass}--${type}-left-${left}`]: typeof left === 'number',
+    [`${baseClass}--${type}-${singleDigit}`]: isValidValue(type, singleDigit),
+    [`${baseClass}--${type}-top-${top}`]: isValidValue(type, top),
+    [`${baseClass}--${type}-right-${right}`]: isValidValue(type, right),
+    [`${baseClass}--${type}-bottom-${bottom}`]: isValidValue(type, bottom),
+    [`${baseClass}--${type}-left-${left}`]: isValidValue(type, left),
     // As long as an array of length >= 2 has been provided, the first number
     // will always be for the top value.
     [`${baseClass}--${type}-top-${arr?.[0]}`]: hasAtLeastTwo,
@@ -159,7 +254,7 @@ Box.propTypes = {
   paddingBottom: ValidSize,
   paddingRight: ValidSize,
   paddingLeft: ValidSize,
-  borderColor: PropTypes.oneOf(Object.values(COLORS)),
+  borderColor: PropTypes.oneOf(Object.values(ValidBorderColors)),
   borderWidth: PropTypes.number,
   borderRadius: PropTypes.oneOf(Object.values(SIZES)),
   borderStyle: PropTypes.oneOf(Object.values(BORDER_STYLE)),
@@ -169,6 +264,6 @@ Box.propTypes = {
   display: PropTypes.oneOf(Object.values(DISPLAY)),
   width: PropTypes.oneOf(Object.values(BLOCK_SIZES)),
   height: PropTypes.oneOf(Object.values(BLOCK_SIZES)),
-  backgroundColor: PropTypes.oneOf(Object.values(COLORS)),
+  backgroundColor: PropTypes.oneOf(Object.values(ValidBackgroundColors)),
   className: PropTypes.string,
 };

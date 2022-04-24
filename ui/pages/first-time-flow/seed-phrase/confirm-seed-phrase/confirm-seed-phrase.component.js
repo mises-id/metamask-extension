@@ -14,7 +14,7 @@ const EMPTY_SEEDS = Array(12).fill(null);
 
 export default class ConfirmSeedPhrase extends PureComponent {
   static contextTypes = {
-    metricsEvent: PropTypes.func,
+    trackEvent: PropTypes.func,
     t: PropTypes.func,
   };
 
@@ -97,11 +97,12 @@ export default class ConfirmSeedPhrase extends PureComponent {
     }
 
     try {
-      this.context.metricsEvent({
-        eventOpts: {
-          category: 'Onboarding',
+      this.context.trackEvent({
+        category: 'Onboarding',
+        event: 'Verify Complete',
+        properties: {
           action: 'Seed Phrase Setup',
-          name: 'Verify Complete',
+          legacy_event: true,
         },
       });
 

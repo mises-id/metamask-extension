@@ -4,12 +4,11 @@
   $self: &;
 
   border-radius: 100px;
-  border: 1px solid design-system.$ui-1;
+  border: 1px solid var(--color-border-default);
   padding: 8px 16px;
   margin: 0 4px;
   display: flex;
   align-items: center;
-  width: max-content;
 
   &__left-icon,
   &__right-icon {
@@ -19,10 +18,10 @@
 
   @each $variant, $color in design-system.$color-map {
     &--border-color-#{$variant} {
-      border-color: $color;
+      border-color: var($color);
     }
     &--background-color-#{$variant} {
-      background-color: $color;
+      background-color: var($color);
     }
   }
 
@@ -47,6 +46,7 @@
     text-align: center;
     width: 100%;
     font-size: design-system.$font-size-h5;
+    color: var(--color-text-default);
 
     &:focus {
       text-align: left;
@@ -62,5 +62,9 @@
     #{$self}__label {
       margin-right: 8px;
     }
+  }
+
+  &--max-content {
+    width: max-content;
   }
 }

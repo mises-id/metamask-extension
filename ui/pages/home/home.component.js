@@ -1,34 +1,38 @@
-/*
- * @Author: lmk
- * @Date: 2021-12-13 16:44:36
- * @LastEditTime: 2022-04-21 11:36:24
- * @LastEditors: lmk
- * @Description:
- */
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route } from 'react-router-dom';
+import { MISESNETWORK } from '../../helpers/constants/mises/common';
+import MisesAssetList from '../../components/app/mises-asset-list';
+import { MisesEthOverview } from '../../components/app/misesWallet-overview';
+///: BEGIN:ONLY_INCLUDE_IN(main)
+import { SUPPORT_LINK } from '../../helpers/constants/common';
+///: END:ONLY_INCLUDE_IN
 import { formatDate } from '../../helpers/utils/util';
 import AssetList from '../../components/app/asset-list';
-import CollectiblesList from '../../components/app/collectibles-list';
+import CollectiblesTab from '../../components/app/collectibles-tab';
 import HomeNotification from '../../components/app/home-notification';
 import MultipleNotifications from '../../components/app/multiple-notifications';
 import TransactionList from '../../components/app/transaction-list';
 import MenuBar from '../../components/app/menu-bar';
 import Popover from '../../components/ui/popover';
 import Button from '../../components/ui/button';
+import Box from '../../components/ui/box';
 import ConnectedSites from '../connected-sites';
 import ConnectedAccounts from '../connected-accounts';
 import { Tabs, Tab } from '../../components/ui/tabs';
 import { EthOverview } from '../../components/app/wallet-overview';
-import { MisesEthOverview } from '../../components/app/misesWallet-overview';
 import WhatsNewPopup from '../../components/app/whats-new-popup';
 import RecoveryPhraseReminder from '../../components/app/recovery-phrase-reminder';
 import ActionableMessage from '../../components/ui/actionable-message/actionable-message';
 import Typography from '../../components/ui/typography/typography';
-import { TYPOGRAPHY, FONT_WEIGHT } from '../../helpers/constants/design-system';
-
-import { isBeta } from '../../helpers/utils/build-types';
+import {
+  TYPOGRAPHY,
+  FONT_WEIGHT,
+  DISPLAY,
+  ///: BEGIN:ONLY_INCLUDE_IN(flask)
+  COLORS,
+  ///: END:ONLY_INCLUDE_IN
+} from '../../helpers/constants/design-system';
 
 import {
   ASSET_ROUTE,
@@ -45,10 +49,12 @@ import {
   CONFIRMATION_V_NEXT_ROUTE,
   ADD_COLLECTIBLE_ROUTE,
 } from '../../helpers/constants/routes';
-import { MISESNETWORK } from '../../helpers/constants/mises/common';
-import MisesAssetList from '../../components/app/mises-asset-list';
-// import MisesCollectiblesList from '../../components/app/misesCollectibles-list';
-import BetaHomeFooter from './beta-home-footer.component';
+///: BEGIN:ONLY_INCLUDE_IN(beta)
+import BetaHomeFooter from './beta/beta-home-footer.component';
+///: END:ONLY_INCLUDE_IN
+///: BEGIN:ONLY_INCLUDE_IN(flask)
+import FlaskHomeFooter from './flask/flask-home-footer.component';
+///: END:ONLY_INCLUDE_IN
 
 const LEARN_MORE_URL =
   'https://metamask.zendesk.com/hc/en-us/articles/360045129011-Intro-to-MetaMask-v8-extension';
@@ -56,6 +62,18 @@ const LEGACY_WEB3_URL =
   'https://metamask.zendesk.com/hc/en-us/articles/360053147012';
 const INFURA_BLOCKAGE_URL =
   'https://metamask.zendesk.com/hc/en-us/articles/360059386712';
+
+function shouldCloseNotificationPopup({
+  isNotification,
+  totalUnapprovedCount,
+  isSigningQRHardwareTransaction,
+}) {
+  return (
+    isNotification &&
+    totalUnapprovedCount === 0 &&
+    !isSigningQRHardwareTransaction
+  );
+}
 
 export default class Home extends PureComponent {
   static contextTypes = {
@@ -83,13 +101,18 @@ export default class Home extends PureComponent {
     selectedAddress: PropTypes.string,
     restoreFromThreeBox: PropTypes.func,
     setShowRestorePromptToFalse: PropTypes.func,
-    closePopUp: PropTypes.func,
     threeBoxLastUpdated: PropTypes.number,
     firstPermissionsRequestId: PropTypes.string,
+    closePopUp: PropTypes.func,
+    getPopupId: PropTypes.func,
+    // This prop is used in the `shouldCloseNotificationPopup` function
+    // eslint-disable-next-line react/no-unused-prop-types
     totalUnapprovedCount: PropTypes.number.isRequired,
     setConnectedStatusPopoverHasBeenShown: PropTypes.func,
     connectedStatusPopoverHasBeenShown: PropTypes.bool,
     defaultHomeActiveTabName: PropTypes.string,
+    firstTimeFlowType: PropTypes.string,
+    completedOnboarding: PropTypes.bool,
     onTabClick: PropTypes.func.isRequired,
     haveSwapsQuotes: PropTypes.bool.isRequired,
     showAwaitingSwapScreen: PropTypes.bool.isRequired,
@@ -103,21 +126,58 @@ export default class Home extends PureComponent {
     showWhatsNewPopup: PropTypes.bool.isRequired,
     hideWhatsNewPopup: PropTypes.func.isRequired,
     notificationsToShow: PropTypes.bool.isRequired,
+    ///: BEGIN:ONLY_INCLUDE_IN(flask)
+    errorsToShow: PropTypes.object.isRequired,
+    shouldShowErrors: PropTypes.bool.isRequired,
+    removeSnapError: PropTypes.func.isRequired,
+    ///: END:ONLY_INCLUDE_IN
     showRecoveryPhraseReminder: PropTypes.bool.isRequired,
     setRecoveryPhraseReminderHasBeenShown: PropTypes.func.isRequired,
     setRecoveryPhraseReminderLastShown: PropTypes.func.isRequired,
     seedPhraseBackedUp: PropTypes.bool.isRequired,
     newNetworkAdded: PropTypes.string,
     setNewNetworkAdded: PropTypes.func.isRequired,
+    // This prop is used in the `shouldCloseNotificationPopup` function
+    // eslint-disable-next-line react/no-unused-prop-types
     isSigningQRHardwareTransaction: PropTypes.bool.isRequired,
-    getPopupId: PropTypes.func,
+    newCollectibleAddedMessage: PropTypes.string,
+    setNewCollectibleAddedMessage: PropTypes.func.isRequired,
+    closeNotificationPopup: PropTypes.func.isRequired,
   };
 
   state = {
-    // eslint-disable-next-line react/no-unused-state
-    mounted: false,
     canShowBlockageNotification: true,
+    notificationClosing: false,
+    redirecting: false,
   };
+
+  constructor(props) {
+    super(props);
+
+    const {
+      closeNotificationPopup,
+      firstPermissionsRequestId,
+      haveSwapsQuotes,
+      isNotification,
+      showAwaitingSwapScreen,
+      suggestedAssets = [],
+      swapsFetchParams,
+      unconfirmedTransactionsCount,
+    } = this.props;
+
+    if (shouldCloseNotificationPopup(props)) {
+      this.state.notificationClosing = true;
+      closeNotificationPopup();
+    } else if (
+      firstPermissionsRequestId ||
+      unconfirmedTransactionsCount > 0 ||
+      suggestedAssets.length > 0 ||
+      (!isNotification &&
+        (showAwaitingSwapScreen || haveSwapsQuotes || swapsFetchParams))
+    ) {
+      this.state.redirecting = true;
+    }
+  }
 
   async checkStatusAndNavigate() {
     const {
@@ -126,7 +186,6 @@ export default class Home extends PureComponent {
       isPopup,
       isNotification,
       suggestedAssets = [],
-      totalUnapprovedCount,
       unconfirmedTransactionsCount,
       haveSwapsQuotes,
       showAwaitingSwapScreen,
@@ -135,6 +194,7 @@ export default class Home extends PureComponent {
       isSigningQRHardwareTransaction,
       closePopUp,
       getPopupId,
+      totalUnapprovedCount,
     } = this.props;
     const _popupId = await getPopupId();
     console.log(
@@ -168,61 +228,36 @@ export default class Home extends PureComponent {
   }
 
   componentDidMount() {
-    // eslint-disable-next-line react/no-unused-state
-    this.setState({ mounted: true });
     this.checkStatusAndNavigate();
   }
 
-  static getDerivedStateFromProps(
-    {
-      firstPermissionsRequestId,
-      isNotification,
-      suggestedAssets,
-      totalUnapprovedCount,
-      unconfirmedTransactionsCount,
-      haveSwapsQuotes,
-      showAwaitingSwapScreen,
-      swapsFetchParams,
-      isSigningQRHardwareTransaction,
-    },
-    { mounted },
-  ) {
-    if (!mounted) {
-      if (
-        isNotification &&
-        totalUnapprovedCount === 0 &&
-        !isSigningQRHardwareTransaction
-      ) {
-        return { closing: true };
-      } else if (
-        firstPermissionsRequestId ||
-        unconfirmedTransactionsCount > 0 ||
-        suggestedAssets.length > 0 ||
-        (!isNotification &&
-          (showAwaitingSwapScreen || haveSwapsQuotes || swapsFetchParams))
-      ) {
-        return { redirecting: true };
-      }
+  static getDerivedStateFromProps(props) {
+    if (shouldCloseNotificationPopup(props)) {
+      return { notificationClosing: true };
     }
     return null;
   }
 
-  componentDidUpdate(_, prevState) {
+  componentDidUpdate(_prevProps, prevState) {
     const {
+      closeNotificationPopup,
       setupThreeBox,
       showRestorePrompt,
       threeBoxLastUpdated,
       threeBoxSynced,
       isNotification,
-      isPopup,
     } = this.props;
+    const { notificationClosing } = this.state;
 
-    if (!prevState.closing && this.state.closing) {
-      global.platform.closeCurrentWindow();
-    }
-    (isNotification || isPopup) && this.checkStatusAndNavigate();
-
-    if (threeBoxSynced && showRestorePrompt && threeBoxLastUpdated === null) {
+    if (notificationClosing && !prevState.notificationClosing) {
+      closeNotificationPopup();
+    } else if (isNotification) {
+      this.checkStatusAndNavigate();
+    } else if (
+      threeBoxSynced &&
+      showRestorePrompt &&
+      threeBoxLastUpdated === null
+    ) {
       setupThreeBox();
     }
   }
@@ -252,34 +287,97 @@ export default class Home extends PureComponent {
       setWeb3ShimUsageAlertDismissed,
       originOfCurrentTab,
       disableWeb3ShimUsageAlert,
+      ///: BEGIN:ONLY_INCLUDE_IN(flask)
+      removeSnapError,
+      errorsToShow,
+      shouldShowErrors,
+      ///: END:ONLY_INCLUDE_IN
       infuraBlocked,
       newNetworkAdded,
       setNewNetworkAdded,
+      newCollectibleAddedMessage,
+      setNewCollectibleAddedMessage,
     } = this.props;
     return (
       <MultipleNotifications>
-        {newNetworkAdded ? (
+        {
+          ///: BEGIN:ONLY_INCLUDE_IN(flask)
+          shouldShowErrors
+            ? Object.entries(errorsToShow).map(([errorId, error]) => {
+                return (
+                  <HomeNotification
+                    classNames={['home__error-message']}
+                    infoText={error.data.snapId}
+                    descriptionText={
+                      <>
+                        <Typography
+                          color={COLORS.TEXT_MUTED}
+                          variant={TYPOGRAPHY.H5}
+                          fontWeight={FONT_WEIGHT.NORMAL}
+                        >
+                          {t('somethingWentWrong')}
+                        </Typography>
+                        <Typography
+                          color={COLORS.TEXT_MUTED}
+                          variant={TYPOGRAPHY.H7}
+                          fontWeight={FONT_WEIGHT.NORMAL}
+                        >
+                          {t('snapError', [error.message, error.code])}
+                        </Typography>
+                      </>
+                    }
+                    onIgnore={async () => {
+                      await removeSnapError(errorId);
+                    }}
+                    ignoreText="Dismiss"
+                    key="home-error-message"
+                  />
+                );
+              })
+            : null
+          ///: END:ONLY_INCLUDE_IN
+        }
+        {newCollectibleAddedMessage === 'success' ? (
           <ActionableMessage
-            type="info"
+            type="success"
             className="home__new-network-notification"
             message={
-              <div className="home__new-network-notification-message">
-                <img
-                  src="./images/check_circle.svg"
-                  className="home__new-network-notification-message--image"
-                />
+              <Box display={DISPLAY.INLINE_FLEX}>
+                <i className="fa fa-check-circle home__new-nft-notification-icon" />
                 <Typography
                   variant={TYPOGRAPHY.H7}
                   fontWeight={FONT_WEIGHT.NORMAL}
                 >
-                  {this.context.t('newNetworkAdded', [newNetworkAdded])}
+                  {t('newCollectibleAddedMessage')}
                 </Typography>
                 <button
-                  className="fas fa-times home__close"
+                  className="fas fa-times home__new-nft-notification-close"
+                  title={t('close')}
+                  onClick={() => setNewCollectibleAddedMessage('')}
+                />
+              </Box>
+            }
+          />
+        ) : null}
+        {newNetworkAdded ? (
+          <ActionableMessage
+            type="success"
+            className="home__new-network-notification"
+            message={
+              <Box display={DISPLAY.INLINE_FLEX}>
+                <i className="fa fa-check-circle home__new-network-notification-icon" />
+                <Typography
+                  variant={TYPOGRAPHY.H7}
+                  fontWeight={FONT_WEIGHT.NORMAL}
+                >
+                  {t('newNetworkAdded', [newNetworkAdded])}
+                </Typography>
+                <button
+                  className="fas fa-times home__new-network-notification-close"
                   title={t('close')}
                   onClick={() => setNewNetworkAdded('')}
                 />
-              </div>
+              </Box>
             }
           />
         ) : null}
@@ -426,178 +524,125 @@ export default class Home extends PureComponent {
       hideWhatsNewPopup,
       seedPhraseBackedUp,
       showRecoveryPhraseReminder,
+      firstTimeFlowType,
+      completedOnboarding,
       provider,
     } = this.props;
+    const isMisesNetwork = provider.type === MISESNETWORK;
     if (forgottenPassword) {
       return <Redirect to={{ pathname: RESTORE_VAULT_ROUTE }} />;
-    } else if (this.state.closing || this.state.redirecting) {
+    } else if (this.state.notificationClosing || this.state.redirecting) {
       return null;
     }
 
-    const showWhatsNew = notificationsToShow && showWhatsNewPopup;
-    const isMisesNetwork = provider.type === MISESNETWORK;
+    const showWhatsNew =
+      ((completedOnboarding && firstTimeFlowType === 'import') ||
+        !completedOnboarding) &&
+      notificationsToShow &&
+      showWhatsNewPopup;
 
     return (
       <div className="main-container">
-        {isMisesNetwork && (
-          // If the current network is Mises Nework
-          <>
-            <Route path={CONNECTED_ROUTE} component={ConnectedSites} exact />
-            <Route
-              path={CONNECTED_ACCOUNTS_ROUTE}
-              component={ConnectedAccounts}
-              exact
+        <Route path={CONNECTED_ROUTE} component={ConnectedSites} exact />
+        <Route
+          path={CONNECTED_ACCOUNTS_ROUTE}
+          component={ConnectedAccounts}
+          exact
+        />
+        <div className="home__container">
+          {showWhatsNew ? <WhatsNewPopup onClose={hideWhatsNewPopup} /> : null}
+          {!showWhatsNew && showRecoveryPhraseReminder ? (
+            <RecoveryPhraseReminder
+              hasBackedUp={seedPhraseBackedUp}
+              onConfirm={this.onRecoveryPhraseReminderClose}
             />
-            <div className="home__container">
-              {showWhatsNew ? (
-                <WhatsNewPopup onClose={hideWhatsNewPopup} />
-              ) : null}
-              {!showWhatsNew && showRecoveryPhraseReminder ? (
-                <RecoveryPhraseReminder
-                  hasBackedUp={seedPhraseBackedUp}
-                  onConfirm={this.onRecoveryPhraseReminderClose}
-                />
-              ) : null}
-              {isPopup && !connectedStatusPopoverHasBeenShown
-                ? this.renderPopover()
-                : null}
-              <div className="home__main-view">
-                <MenuBar />
-                <div className="home__balance-wrapper">
-                  <MisesEthOverview />
-                </div>
-                <Tabs
-                  defaultActiveTabName={defaultHomeActiveTabName}
-                  onTabClick={onTabClick}
-                  tabsClassName="home__tabs"
-                >
-                  <Tab
-                    activeClassName="home__tab--active"
-                    className="home__tab"
-                    data-testid="home__asset-tab"
-                    name={t('assets')}
-                  >
-                    <MisesAssetList
-                      onClickAsset={(asset) =>
-                        history.push(`${ASSET_ROUTE}/${asset}`)
-                      }
-                    />
-                  </Tab>
-                  <Tab
-                    activeClassName="home__tab--active"
-                    className="home__tab"
-                    data-testid="home__nfts-tab"
-                    name={t('nfts')}
-                  >
-                    <CollectiblesList
-                      onAddNFT={() => {
-                        history.push(ADD_COLLECTIBLE_ROUTE);
-                      }}
-                    />
-                  </Tab>
-                  <Tab
-                    activeClassName="home__tab--active"
-                    className="home__tab"
-                    data-testid="home__activity-tab"
-                    name="Transactions"
-                  >
-                    <TransactionList />
-                  </Tab>
-                </Tabs>
-              </div>
-
-              {this.renderNotifications()}
+          ) : null}
+          {isPopup && !connectedStatusPopoverHasBeenShown
+            ? this.renderPopover()
+            : null}
+          <div className="home__main-view">
+            <MenuBar />
+            <div className="home__balance-wrapper">
+              {isMisesNetwork ? <MisesEthOverview /> : <EthOverview />}
             </div>
-          </>
-        )}
-        {!isMisesNetwork && (
-          <>
-            <Route path={CONNECTED_ROUTE} component={ConnectedSites} exact />
-            <Route
-              path={CONNECTED_ACCOUNTS_ROUTE}
-              component={ConnectedAccounts}
-              exact
-            />
-            <div className="home__container">
-              {showWhatsNew ? (
-                <WhatsNewPopup onClose={hideWhatsNewPopup} />
-              ) : null}
-              {!showWhatsNew && showRecoveryPhraseReminder ? (
-                <RecoveryPhraseReminder
-                  hasBackedUp={seedPhraseBackedUp}
-                  onConfirm={this.onRecoveryPhraseReminderClose}
-                />
-              ) : null}
-              {isPopup && !connectedStatusPopoverHasBeenShown
-                ? this.renderPopover()
-                : null}
-              <div className="home__main-view">
-                <MenuBar />
-                <div className="home__balance-wrapper">
-                  <EthOverview />
-                </div>
-                <Tabs
-                  defaultActiveTabName={defaultHomeActiveTabName}
-                  onTabClick={onTabClick}
-                  tabsClassName="home__tabs"
+            <Tabs
+              defaultActiveTabName={defaultHomeActiveTabName}
+              onTabClick={onTabClick}
+              tabsClassName="home__tabs"
+            >
+              <Tab
+                activeClassName="home__tab--active"
+                className="home__tab"
+                data-testid="home__asset-tab"
+                name={t('assets')}
+              >
+                {isMisesNetwork ? (
+                  <MisesAssetList
+                    onClickAsset={(asset) =>
+                      history.push(`${ASSET_ROUTE}/${asset}`)
+                    }
+                  />
+                ) : (
+                  <AssetList
+                    onClickAsset={(asset) =>
+                      history.push(`${ASSET_ROUTE}/${asset}`)
+                    }
+                  />
+                )}
+              </Tab>
+              {process.env.COLLECTIBLES_V1 ? (
+                <Tab
+                  activeClassName="home__tab--active"
+                  className="home__tab"
+                  data-testid="home__nfts-tab"
+                  name={t('nfts')}
                 >
-                  <Tab
-                    activeClassName="home__tab--active"
-                    className="home__tab"
-                    data-testid="home__asset-tab"
-                    name={t('assets')}
+                  <CollectiblesTab
+                    onAddNFT={() => {
+                      history.push(ADD_COLLECTIBLE_ROUTE);
+                    }}
+                  />
+                </Tab>
+              ) : null}
+              <Tab
+                activeClassName="home__tab--active"
+                className="home__tab"
+                data-testid="home__activity-tab"
+                name={t('activity')}
+              >
+                <TransactionList />
+              </Tab>
+            </Tabs>
+            <div className="home__support">
+              {
+                ///: BEGIN:ONLY_INCLUDE_IN(main)
+                t('needHelp', [
+                  <a
+                    href={SUPPORT_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    key="need-help-link"
                   >
-                    <AssetList
-                      onClickAsset={(asset) =>
-                        history.push(`${ASSET_ROUTE}/${asset}`)
-                      }
-                    />
-                  </Tab>
-                  {process.env.COLLECTIBLES_V1 ? (
-                    <Tab
-                      activeClassName="home__tab--active"
-                      className="home__tab"
-                      data-testid="home__nfts-tab"
-                      name={t('nfts')}
-                    >
-                      <CollectiblesList
-                        onAddNFT={() => {
-                          history.push(ADD_COLLECTIBLE_ROUTE);
-                        }}
-                      />
-                    </Tab>
-                  ) : null}
-                  <Tab
-                    activeClassName="home__tab--active"
-                    className="home__tab"
-                    data-testid="home__activity-tab"
-                    name={t('activity')}
-                  >
-                    <TransactionList />
-                  </Tab>
-                </Tabs>
-                <div className="home__support">
-                  {isBeta() ? (
-                    <BetaHomeFooter />
-                  ) : (
-                    t('needHelp', [
-                      <a
-                        href="https://support.metamask.io"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        key="need-help-link"
-                      >
-                        {t('needHelpLinkText')}
-                      </a>,
-                    ])
-                  )}
-                </div>
-              </div>
-
-              {this.renderNotifications()}
+                    {t('needHelpLinkText')}
+                  </a>,
+                ])
+                ///: END:ONLY_INCLUDE_IN
+              }
+              {
+                ///: BEGIN:ONLY_INCLUDE_IN(beta)
+                <BetaHomeFooter />
+                ///: END:ONLY_INCLUDE_IN
+              }
+              {
+                ///: BEGIN:ONLY_INCLUDE_IN(flask)
+                <FlaskHomeFooter />
+                ///: END:ONLY_INCLUDE_IN
+              }
             </div>
-          </>
-        )}
+          </div>
+
+          {this.renderNotifications()}
+        </div>
       </div>
     );
   }

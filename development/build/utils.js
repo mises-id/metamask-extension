@@ -1,16 +1,5 @@
 const semver = require('semver');
-const { version } = require('../../package.json');
-
-/**
- * The distribution this build is intended for.
- *
- * This should be kept in-sync with the `BuildType` map in `shared/constants/app.js`.
- */
-const BuildType = {
-  beta: 'beta',
-  flask: 'flask',
-  main: 'main',
-};
+const { BuildType } = require('../lib/build-type');
 
 /**
  * Map the current version to a format that is compatible with each browser.
@@ -19,13 +8,13 @@ const BuildType = {
  * has a prerelease component, it is assumed to have the format "<build type>.<build version",
  * where the build version is a positive integer.
  *
- * @param {string} currentVersion - The current version.
  * @param {string[]} platforms - A list of browsers to generate versions for.
+ * @param {string} version - The current version.
  * @returns {Object} An object with the browser as the key and the browser-specific version object
  * as the value.  For example, the version `9.6.0-beta.1` would return the object
- * `{ firefox: { version: '9.6.0.beta1' }, chrome: { version: '9.6.0.1', version_name: 'beta' } }`.
+ * `{ firefox: { version: '9.6.0.beta1' }, chrome: { version: '9.6.0.1', version_name: '9.6.0-beta.1' } }`.
  */
-function getBrowserVersionMap(platforms) {
+function getBrowserVersionMap(platforms, version) {
   const major = semver.major(version);
   const minor = semver.minor(version);
   const patch = semver.patch(version);
@@ -40,7 +29,7 @@ function getBrowserVersionMap(platforms) {
     [buildType, buildVersion] = prerelease;
     if (!String(buildVersion).match(/^\d+$/u)) {
       throw new Error(`Invalid prerelease build version: '${buildVersion}'`);
-    } else if (buildType !== BuildType.beta) {
+    } else if (![BuildType.beta, BuildType.flask].includes(buildType)) {
       throw new Error(`Invalid prerelease build type: ${buildType}`);
     }
   }
@@ -50,10 +39,10 @@ function getBrowserVersionMap(platforms) {
     const browserSpecificVersion = {};
     if (prerelease) {
       if (platform === 'firefox') {
-        versionParts.push(`${buildType}${buildVersion}`);
+        versionParts[2] = `${versionParts[2]}${buildType}${buildVersion}`;
       } else {
         versionParts.push(buildVersion);
-        browserSpecificVersion.version_name = buildType;
+        browserSpecificVersion.version_name = version;
       }
     }
     browserSpecificVersion.version = versionParts.join('.');
@@ -63,6 +52,5 @@ function getBrowserVersionMap(platforms) {
 }
 
 module.exports = {
-  BuildType,
   getBrowserVersionMap,
 };

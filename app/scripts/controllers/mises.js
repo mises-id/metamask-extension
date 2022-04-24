@@ -11,7 +11,7 @@ import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/l
 /*
  * @Author: lmk
  * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-04-06 16:34:41
+ * @LastEditTime: 2022-04-22 14:57:23
  * @LastEditors: lmk
  * @Description: mises controller
  */
@@ -22,10 +22,10 @@ export default class MisesController {
 
   misesGasfee;
 
-  constructor({ exportAccount, getKeyringAccounts, getSelectedAddress }) {
+  constructor({ exportAccount, getKeyringAccounts }) {
     this.exportAccount = exportAccount;
     this.getKeyringAccounts = getKeyringAccounts;
-    this.getSelectedAddress = getSelectedAddress;
+    // this.getSelectedAddress = getSelectedAddress;
     this.store = new ObservableStore({
       priKeyHex: '',
       accountList: [],
@@ -422,8 +422,8 @@ export default class MisesController {
     });
   }
 
-  async recentTransactions(type) {
-    const selectedAddress = this.getSelectedAddress();
+  async recentTransactions(type, selectedAddress) {
+    // const selectedAddress = this.getSelectedAddress();
     const accountList = this.getAccountList();
     const index = accountList.findIndex(
       (val) => val.address === selectedAddress,
@@ -489,8 +489,8 @@ export default class MisesController {
     return window.localStorage.getItem('setAccount');
   }
 
-  async setAccountTransactionsHeight() {
-    const selectedAddress = this.getSelectedAddress();
+  async setAccountTransactionsHeight(selectedAddress) {
+    // const selectedAddress = this.getSelectedAddress();
     const accountList = this.getAccountList();
     const index = accountList.findIndex(
       (val) => val.address === selectedAddress,

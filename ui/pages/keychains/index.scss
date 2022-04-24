@@ -29,7 +29,7 @@
   &__input-label {
     padding-bottom: 10px;
     font-weight: 400;
-    color: #333;
+    color: var(--color-text-default);
     font-size: 16px;
     display: inline-block;
   }
@@ -80,7 +80,7 @@
   &__title {
     @include H4;
 
-    color: #1b344d;
+    color: var(--color-text-default);
     margin-bottom: 10px;
   }
 
@@ -112,7 +112,7 @@
   &__selector-label {
     // @include Paragraph;
     font-size: 18px;
-    color: #333;
+    color: var(--color-text-default);
     font-weight: bold;
   }
 
@@ -120,7 +120,7 @@
     line-height: 22px;
     display: flex;
     align-items: center;
-    color: #000;
+    color: var(--color-text-default);
     margin-top: 18px;
   }
 
@@ -170,7 +170,7 @@
 
   &__checkbox-label {
     // @include H4;
-    color: #666666;
+    color: var(--color-text-default);
     font-size: 13px;
     margin-left: 6px;
   }
@@ -200,7 +200,7 @@
   &__error {
     @include H6;
 
-    color: $crimson;
+    // color: $crimson;
     padding-top: 5px;
   }
 }

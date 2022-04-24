@@ -5,6 +5,7 @@ import {
   getRpcPrefsForCurrentProvider,
   getCurrentChainId,
   getMisesOpt,
+  getMetaMaskAccountsOrdered,
 } from '../../../../selectors';
 import AccountDetailsModal from './account-details-modal.component';
 
@@ -16,6 +17,7 @@ const mapStateToProps = (state) => {
     rpcPrefs: getRpcPrefsForCurrentProvider(state),
     misesOpt: getMisesOpt(state),
     provider: state.metamask.provider,
+    accounts: getMetaMaskAccountsOrdered(state),
   };
 };
 

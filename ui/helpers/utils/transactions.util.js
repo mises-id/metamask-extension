@@ -1,6 +1,4 @@
 import { MethodRegistry } from 'eth-method-registry';
-import abi from 'human-standard-token-abi';
-import { ethers } from 'ethers';
 import log from 'loglevel';
 
 import { addHexPrefix } from '../../../app/scripts/lib/util';
@@ -14,8 +12,6 @@ import { addCurrencies } from '../../../shared/modules/conversion.utils';
 import { readAddressAsContract } from '../../../shared/modules/contract-utils';
 import fetchWithCache from './fetch-with-cache';
 
-const hstInterface = new ethers.utils.Interface(abi);
-
 /**
  * @typedef EthersContractCall
  * @type object
@@ -28,18 +24,6 @@ const hstInterface = new ethers.utils.Interface(abi);
  * @property {FunctionFragment} functionFragment - The Ethers function fragment
  * representation of the function.
  */
-
-/**
- * @returns {EthersContractCall | undefined}
- */
-export function getTokenData(data) {
-  try {
-    return hstInterface.parseTransaction({ data });
-  } catch (error) {
-    log.debug('Failed to parse transaction data.', error, data);
-    return undefined;
-  }
-}
 
 async function getMethodFrom4Byte(fourBytePrefix) {
   const fourByteResponse = await fetchWithCache(
@@ -61,6 +45,7 @@ let registry;
 
 /**
  * Attempts to return the method data from the MethodRegistry library, the message registry library and the token abi, in that order of preference
+ *
  * @param {string} fourBytePrefix - The prefix from the method code associated with the data
  * @returns {Object}
  */
@@ -120,6 +105,7 @@ export function isTokenMethodAction(type) {
     TRANSACTION_TYPES.TOKEN_METHOD_TRANSFER,
     TRANSACTION_TYPES.TOKEN_METHOD_APPROVE,
     TRANSACTION_TYPES.TOKEN_METHOD_TRANSFER_FROM,
+    TRANSACTION_TYPES.TOKEN_METHOD_SAFE_TRANSFER_FROM,
   ].includes(type);
 }
 
@@ -168,6 +154,7 @@ export function isLegacyTransaction(txParams) {
 /**
  * Returns a status key for a transaction. Requires parsing the txMeta.txReceipt on top of
  * txMeta.status because txMeta.status does not reflect on-chain errors.
+ *
  * @param {Object} transaction - The txMeta object of a transaction.
  * @param {Object} transaction.txReceipt - The transaction receipt.
  * @returns {string}
@@ -198,7 +185,8 @@ export function getStatusKey(transaction) {
  * Returns a title for the given transaction category.
  *
  * This will throw an error if the transaction category is unrecognized and no default is provided.
- * @param {function} t - The translation function
+ *
+ * @param {Function} t - The translation function
  * @param {TRANSACTION_TYPES[keyof TRANSACTION_TYPES]} type - The transaction type constant
  * @param {string} nativeCurrency - The native currency of the currently selected network
  * @returns {string} The transaction category title
@@ -210,6 +198,9 @@ export function getTransactionTypeTitle(t, type, nativeCurrency = 'ETH') {
     }
     case TRANSACTION_TYPES.TOKEN_METHOD_TRANSFER_FROM: {
       return t('transferFrom');
+    }
+    case TRANSACTION_TYPES.TOKEN_METHOD_SAFE_TRANSFER_FROM: {
+      return t('safeTransferFrom');
     }
     case TRANSACTION_TYPES.TOKEN_METHOD_APPROVE: {
       return t('approve');
