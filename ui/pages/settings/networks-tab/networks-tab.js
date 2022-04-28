@@ -9,8 +9,8 @@ import {
 } from '../../../helpers/constants/routes';
 import { setSelectedSettingsRpcUrl } from '../../../store/actions';
 import Button from '../../../components/ui/button';
-import { getEnvironmentType } from '../../../../app/scripts/lib/util';
-import { ENVIRONMENT_TYPE_FULLSCREEN } from '../../../../shared/constants/app';
+// import { getEnvironmentType } from '../../../../app/scripts/lib/util';
+// import { ENVIRONMENT_TYPE_FULLSCREEN } from '../../../../shared/constants/app';
 import {
   getFrequentRpcListDetail,
   getNetworksTabSelectedRpcUrl,
@@ -36,8 +36,8 @@ const NetworksTab = ({ addNewNetwork }) => {
   const dispatch = useDispatch();
   const { pathname } = useLocation();
 
-  const environmentType = getEnvironmentType();
-  const isFullScreen = environmentType === ENVIRONMENT_TYPE_FULLSCREEN;
+  // const environmentType = getEnvironmentType();
+  const isFullScreen = true;
   const shouldRenderNetworkForm =
     isFullScreen || Boolean(pathname.match(NETWORKS_FORM_ROUTE));
 
@@ -86,7 +86,7 @@ const NetworksTab = ({ addNewNetwork }) => {
       dispatch(setSelectedSettingsRpcUrl(''));
     };
   }, [dispatch]);
-  console.log(networksToRender);
+
   return (
     <div className="networks-tab__body">
       {isFullScreen ? (

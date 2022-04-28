@@ -145,6 +145,7 @@
     "base64-js": "^1.5.1",
     "bignumber.js": "^4.1.0",
     "bn.js": "^4.11.7",
+    "caniuse-lite": "^1.0.30001332",
     "classnames": "^2.2.6",
     "copy-to-clipboard": "^3.0.8",
     "currency-formatter": "^1.4.2",
@@ -440,7 +441,7 @@
       "@metamask/iframe-execution-environment-service>@metamask/snap-controllers>@metamask/execution-environments": false,
       "@metamask/rpc-methods>@metamask/snap-controllers>@metamask/execution-environments": false,
       "mises-js-sdk>@cosmjs/proto-signing>protobufjs": false,
-      "mises-js-sdk>@cosmjs/stargate>protobufjs":false
+      "mises-js-sdk>@cosmjs/stargate>protobufjs": false
     }
   }
 }

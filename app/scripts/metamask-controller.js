@@ -35,9 +35,7 @@ import {
   TokenListController,
   TokensController,
   TokenRatesController,
-  CollectiblesController,
   AssetsContractController,
-  CollectibleDetectionController,
   PermissionController,
   SubjectMetadataController,
   ///: BEGIN:ONLY_INCLUDE_IN(flask)
@@ -139,6 +137,10 @@ import {
   ///: END:ONLY_INCLUDE_IN
 } from './controllers/permissions';
 import createRPCMethodTrackingMiddleware from './lib/createRPCMethodTrackingMiddleware';
+import {
+  MisesCollectiblesController,
+  MisesCollectibleDetectionController,
+} from './controllers/misesCollectibles';
 
 export const METAMASK_CONTROLLER_EVENTS = {
   // Fired after state changes that impact the extension badge (unapproved msg count)
@@ -308,7 +310,7 @@ export default class MetamaskController extends EventEmitter {
           },
         ));
 
-    this.collectiblesController = new CollectiblesController(
+    this.collectiblesController = new MisesCollectiblesController(
       {
         onPreferencesStateChange: this.preferencesController.store.subscribe.bind(
           this.preferencesController.store,
@@ -338,11 +340,10 @@ export default class MetamaskController extends EventEmitter {
       {},
       initState.CollectiblesController,
     );
-
     this.collectiblesController.setApiKey(process.env.OPENSEA_KEY);
 
     process.env.COLLECTIBLES_V1 &&
-      (this.collectibleDetectionController = new CollectibleDetectionController(
+      (this.collectibleDetectionController = new MisesCollectibleDetectionController(
         {
           onCollectiblesStateChange: (listener) =>
             this.collectiblesController.subscribe(listener),
@@ -360,6 +361,7 @@ export default class MetamaskController extends EventEmitter {
             this.collectiblesController,
           ),
           getCollectiblesState: () => this.collectiblesController.state,
+          isUnlocked: this.isUnlocked.bind(this),
         },
       ));
 
@@ -1078,13 +1080,7 @@ export default class MetamaskController extends EventEmitter {
     // Lazily update the store with the current extension environment
     this.extension.runtime.getPlatformInfo().then((info) => {
       if (info && info.os) {
-        this.appStateController.setBrowserEnvironment(
-          info.os,
-          // This method is presently only supported by Firefox
-          this.extension.runtime.getBrowserInfo === undefined
-            ? 'chrome'
-            : 'firefox',
-        );
+        this.appStateController.setBrowserEnvironment(info.os, 'chrome');
       }
     });
 
@@ -2257,9 +2253,9 @@ export default class MetamaskController extends EventEmitter {
   }
 
   /**
-   * @description: get the first address in the state to the selected address
-   * @param {*}
-   * @returns {*} address
+   * @type address
+   * @property {string} address - The account's ethereum address, in lower case.
+   * get the first address in the state to the selected address
    */
   getFirstIdentity() {
     const { identities } = this.preferencesController.store.getState();
@@ -4210,10 +4206,9 @@ export default class MetamaskController extends EventEmitter {
   }
 
   /**
-   * @description: set Selected Address
-   * @param type
-   * @param {string} address
-   * @returns {*}
+   * @type address
+   * @property {string} address - The account's ethereum address, in lower case.
+   * set Selected Address
    */
   async setSelectedAddress(address, type) {
     await this.preferencesController.setSelectedAddress(address); // set address
@@ -4224,9 +4219,9 @@ export default class MetamaskController extends EventEmitter {
   }
 
   /**
-   * @description: set mises user info
-   * @param {string} address
-   * @returns {promise} any
+   * @type address
+   * @property {string} address - The account's ethereum address, in lower case.
+   * set mises user info
    */
   async setMisesUser(address) {
     console.log('Set user');
@@ -4243,14 +4238,14 @@ export default class MetamaskController extends EventEmitter {
   }
 
   /**
-   * @description: remove current active
+   * remove current active
    */
   lockAll() {
     this.misesController.lockAll();
   }
 
   /**
-   * @description: open restore page
+   * open restore page
    */
   restorePage() {
     this.opts.restoreAccount();

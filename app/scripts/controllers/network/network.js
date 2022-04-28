@@ -245,6 +245,10 @@ function createMisesMiddleware() {
       res.result = null;
       return end();
     }
+    // if (req.method === 'eth_gasPrice') {
+    //   res.result = 0;
+    //   return end();
+    // }
     if (
       req.method === 'eth_call' ||
       req.method === 'eth_sendTransaction' ||

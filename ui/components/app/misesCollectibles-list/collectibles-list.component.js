@@ -1,10 +1,3 @@
-/*
- * @Author: lmk
- * @Date: 2021-12-14 10:57:10
- * @LastEditTime: 2021-12-14 10:57:37
- * @LastEditors: lmk
- * @Description:
- */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Box from '../../ui/box';

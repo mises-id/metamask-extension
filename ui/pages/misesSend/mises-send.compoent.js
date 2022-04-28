@@ -1,10 +1,3 @@
-/*
- * @Author: lmk
- * @Date: 2022-01-14 13:57:50
- * @LastEditTime: 2022-01-14 16:47:11
- * @LastEditors: lmk
- * @Description:
- */
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';

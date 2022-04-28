@@ -8,13 +8,7 @@ import {
 import { request } from '../../../ui/helpers/utils/fetch';
 import { shortenAddress } from '../../../ui/helpers/utils/util';
 import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../shared/constants/labels';
-/*
- * @Author: lmk
- * @Date: 2021-12-16 14:36:05
- * @LastEditTime: 2022-04-22 14:57:23
- * @LastEditors: lmk
- * @Description: mises controller
- */
+
 export default class MisesController {
   timer;
 
@@ -73,18 +67,18 @@ export default class MisesController {
   }
 
   /**
-   * @description: set current misesUser
-   * @param {string} key
-   * @return {object} MUser
+   * @type key
+   * @property {string} key - private key
+   * @returns {object} MUser
    */
   async activate(priKeyHex) {
     return this.misesUser.activateUser(priKeyHex);
   }
 
   /**
-   * @description: get mises.site token
-   * @param {object} query:{misesId:string,sign:string,nonce:string,pubkey:string}
-   * @return {string} token
+   * @type query
+   * @property {object} query - {misesId:string,sign:string,nonce:string,pubkey:string}
+   * @returns {object} MUser
    */
   getServerToken(query) {
     return request({
@@ -110,14 +104,18 @@ export default class MisesController {
   }
 
   /**
-   * @description: set store token
-   * @param {string} token
-   * @return {*}
+   * @type address
+   * @property {string} address - The account's ethereum address, in lower case.
+   * @type token
+   * @property {string} token - The token to be used for the transaction.
+   * @returns {object} MUser
+   * set store token
    */
   async getMisesUserInfo(address) {
     const { accountList } = this.store.getState();
     const activeUser = this.getActive();
-    const misesId = activeUser.address();
+    console.log(activeUser, 'activeUser');
+    const misesId = activeUser ? activeUser.address() : '';
     let account = accountList.find((val) => val.address === address) || null;
     const nonce = new Date().getTime();
     const auth = await this.generateAuth(nonce);
@@ -188,8 +186,9 @@ export default class MisesController {
   }
 
   /**
-   * @description: set mises userInfo to browser
-   * @param {object} params:{misesId:string,nickname:string,avatar:string,token:string}
+   * @type params
+   * @property {object} params - {misesId:string,nickname:string,avatar:string,token:string}
+   * set mises userInfo to browser
    */
   setToMisesPrivate(params) {
     console.log('Ready to call setmisesid', params);
@@ -207,9 +206,7 @@ export default class MisesController {
   }
 
   /**
-   * @description: reset account list
-   * @param {*}
-   * @return {*}
+   * reset account list
    */
   lockAll() {
     // console.log('清除了mises数据');

@@ -3,13 +3,11 @@ import log from 'loglevel';
 
 const returnToOnboardingInitiatorTab = async (onboardingInitiator) => {
   const tab = await new Promise((resolve) => {
-    browser.tabs.update(
-      onboardingInitiator.tabId,
-      { active: true },
-      // eslint-disable-next-line no-shadow
-      (tab) => {
-        if (tab) {
-          resolve(tab);
+    browser.tabs
+      .update(onboardingInitiator.tabId, { active: true })
+      .then((data) => {
+        if (data) {
+          resolve(data);
         } else {
           // silence console message about unchecked error
           if (browser.runtime.lastError) {
@@ -17,8 +15,7 @@ const returnToOnboardingInitiatorTab = async (onboardingInitiator) => {
           }
           resolve();
         }
-      },
-    );
+      });
   });
 
   if (tab) {
@@ -35,7 +32,7 @@ const returnToOnboardingInitiatorTab = async (onboardingInitiator) => {
 export const returnToOnboardingInitiator = async (onboardingInitiator) => {
   const tab = await new Promise((resolve) => {
     // eslint-disable-next-line no-shadow
-    browser.tabs.get(onboardingInitiator.tabId, (tab) => {
+    browser.tabs.get(onboardingInitiator.tabId).then((tab) => {
       if (tab) {
         resolve(tab);
       } else {

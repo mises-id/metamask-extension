@@ -1,10 +1,3 @@
-/*
- * @Author: lmk
- * @Date: 2021-11-16 23:10:59
- * @LastEditTime: 2022-01-14 01:00:47
- * @LastEditors: lmk
- * @Description: 
- */
 import { connect } from 'react-redux';
 import {
   exportAccount,

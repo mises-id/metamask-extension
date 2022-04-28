@@ -1,10 +1,3 @@
-/*
- * @Author: lmk
- * @Date: 2021-11-16 23:10:59
- * @LastEditTime: 2022-02-21 17:58:13
- * @LastEditors: lmk
- * @Description:
- */
 // need to make sure we aren't affected by overlapping namespaces
 // and that we dont affect the app with our namespace
 // mostly a fix for web3's BigNumber if AMD's "define" is defined...

@@ -5,7 +5,7 @@ import { MISESNETWORK } from '../../helpers/constants/mises/common';
 import MisesAssetList from '../../components/app/mises-asset-list';
 import { MisesEthOverview } from '../../components/app/misesWallet-overview';
 ///: BEGIN:ONLY_INCLUDE_IN(main)
-import { SUPPORT_LINK } from '../../helpers/constants/common';
+// import { SUPPORT_LINK } from '../../helpers/constants/common';
 ///: END:ONLY_INCLUDE_IN
 import { formatDate } from '../../helpers/utils/util';
 import AssetList from '../../components/app/asset-list';
@@ -50,10 +50,10 @@ import {
   ADD_COLLECTIBLE_ROUTE,
 } from '../../helpers/constants/routes';
 ///: BEGIN:ONLY_INCLUDE_IN(beta)
-import BetaHomeFooter from './beta/beta-home-footer.component';
+// import BetaHomeFooter from './beta/beta-home-footer.component';
 ///: END:ONLY_INCLUDE_IN
 ///: BEGIN:ONLY_INCLUDE_IN(flask)
-import FlaskHomeFooter from './flask/flask-home-footer.component';
+// import FlaskHomeFooter from './flask/flask-home-footer.component';
 ///: END:ONLY_INCLUDE_IN
 
 const LEARN_MORE_URL =
@@ -143,6 +143,7 @@ export default class Home extends PureComponent {
     newCollectibleAddedMessage: PropTypes.string,
     setNewCollectibleAddedMessage: PropTypes.func.isRequired,
     closeNotificationPopup: PropTypes.func.isRequired,
+    isMainnet: PropTypes.bool,
   };
 
   state = {
@@ -527,6 +528,7 @@ export default class Home extends PureComponent {
       firstTimeFlowType,
       completedOnboarding,
       provider,
+      isMainnet,
     } = this.props;
     const isMisesNetwork = provider.type === MISESNETWORK;
     if (forgottenPassword) {
@@ -590,7 +592,7 @@ export default class Home extends PureComponent {
                   />
                 )}
               </Tab>
-              {process.env.COLLECTIBLES_V1 ? (
+              {process.env.COLLECTIBLES_V1 && isMainnet ? (
                 <Tab
                   activeClassName="home__tab--active"
                   className="home__tab"
@@ -613,7 +615,7 @@ export default class Home extends PureComponent {
                 <TransactionList />
               </Tab>
             </Tabs>
-            <div className="home__support">
+            {/* <div className="home__support">
               {
                 ///: BEGIN:ONLY_INCLUDE_IN(main)
                 t('needHelp', [
@@ -638,7 +640,7 @@ export default class Home extends PureComponent {
                 <FlaskHomeFooter />
                 ///: END:ONLY_INCLUDE_IN
               }
-            </div>
+            </div> */}
           </div>
 
           {this.renderNotifications()}

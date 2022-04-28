@@ -160,5 +160,5 @@ Typography.propTypes = {
   /**
    * The text content of the Typography component
    */
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node,
 };

@@ -200,15 +200,10 @@ export default class ExtensionPlatform {
   }
 
   getPlatformInfo(cb) {
-    try {
-      const platformInfo = browser.runtime.getPlatformInfo();
-      cb(platformInfo);
-      return;
-    } catch (e) {
-      cb(e);
-      // eslint-disable-next-line no-useless-return
-      return;
-    }
+    browser.runtime
+      .getPlatformInfo()
+      .then((platformInfo) => cb(platformInfo))
+      .catch((err) => cb(err));
   }
 
   showTransactionNotification(txMeta, rpcPrefs) {

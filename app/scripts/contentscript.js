@@ -306,6 +306,7 @@ function redirectToPhishingWarning() {
 
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.check === 'contentscript') {
+    console.log(sender, 'browser.runtime.onMessage:sender');
     sendResponse({ message: 'injected' });
     if (shouldInjectProvider()) {
       injectScript(inpageBundle);

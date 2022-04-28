@@ -6,9 +6,7 @@ const isMobileView = () =>
 export default isMobileView;
 
 /**
- * @description: Judge platform type
- * @param {*}
- * @return {boolean} true:mobile false:pc
+ * Judge platform type
  */
 export function isMobile() {
   // const isMobileFlag = Boolean(

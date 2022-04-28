@@ -9,10 +9,10 @@ export default function UserPreferencedCurrencyDisplay({
   ethLogoHeight = 14,
   ethNumberOfDecimals,
   fiatNumberOfDecimals,
-  'numberOfDecimals': propsNumberOfDecimals,
+  numberOfDecimals: propsNumberOfDecimals,
   showEthLogo,
   type,
-  showFiat,
+  showFiat = false,
   ...restProps
 }) {
   const { currency, numberOfDecimals } = useUserPreferencedCurrency(type, {
@@ -48,24 +48,24 @@ export default function UserPreferencedCurrencyDisplay({
 }
 
 UserPreferencedCurrencyDisplay.propTypes = {
-  'className': PropTypes.string,
+  className: PropTypes.string,
   'data-testid': PropTypes.string,
-  'prefix': PropTypes.string,
-  'value': PropTypes.string,
-  'numberOfDecimals': PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  'hideLabel': PropTypes.bool,
-  'hideTitle': PropTypes.bool,
-  'style': PropTypes.object,
-  'showEthLogo': PropTypes.bool,
-  'ethLogoHeight': PropTypes.number,
-  'type': PropTypes.oneOf([PRIMARY, SECONDARY]),
-  'ethNumberOfDecimals': PropTypes.oneOfType([
+  prefix: PropTypes.string,
+  value: PropTypes.string,
+  numberOfDecimals: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  hideLabel: PropTypes.bool,
+  hideTitle: PropTypes.bool,
+  style: PropTypes.object,
+  showEthLogo: PropTypes.bool,
+  ethLogoHeight: PropTypes.number,
+  type: PropTypes.oneOf([PRIMARY, SECONDARY]),
+  ethNumberOfDecimals: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
   ]),
-  'fiatNumberOfDecimals': PropTypes.oneOfType([
+  fiatNumberOfDecimals: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
   ]),
-  'showFiat': PropTypes.boolean,
+  showFiat: PropTypes.boolean,
 };

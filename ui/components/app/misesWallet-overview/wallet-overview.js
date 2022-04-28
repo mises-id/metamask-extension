@@ -1,10 +1,3 @@
-/*
- * @Author: lmk
- * @Date: 2021-12-14 10:58:38
- * @LastEditTime: 2022-04-21 17:47:08
- * @LastEditors: lmk
- * @Description:
- */
 import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';

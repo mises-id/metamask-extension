@@ -266,31 +266,26 @@ class SettingsPage extends PureComponent {
             {
               icon: <i className="fa fa-cog" />,
               content: t('general'),
-              description: t('generalSettingsDescription'),
               key: GENERAL_ROUTE,
             },
             {
               icon: <i className="fas fa-sliders-h" />,
               content: t('advanced'),
-              description: t('advancedSettingsDescription'),
               key: ADVANCED_ROUTE,
             },
             {
               icon: <i className="fa fa-lock" />,
               content: t('securityAndPrivacy'),
-              description: t('securitySettingsDescription'),
               key: SECURITY_ROUTE,
             },
             {
               icon: <i className="fa fa-bell" />,
               content: t('alerts'),
-              description: t('alertsSettingsDescription'),
               key: ALERTS_ROUTE,
             },
             {
               icon: <i className="fa fa-plug" />,
               content: t('networks'),
-              description: t('networkSettingsDescription'),
               key: NETWORKS_ROUTE,
             },
             {
@@ -301,7 +296,6 @@ class SettingsPage extends PureComponent {
             {
               icon: <i className="fa fa-info-circle" />,
               content: t('about'),
-              description: t('aboutSettingsDescription'),
               key: ABOUT_US_ROUTE,
             },
           ]

@@ -389,9 +389,8 @@ export function addNewAccount() {
 }
 // getAccount PrivateKey
 /**
- * @description:
- * @param {*} address
- * @return {*}
+ * @type address
+ * @property {string} address - the address of the account
  */
 export function getPrivateKey(address) {
   return new Promise((resolve, reject) => {
@@ -1304,8 +1303,9 @@ export function updateMetamaskState(newState) {
       newState.provider &&
       newState.provider &&
       newState.provider.ticker !== newState.nativeCurrency
-    )
+    ) {
       newState.nativeCurrency = newState.provider.ticker;
+    }
     dispatch({
       type: actionConstants.UPDATE_METAMASK_STATE,
       value: newState,
@@ -2559,6 +2559,7 @@ export function detectCollectibles() {
   return async (dispatch) => {
     dispatch(showLoadingIndication());
     log.debug(`background.detectCollectibles`);
+    console.log(promisifiedBackground.detectCollectibles());
     await promisifiedBackground.detectCollectibles();
     dispatch(hideLoadingIndication());
     await forceUpdateMetamaskState(dispatch);
@@ -3703,10 +3704,10 @@ export function getPopupId() {
   return promisifiedBackground.getPopupId();
 }
 /**
- * @description: get gas fee
- * @param {String} amount
- * @param {String} misesId
- * @return {*}
+ * @type amount
+ * @property {string} amount - amount of the token
+ * @type misesId
+ * @property {string} misesId - misesId of the token
  */
 export function getMisesGasfee() {
   return async (dispatch, getState) => {

@@ -1,10 +1,3 @@
-/*
- * @Author: lmk
- * @Date: 2022-01-18 17:59:56
- * @LastEditTime: 2022-03-18 13:34:21
- * @LastEditors: lmk
- * @Description:
- */
 import React from 'react';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 

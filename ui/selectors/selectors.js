@@ -19,6 +19,7 @@ import {
   BSC_DISPLAY_NAME,
   POLYGON_DISPLAY_NAME,
   AVALANCHE_DISPLAY_NAME,
+  RINKEBY_CHAIN_ID,
 } from '../../shared/constants/network';
 
 import {
@@ -550,7 +551,7 @@ export function getSuggestedAssets(state) {
 
 export function getIsMainnet(state) {
   const chainId = getCurrentChainId(state);
-  return chainId === MAINNET_CHAIN_ID;
+  return [MAINNET_CHAIN_ID, RINKEBY_CHAIN_ID].includes(chainId);
 }
 
 export function getIsTestnet(state) {
@@ -999,9 +1000,6 @@ export function getIsAdvancedGasFeeDefault(state) {
   );
 }
 
-/**
- * @param {*}
- */
 export function getMisesTranstionFlag(state) {
   return state.metamask.transformFlag;
 }

@@ -1,10 +1,3 @@
-/*
- * @Author: lmk
- * @Date: 2021-11-16 23:11:00
- * @LastEditTime: 2022-01-28 14:29:56
- * @LastEditors: lmk
- * @Description:
- */
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';

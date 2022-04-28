@@ -127,7 +127,7 @@ initialize().catch(log.error);
  */
 
 /**
- * @description: Set the web address of Web3 currently connected to the local store
+ * Set the web address of Web3 currently connected to the local store
  */
 const setActiveUrl = async () => {
   const [activeTab] = await platform.getActiveTabs();
@@ -159,6 +159,7 @@ const setActiveUrl = async () => {
 
 async function initialize() {
   const initState = await loadStateFromPersistence();
+  console.log(initState, 'initState');
   const initLangCode = await getFirstPreferredLangCode();
   setActiveUrl();
   await setupController(initState, initLangCode);
@@ -374,6 +375,11 @@ function setupController(initState, initLangCode) {
    * @param {Port} remotePort - The port provided by a new context.
    */
   function connectRemote(remotePort) {
+    console.log(remotePort, 'old: remotePort');
+    if (!remotePort.sender.origin) {
+      remotePort.sender.origin = new URL(remotePort.sender.url).origin;
+    }
+    console.log(remotePort, 'new: remotePort');
     const processName = remotePort.name;
 
     if (metamaskBlockedPorts.includes(remotePort.name)) {
@@ -441,7 +447,7 @@ function setupController(initState, initLangCode) {
         const { origin } = url;
 
         remotePort.onMessage.addListener((msg) => {
-          console.log('remotePort', msg);
+          console.log('remotePort.onMessage:remotePort', msg);
           if (
             msg.data &&
             ['eth_requestAccounts', 'mises_requestAccounts'].includes(
@@ -605,11 +611,11 @@ function setupController(initState, initLangCode) {
       ethErrors.provider.userRejectedRequest(),
     );
 
-    Object.keys(
-      controller.permissionsController.approvals.state.pendingApprovals,
-    ).forEach((approvalId) => {
-      controller.permissionsController.rejectPermissionsRequest(approvalId);
-    });
+    // Object.keys(
+    //   controller.permissionsController.approvals.state.pendingApprovals,
+    // ).forEach((approvalId) => {
+    //   controller.permissionsController.rejectPermissionsRequest(approvalId);
+    // });
 
     // reject all pending unlock request
     controller.appStateController.rejectUnlock();
@@ -732,20 +738,19 @@ async function checkAndInject() {
     return;
   }
 
-  browser.tabs.sendMessage(
-    activeTab.id,
-    { check: 'contentscript' },
-    function (response) {
+  browser.tabs
+    .sendMessage(activeTab.id, { check: 'contentscript' })
+    .then((response) => {
       if (response) {
         console.log('contentscript already there');
       } else {
         injectDynamic();
       }
-    },
-  );
+    });
 }
 
-browser.runtime.onMessage.addListener(function (request, _, sendResponse) {
+browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  console.log('browser.runtime.onMessage:sender', sender);
   if (request.check === 'backgroundscript') {
     sendResponse({ message: 'ready' });
   }

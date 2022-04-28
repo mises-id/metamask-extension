@@ -70,15 +70,16 @@ export default class SendFooter extends Component {
       provider,
       addToMisesBookIfNew,
     } = this.props;
-    const { metricsEvent } = this.context;
+    const { trackEvent } = this.context;
     // let promise = null;
     if (provider.type === 'MisesTestNet') {
       addToMisesBookIfNew(to);
-      metricsEvent({
-        eventOpts: {
-          category: 'Transactions',
+      trackEvent({
+        category: 'Transactions',
+        event: 'Complete',
+        properties: {
           action: 'Edit Screen',
-          name: 'Complete',
+          legacy_event: true,
         },
       });
       setTimeout(() => {
@@ -89,13 +90,11 @@ export default class SendFooter extends Component {
       await addToAddressBookIfNew(to, toAccounts);
       const promise = sign();
       Promise.resolve(promise).then(() => {
-        metricsEvent({
-          eventOpts: {
-            category: 'Transactions',
-            action: 'Edit Screen',
-            name: 'Complete',
-          },
-          customVariables: {
+        trackEvent({
+          category: 'Transactions',
+          action: 'Edit Screen',
+          name: 'Complete',
+          environmentType: {
             gasChanged: gasEstimateType,
           },
         });
