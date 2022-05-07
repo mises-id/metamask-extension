@@ -133,7 +133,9 @@ export default function TransactionList({
     if (Array.isArray(arr)) {
       arr.forEach((val) => {
         const flag = uniqueArr.some((item) => item.height === val.height);
-        if (!flag) uniqueArr.push(val);
+        if (!flag) {
+          uniqueArr.push(val);
+        }
       });
     }
     return uniqueArr.sort((a, b) => b.height - a.height);

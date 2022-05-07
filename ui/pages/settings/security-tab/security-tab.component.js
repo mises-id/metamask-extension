@@ -183,7 +183,7 @@ export default class SecurityTab extends PureComponent {
         {this.renderSeedWords()}
         {!isMises && this.renderIncomingTransactionsOptIn()}
         {this.renderPhishingDetectionToggle()}
-        {!isMises && this.renderMetaMetricsOptIn()}
+        {this.renderMetaMetricsOptIn()}
       </div>
     );
   }

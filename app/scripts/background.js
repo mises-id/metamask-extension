@@ -159,7 +159,6 @@ const setActiveUrl = async () => {
 
 async function initialize() {
   const initState = await loadStateFromPersistence();
-  console.log(initState, 'initState');
   const initLangCode = await getFirstPreferredLangCode();
   setActiveUrl();
   await setupController(initState, initLangCode);
@@ -635,7 +634,6 @@ function setupController(initState, initLangCode) {
  */
 async function triggerUi() {
   const tabs = await platform.getActiveTabs();
-  console.log(tabs, '212222');
   const currentlyActiveMetamaskTab = Boolean(
     tabs.find((tab) => openMetamaskTabsIDs[tab.id]),
   );
@@ -645,14 +643,6 @@ async function triggerUi() {
     tabs.length > 0 &&
     tabs[0].extData &&
     tabs[0].extData.indexOf('vivaldi_tab') > -1;
-
-  console.log(
-    'triggerUi',
-    uiIsTriggering,
-    isVivaldi,
-    popupIsOpen,
-    currentlyActiveMetamaskTab,
-  );
   const flag = await setExtensionTab();
   console.log(flag, 'setExtensionTab');
   if (
@@ -680,16 +670,25 @@ async function setExtensionTab(type) {
         val.title.indexOf('MetaMask') > -1 &&
         val.url.indexOf('chrome-extension://') > -1,
     );
-    console.log(findExtensionTab, 'findExtensionTab', chromeTabs);
     if (findExtensionTab) {
-      const activeTabs = await platform.getActiveTabs();
-      await platform.switchToTab(findExtensionTab.id);
-      browser.tabs.reload(findExtensionTab.id);
-      if (!type) {
-        notificationManager._openerTab =
-          activeTabs.length > 0 ? activeTabs[0] : undefined;
-        notificationManager._popupId = findExtensionTab.id;
-        notificationManager.setExtensionTab = true;
+      try {
+        const activeTabs = await platform.getActiveTabs();
+        const switchTabObj = await platform.switchToTab(findExtensionTab.id);
+        browser.tabs.reload(switchTabObj.id);
+        if (!type) {
+          if (activeTabs[0]) {
+            notificationManager._openerTab = activeTabs[0];
+            browser.tabs.update(activeTabs[0].id, {
+              highlighted: false,
+              active: false,
+            });
+          }
+          notificationManager._popupId = switchTabObj.id;
+          notificationManager.setExtensionTab = true;
+        }
+      } catch (error) {
+        console.log(error, 'setExtensionTab-error');
+        return false;
       }
 
       return true;

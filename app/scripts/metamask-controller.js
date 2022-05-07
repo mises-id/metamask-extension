@@ -57,7 +57,11 @@ import {
   GAS_DEV_API_BASE_URL,
   SWAPS_CLIENT_ID,
 } from '../../shared/constants/swaps';
-import { MAINNET_CHAIN_ID } from '../../shared/constants/network';
+import {
+  NETWORK_TO_NAME_MAP,
+  MAINNET_CHAIN_ID,
+  LOCALHOST_RPC_URL,
+} from '../../shared/constants/network';
 import {
   DEVICE_NAMES,
   KEYRING_TYPES,
@@ -362,6 +366,7 @@ export default class MetamaskController extends EventEmitter {
           ),
           getCollectiblesState: () => this.collectiblesController.state,
           isUnlocked: this.isUnlocked.bind(this),
+          getNetwork: this.collectiblesController.getNetwork.bind(this),
         },
       ));
 
@@ -2582,7 +2587,6 @@ export default class MetamaskController extends EventEmitter {
    * array.
    */
   async getPermittedAccounts(origin) {
-    console.log(origin, 'origin');
     try {
       return await this.permissionController.executeRestrictedMethod(
         origin,
@@ -3590,6 +3594,15 @@ export default class MetamaskController extends EventEmitter {
         ),
       }),
     );
+    const getAccountsFn = async (originStr) => {
+      if (originStr.indexOf('metamask') > -1) {
+        const selectedAddress = this.preferencesController.getSelectedAddress();
+        return selectedAddress ? [selectedAddress] : [];
+      } else if (this.isUnlocked()) {
+        return await this.getPermittedAccounts(originStr);
+      }
+      return []; // changing this is a breaking change
+    };
     this.networkController.mergeNetworkOpts({
       hasPermission: this.permissionController.hasPermission.bind(
         this.permissionController,
@@ -3603,7 +3616,8 @@ export default class MetamaskController extends EventEmitter {
       getUnlockPromise: this.appStateController.getUnlockPromise.bind(
         this.appStateController,
       ),
-      getAccounts: this.getPermittedAccounts.bind(this, origin),
+      getAccounts: getAccountsFn.bind(this, origin),
+      getCollectibles: this.getCollectibles.bind(this),
     });
     ///: BEGIN:ONLY_INCLUDE_IN(flask)
     engine.push(
@@ -4291,16 +4305,34 @@ export default class MetamaskController extends EventEmitter {
   }
 
   closePopUp(from) {
-    console.log(
-      this.opts.notificationManager,
-      'this.opts.notificationManager',
-      from,
-    );
+    console.log('this.opts.notificationManager', from);
     this.opts.notificationManager.closePopup();
   }
 
   getPopupId() {
     return this.opts.notificationManager.setExtensionTab;
+  }
+
+  // get selectAddress Collectibles
+  async getCollectibles() {
+    const selectedAddress = this.preferencesController.getSelectedAddress();
+    const { allCollectibles } = this.collectiblesController.state;
+    if (selectedAddress) {
+      const rpcList = this.preferencesController
+        .getFrequentRpcListDetail()
+        .filter((val) => val.rpcUrl !== LOCALHOST_RPC_URL);
+      return Object.keys(allCollectibles[selectedAddress])
+        .map((val) => {
+          const rpcNetwork = rpcList.find((item) => item.chainId === val);
+          return {
+            chainId: val,
+            chainName: NETWORK_TO_NAME_MAP[val] || rpcNetwork.nickname || '',
+            list: allCollectibles[selectedAddress][val] || [],
+          };
+        })
+        .filter((val) => val.list.length > 0);
+    }
+    return [];
   }
 
   ///: BEGIN:ONLY_INCLUDE_IN(flask)

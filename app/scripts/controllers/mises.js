@@ -169,6 +169,7 @@ export default class MisesController {
       misesId,
       token: account.token,
     };
+    console.log(userinfo, 'method:getMisesUserInfo');
     return userinfo;
   }
 

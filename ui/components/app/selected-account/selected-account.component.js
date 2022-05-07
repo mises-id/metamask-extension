@@ -39,7 +39,7 @@ class SelectedAccount extends Component {
 
   render() {
     const { t } = this.context;
-    const { selectedIdentity, misesOpt } = this.props;
+    const { selectedIdentity, misesOpt = {} } = this.props;
     const checksummedAddress = misesOpt.isMises
       ? misesOpt.account.misesId
       : toChecksumHexAddress(selectedIdentity.address);

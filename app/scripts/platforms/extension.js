@@ -243,15 +243,7 @@ export default class ExtensionPlatform {
   }
 
   getActiveTabs() {
-    return new Promise((resolve, reject) => {
-      browser.tabs.query({ active: true }).then((tabs) => {
-        const error = checkForError();
-        if (error) {
-          return reject(error);
-        }
-        return resolve(tabs);
-      });
-    });
+    return browser.tabs.query({ active: true });
   }
 
   getTabs(options) {
@@ -281,16 +273,7 @@ export default class ExtensionPlatform {
 
   switchToTab(tabId) {
     console.log('switchToTab', tabId);
-    return new Promise((resolve, reject) => {
-      browser.tabs.update(tabId, { highlighted: true }).then((tab) => {
-        const err = checkForError();
-        if (err) {
-          reject(err);
-        } else {
-          resolve(tab);
-        }
-      });
-    });
+    return browser.tabs.update(tabId, { highlighted: true });
   }
 
   closeTab(tabId) {

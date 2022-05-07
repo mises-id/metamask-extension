@@ -198,12 +198,6 @@ export default class Home extends PureComponent {
       totalUnapprovedCount,
     } = this.props;
     const _popupId = await getPopupId();
-    console.log(
-      isNotification,
-      totalUnapprovedCount === 0,
-      !isSigningQRHardwareTransaction,
-      _popupId,
-    );
     if (
       (isNotification &&
         totalUnapprovedCount === 0 &&

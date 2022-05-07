@@ -39,8 +39,8 @@ export default class PreferencesController {
       // set to true means the dynamic list from the API is being used
       // set to false will be using the static list from contract-metadata
       useTokenDetection: Boolean(process.env.TOKEN_DETECTION_V2),
-      useCollectibleDetection: false,
-      openSeaEnabled: false,
+      useCollectibleDetection: true,
+      openSeaEnabled: true,
       advancedGasFee: null,
 
       // WARNING: Do not use feature flags for security-sensitive things.
@@ -56,7 +56,7 @@ export default class PreferencesController {
       lostIdentities: {},
       forgottenPassword: false,
       preferences: {
-        autoLockTimeLimit: undefined,
+        autoLockTimeLimit: 60,
         showFiatInTestnets: false,
         showTestNetworks: false,
         useNativeCurrencyAsPrimaryCurrency: true,

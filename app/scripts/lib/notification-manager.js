@@ -15,8 +15,6 @@ export default class NotificationManager extends EventEmitter {
   /**
    * A collection of methods for controlling the showing and hiding of the notification popup.
    *
-   * @typedef {Object} NotificationManager
-   * @property
    */
   setExtensionTab = false;
 
