@@ -175,7 +175,6 @@ export default function SrpInput({ onChange, srpText }) {
                 autoComplete="off"
                 onPaste={(event) => {
                   const newSrp = event.clipboardData.getData('text');
-
                   if (newSrp.trim().match(/\s/u)) {
                     event.preventDefault();
                     onSrpPaste(newSrp);

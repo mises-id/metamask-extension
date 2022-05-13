@@ -78,7 +78,6 @@ export default function CollectiblesTab({ onAddNFT }) {
             </Box>
             <Box
               marginTop={4}
-              marginBottom={12}
               justifyContent={JUSTIFY_CONTENT.CENTER}
               flexDirection={FLEX_DIRECTION.COLUMN}
               className="collectibles-tab__link"

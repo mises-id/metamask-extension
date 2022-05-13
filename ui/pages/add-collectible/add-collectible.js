@@ -145,7 +145,6 @@ export default function AddCollectible() {
                 setCollectibleAddFailed(false);
               }}
               tooltipText={t('importNFTTokenIdToolTip')}
-              numeric
             />
           </Box>
         </Box>

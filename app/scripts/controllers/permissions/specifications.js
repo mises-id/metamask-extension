@@ -271,4 +271,5 @@ export const unrestrictedMethods = Object.freeze([
   'mises_connect',
   'mises_disconnect',
   'mises_getAddressToMisesId',
+  'mises_getCollectibles',
 ]);

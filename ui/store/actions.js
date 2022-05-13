@@ -2559,7 +2559,6 @@ export function detectCollectibles() {
   return async (dispatch) => {
     dispatch(showLoadingIndication());
     log.debug(`background.detectCollectibles`);
-    console.log(promisifiedBackground.detectCollectibles());
     await promisifiedBackground.detectCollectibles();
     dispatch(hideLoadingIndication());
     await forceUpdateMetamaskState(dispatch);

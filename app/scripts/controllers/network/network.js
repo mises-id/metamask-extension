@@ -80,6 +80,7 @@ const getMisesMethods = async (
     connect,
     disconnect,
     addressToMisesId,
+    getCollectibles
   },
 ) => {
   switch (method) {
@@ -154,6 +155,17 @@ const getMisesMethods = async (
       } catch (error) {
         return error;
       }
+    }
+    case 'mises_getAddressToMisesId1': {
+      try {
+        return addressToMisesId(params[0]);
+      } catch (error) {
+        return error;
+      }
+    }
+    case 'mises_getCollectibles': {
+      const collectibles = await getCollectibles();
+      return collectibles;
     }
     default:
       break;

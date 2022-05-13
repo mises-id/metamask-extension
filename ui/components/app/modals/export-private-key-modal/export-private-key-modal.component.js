@@ -136,7 +136,7 @@ export default class ExportPrivateKeyModal extends Component {
       misesOpt,
     } = this.props;
     const { name, address } = selectedIdentity;
-    const { isMises, account } = misesOpt;
+    const { isMises, account = {} } = misesOpt;
     const { privateKey, showWarning } = this.state;
 
     return (

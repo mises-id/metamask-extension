@@ -3,9 +3,15 @@ import PropTypes from 'prop-types';
 import Button from '../../../components/ui/button';
 import Snackbar from '../../../components/ui/snackbar';
 import MetaFoxLogo from '../../../components/ui/metafox-logo';
-import { SUPPORT_REQUEST_LINK } from '../../../helpers/constants/common';
+// import { SUPPORT_REQUEST_LINK } from '../../../helpers/constants/common';
 import { DEFAULT_ROUTE } from '../../../helpers/constants/routes';
 import { returnToOnboardingInitiator } from '../onboarding-initiator-util';
+import {
+  COLORS,
+  TEXT_ALIGN,
+  TYPOGRAPHY,
+} from '../../../helpers/constants/design-system';
+import Typography from '../../../components/ui/typography';
 
 export default class EndOfFlowScreen extends PureComponent {
   static contextTypes = {
@@ -21,6 +27,14 @@ export default class EndOfFlowScreen extends PureComponent {
       location: PropTypes.string,
       tabId: PropTypes.number,
     }),
+
+    firstTimeFlowType: PropTypes.oneOf(['create', 'import']),
+    setParticipateInMetaMetrics: PropTypes.func,
+    // participateInMetaMetrics: PropTypes.bool,
+  };
+
+  onCancel = async () => {
+    this.onComplete(false);
   };
 
   async _beforeUnload() {
@@ -31,8 +45,14 @@ export default class EndOfFlowScreen extends PureComponent {
     window.removeEventListener('beforeunload', this._beforeUnload);
   }
 
-  async _onOnboardingComplete() {
-    const { setCompletedOnboarding, completionMetaMetricsName } = this.props;
+  async _onOnboardingComplete(flag) {
+    const {
+      setCompletedOnboarding,
+      completionMetaMetricsName,
+      firstTimeFlowType,
+      setParticipateInMetaMetrics,
+    } = this.props;
+    const [, metaMetricsId] = await setParticipateInMetaMetrics(flag);
     await setCompletedOnboarding();
     this.context.trackEvent({
       category: 'Onboarding',
@@ -42,13 +62,36 @@ export default class EndOfFlowScreen extends PureComponent {
         legacy_event: true,
       },
     });
+
+    const firstTimeFlowTypeNameMap = {
+      create: 'Selected Create New Wallet',
+      import: 'Selected Import Wallet',
+    };
+    const firstTimeSelectionMetaMetricsName =
+      firstTimeFlowTypeNameMap[firstTimeFlowType];
+    console.log(firstTimeFlowType, metaMetricsId);
+    this.context.trackEvent(
+      {
+        category: 'Onboarding',
+        event: firstTimeSelectionMetaMetricsName,
+        properties: {
+          action: 'Import or Create',
+          legacy_event: true,
+        },
+      },
+      {
+        isOptIn: true,
+        metaMetricsId,
+        flushImmediately: true,
+      },
+    );
   }
 
-  onComplete = async () => {
+  onComplete = async (flag = true) => {
     const { history, onboardingInitiator } = this.props;
 
     this._removeBeforeUnload();
-    await this._onOnboardingComplete();
+    await this._onOnboardingComplete(flag);
     if (onboardingInitiator) {
       await returnToOnboardingInitiator(onboardingInitiator);
     }
@@ -85,6 +128,9 @@ export default class EndOfFlowScreen extends PureComponent {
           <div className="first-time-flow__text-block end-of-flow__text-2">
             Please connect to Mises chain to edit your personal info.
           </div>
+          {/* <div className="first-time-flow__text-block end-of-flow__text-2">
+            {t('metametricsOptInDescription')}
+          </div> */}
         </div>
         {/* <div className="end-of-flow__text-3">
           {`• ${t('endOfFlowMessage3')}`}
@@ -125,13 +171,50 @@ export default class EndOfFlowScreen extends PureComponent {
             </span>
           </a>
         </div> */}
-        <Button
+        <div className="end-of-flow-btn">
+          <Typography
+            color={COLORS.TEXT_ALTERNATIVE}
+            align={TEXT_ALIGN.CENTER}
+            variant={TYPOGRAPHY.H6}
+            className="onboarding-metametrics__terms"
+          >
+            {t('metametricsOptInDescription', [
+              <a
+                key="metametrics-bottom-text-wrapper"
+                href="https://www.mises.site/policy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('gdprMessagePrivacyPolicy')}
+              </a>,
+            ])}
+          </Typography>
+          <div className="endofflow-metametrics__buttons">
+            <Button
+              className="first-time-flow__button"
+              data-testid="metametrics-no-thanks"
+              type="secondary"
+              onClick={this.onCancel}
+            >
+              {t('noThanks')}
+            </Button>
+            <Button
+              className="first-time-flow__button"
+              data-testid="metametrics-i-agree"
+              type="primary"
+              onClick={() => this.onComplete(true)}
+            >
+              {t('affirmAgree')}
+            </Button>
+          </div>
+        </div>
+        {/* <Button
           type="primary"
           className="first-time-flow__button"
           onClick={this.onComplete}
         >
           {t('endOfFlowMessage10')}
-        </Button>
+        </Button> */}
         {onboardingInitiator ? (
           <Snackbar
             content={t('onboardingReturnNotice', [
