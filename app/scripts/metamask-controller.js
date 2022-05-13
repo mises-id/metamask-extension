@@ -366,7 +366,9 @@ export default class MetamaskController extends EventEmitter {
           ),
           getCollectiblesState: () => this.collectiblesController.state,
           isUnlocked: this.isUnlocked.bind(this),
-          getNetwork: this.collectiblesController.getNetwork.bind(this),
+          getNetwork: this.collectiblesController.getNetwork.bind(
+            this.collectiblesController,
+          ),
         },
       ));
 
@@ -3595,11 +3597,18 @@ export default class MetamaskController extends EventEmitter {
       }),
     );
     const getAccountsFn = async (originStr) => {
+      if (originStr.indexOf('mises') > -1) {
+        if (this.isUnlocked()) {
+          console.log(originStr, 'originStroriginStr');
+          return this.getPermittedAccounts(originStr);
+        }
+        return [];
+      }
+      console.log(originStr);
       if (originStr.indexOf('metamask') > -1) {
         const selectedAddress = this.preferencesController.getSelectedAddress();
+        console.log(selectedAddress, 'selectedAddressmetamask');
         return selectedAddress ? [selectedAddress] : [];
-      } else if (this.isUnlocked()) {
-        return await this.getPermittedAccounts(originStr);
       }
       return []; // changing this is a breaking change
     };

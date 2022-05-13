@@ -131,7 +131,6 @@ initialize().catch(log.error);
  */
 const setActiveUrl = async () => {
   const [activeTab] = await platform.getActiveTabs();
-  console.log('setActiveUrl', activeTab);
   if (!activeTab) {
     return false;
   }
@@ -446,7 +445,7 @@ function setupController(initState, initLangCode) {
         const { origin } = url;
 
         remotePort.onMessage.addListener((msg) => {
-          console.log('remotePort.onMessage:remotePort', msg);
+          // console.log('remotePort.onMessage:remotePort', msg);
           if (
             msg.data &&
             ['eth_requestAccounts', 'mises_requestAccounts'].includes(

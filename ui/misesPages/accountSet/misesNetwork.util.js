@@ -1,5 +1,5 @@
 export const MISES_SITE_API = 'https://api.alb.mises.site/api/v1';
-// export const MISES_SITE_API = 'http://192.168.1.4:8080/api/v1';
+// export const MISES_SITE_API = 'http://192.168.1.2:8080/api/v1';
 // export const MISES_POINT = 'http://192.168.1.8:26657';
 export const MISES_POINT = 'http://127.0.0.1:26657';
 // mises network api map

@@ -184,10 +184,11 @@ const getMisesAccount = async ({
   if (isProcessingRequestAccounts) {
     return Promise.reject(
       ethErrors.rpc.resourceUnavailable(
-        'Already processing eth_requestAccounts. Please wait.',
+        'Already processing mises_requestAccounts. Please wait.',
       ),
     );
   }
+  console.log(hasPermission('eth_accounts'), 'hasPermission');
   if (hasPermission('eth_accounts')) {
     isProcessingRequestAccounts = true;
     try {
@@ -219,6 +220,7 @@ const getMisesAccount = async ({
 
   // get the accounts again
   accounts = await getAccounts();
+  console.log(accounts, 'accounts2');
   /* istanbul ignore else: too hard to induce, see below comment */
   if (accounts.length > 0) {
     const nonce = new Date().getTime();

@@ -29,4 +29,46 @@ export default class MisesCollectiblesController extends CollectiblesController 
       'assets_contract',
     )}?asset_contract_address=${contractAddress}&network=${this.getNetwork()}`;
   }
+
+  /**
+   * Checks the ownership of a ERC-721 or ERC-1155 collectible for a given address.
+   *
+   * @param ownerAddress - User public address.
+   * @param collectibleAddress - Collectible contract address.
+   * @param collectibleId - Collectible token ID.
+   * @returns Promise resolving the collectible ownership.
+   */
+  async isCollectibleOwner(ownerAddress, collectibleAddress, collectibleId) {
+    console.log(ownerAddress, collectibleAddress, collectibleId);
+    // Checks the ownership for ERC-721.
+    try {
+      const owner = await this.getERC721OwnerOf(
+        collectibleAddress,
+        collectibleId,
+      );
+      // If the owner contract address of the current collectibleAddress returns 0x, it is considered not the current owner Continue with the getERC1155BalanceOf function
+      if (owner.toLowerCase() !== '0x') {
+        return ownerAddress.toLowerCase() === owner.toLowerCase();
+      }
+      // eslint-disable-next-line no-empty
+    } catch (_a) {
+      // Ignore ERC-721 contract error
+      console.log(_a, 'isCollectibleOwner');
+    }
+    // Checks the ownership for ERC-1155.
+    try {
+      const balance = await this.getERC1155BalanceOf(
+        ownerAddress,
+        collectibleAddress,
+        collectibleId,
+      );
+      return balance > 0;
+      // eslint-disable-next-line no-empty
+    } catch (_b) {
+      // Ignore ERC-1155 contract error
+    }
+    throw new Error(
+      'Unable to verify ownership. Probably because the standard is not supported or the chain is incorrect.',
+    );
+  }
 }

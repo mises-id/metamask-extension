@@ -15,6 +15,7 @@ export default class ExtensionPlatform {
   }
 
   openTab(options) {
+    console.log('openTab', browser.tabs);
     return new Promise((resolve, reject) => {
       browser.tabs.create(options).then((newTab) => {
         const error = checkForError();
