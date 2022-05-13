@@ -366,9 +366,13 @@ export default class MetamaskController extends EventEmitter {
           ),
           getCollectiblesState: () => this.collectiblesController.state,
           isUnlocked: this.isUnlocked.bind(this),
+<<<<<<< HEAD
           getNetwork: this.collectiblesController.getNetwork.bind(
             this.collectiblesController,
           ),
+=======
+          getNetwork: this.collectiblesController.getNetwork.bind(this),
+>>>>>>> 5995d00b123c7680b720a8893090051aef4edfeb
         },
       ));
 
