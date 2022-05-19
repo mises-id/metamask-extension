@@ -174,33 +174,35 @@ export default function CollectiblesItems({
         </button>
 
         {isExpanded ? (
-          <Box display={DISPLAY.FLEX} flexWrap={FLEX_WRAP.WRAP} gap={4}>
+          <Box
+            display={DISPLAY.GRID}
+            flexWrap={FLEX_WRAP.WRAP}
+            gap={4}
+            className="collectibles-items__collection-item-wrapper-grid"
+          >
             {collectibles.map((collectible, i) => {
               const { image, address, tokenId, backgroundColor } = collectible;
               const collectibleImage = getAssetImageURL(image, ipfsGateway);
               return (
-                <Box
-                  width={width}
+                <div
                   key={`collectible-${i}`}
                   className="collectibles-items__collection-item-wrapper"
                 >
-                  <Card padding={0} justifyContent={JUSTIFY_CONTENT.CENTER}>
-                    <div
-                      className="collectibles-items__collection-item"
-                      style={{
-                        backgroundColor,
-                      }}
-                    >
-                      <img
-                        onClick={() =>
-                          history.push(`${ASSET_ROUTE}/${address}/${tokenId}`)
-                        }
-                        className="collectibles-items__collection-item-image"
-                        src={collectibleImage}
-                      />
-                    </div>
-                  </Card>
-                </Box>
+                  <div
+                    className="collectibles-items__collection-item"
+                    style={{
+                      backgroundColor,
+                    }}
+                  >
+                    <img
+                      onClick={() =>
+                        history.push(`${ASSET_ROUTE}/${address}/${tokenId}`)
+                      }
+                      className="collectibles-items__collection-item-image"
+                      src={collectibleImage}
+                    />
+                  </div>
+                </div>
               );
             })}
           </Box>
