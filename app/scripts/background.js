@@ -258,6 +258,7 @@ function setupController(initState, initLangCode) {
       return openMetamaskTabsIDs;
     },
     restoreAccount,
+    openNFTPage,
   });
 
   setupEnsIpfsResolver({
@@ -373,11 +374,11 @@ function setupController(initState, initLangCode) {
    * @param {Port} remotePort - The port provided by a new context.
    */
   function connectRemote(remotePort) {
-    console.log(remotePort, 'old: remotePort');
+    // console.log(remotePort, 'old: remotePort');
     if (!remotePort.sender.origin) {
       remotePort.sender.origin = new URL(remotePort.sender.url).origin;
     }
-    console.log(remotePort, 'new: remotePort');
+    // console.log(remotePort, 'new: remotePort');
     const processName = remotePort.name;
 
     if (metamaskBlockedPorts.includes(remotePort.name)) {
@@ -780,6 +781,18 @@ browser.tabs.onUpdated.addListener((e) => {
 });
 async function restoreAccount() {
   const flag = await setExtensionTab('openPopup');
+  if (!flag) {
+    notificationManager.platform.openExtensionInBrowser(
+      DEFAULT_ROUTE,
+      null,
+      null,
+      'popup.html',
+    );
+  }
+}
+
+async function openNFTPage() {
+  const flag = await setExtensionTab('openNFTPage');
   if (!flag) {
     notificationManager.platform.openExtensionInBrowser(
       DEFAULT_ROUTE,

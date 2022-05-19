@@ -1,9 +1,8 @@
 import { strict as assert } from 'assert';
 import EventEmitter from 'events';
 import { ComposedStore, ObservableStore } from '@metamask/obs-store';
-import { JsonRpcEngine, mergeMiddleware } from 'json-rpc-engine';
+import { JsonRpcEngine } from 'json-rpc-engine';
 import { providerFromEngine } from 'eth-json-rpc-middleware';
-import { ethErrors } from 'eth-rpc-errors';
 import log from 'loglevel';
 import {
   createSwappableProxy,
@@ -67,179 +66,6 @@ export const NETWORK_EVENTS = {
   INFURA_IS_UNBLOCKED: 'infuraIsUnblocked',
 };
 
-const getMisesMethods = async (
-  method,
-  params,
-  {
-    setInfo,
-    setFollow,
-    setUnFollow,
-    getAccountFlag,
-    getActive,
-    restorePage,
-    connect,
-    disconnect,
-    addressToMisesId,
-    getCollectibles
-  },
-) => {
-  switch (method) {
-    case 'mises_setUserInfo': {
-      try {
-        await setInfo(params[0]);
-        return true;
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_userFollow': {
-      try {
-        await setFollow(params[0]);
-        return true;
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_userUnFollow': {
-      try {
-        await setUnFollow(params[0]);
-        return true;
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_getMisesAccount': {
-      try {
-        return getAccountFlag();
-      } catch (error) {
-        console.log(error);
-        return error;
-      }
-    }
-    case 'mises_getActive': {
-      try {
-        const flag = await getActive();
-        console.log(flag, '有active');
-        return Boolean(flag);
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_openRestore': {
-      try {
-        restorePage();
-        return true;
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_connect': {
-      try {
-        connect(params[0]);
-        return true;
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_disconnect': {
-      try {
-        disconnect(params[0]);
-        return true;
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_getAddressToMisesId': {
-      try {
-        return addressToMisesId(params[0]);
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_getAddressToMisesId1': {
-      try {
-        return addressToMisesId(params[0]);
-      } catch (error) {
-        return error;
-      }
-    }
-    case 'mises_getCollectibles': {
-      const collectibles = await getCollectibles();
-      return collectibles;
-    }
-    default:
-      break;
-  }
-  return true;
-};
-const getMisesAccount = async ({
-  exportAccount,
-  generateAuth,
-  getAccounts,
-  hasPermission,
-  getUnlockPromise,
-  requestAccountsPermission,
-}) => {
-  let isProcessingRequestAccounts = false;
-  if (isProcessingRequestAccounts) {
-    return Promise.reject(
-      ethErrors.rpc.resourceUnavailable(
-        'Already processing mises_requestAccounts. Please wait.',
-      ),
-    );
-  }
-  console.log(hasPermission('eth_accounts'), 'hasPermission');
-  if (hasPermission('eth_accounts')) {
-    isProcessingRequestAccounts = true;
-    try {
-      await getUnlockPromise(true);
-    } catch (err) {
-      return Promise.reject(err);
-    }
-    isProcessingRequestAccounts = false;
-  }
-  // first, just try to get accounts
-  let accounts = await getAccounts();
-  console.log(accounts, 'accounts');
-  if (accounts.length > 0) {
-    const nonce = new Date().getTime();
-    const key = await exportAccount(accounts[0]);
-    const auth = await generateAuth(nonce, key); // get mises auth
-    console.log('first, just try to get accounts');
-    return {
-      accounts,
-      auth,
-    };
-  }
-  // if no accounts, request the accounts permission
-  try {
-    await requestAccountsPermission();
-  } catch (err) {
-    return Promise.reject(err);
-  }
-
-  // get the accounts again
-  accounts = await getAccounts();
-  console.log(accounts, 'accounts2');
-  /* istanbul ignore else: too hard to induce, see below comment */
-  if (accounts.length > 0) {
-    const nonce = new Date().getTime();
-    const key = await exportAccount(accounts[0]);
-    const auth = await generateAuth(nonce, key); // get mises auth
-    console.log('get the accounts again');
-    return {
-      accounts,
-      auth,
-    };
-  }
-  // this should never happen, because it should be caught in the
-  // above catch clause
-  return Promise.reject(
-    ethErrors.rpc.internal(
-      'Accounts unexpectedly unavailable. Please report this bug.',
-    ),
-  );
-};
 function createMisesMiddleware() {
   return (req, res, next, end) => {
     console.log('MisesMiddleware', 'req', req);
@@ -273,34 +99,6 @@ function createMisesMiddleware() {
       );
     }
     return next();
-  };
-}
-function misesMethodsMiddleware() {
-  return (req, res, next, end) => {
-    console.log('misesMethodsMiddleware', 'req', req);
-    if (req.method === 'mises_requestAccounts') {
-      getMisesAccount(globalOptions)
-        .then((data) => {
-          res.result = data;
-          return end();
-        })
-        .catch((err) => {
-          res.error = err;
-          return end();
-        });
-    } else if (req.method && req.method.indexOf('mises_') > -1) {
-      getMisesMethods(req.method, req.params, globalOptions)
-        .then((data) => {
-          res.result = data;
-          return end();
-        })
-        .catch(() => {
-          res.result = false;
-          return end();
-        });
-    } else {
-      return next();
-    }
   };
 }
 class DummyBlockTracker extends SafeEventEmitter {
@@ -692,13 +490,9 @@ export default class NetworkController extends EventEmitter {
     const metamaskMiddleware = createMetamaskMiddleware(
       this._baseProviderParams,
     );
-    const networkMiddlewareFn = mergeMiddleware([
-      misesMethodsMiddleware(),
-      networkMiddleware,
-    ]);
     const engine = new JsonRpcEngine();
     engine.push(metamaskMiddleware);
-    engine.push(networkMiddlewareFn);
+    engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
     this._setProviderAndBlockTracker({ provider, blockTracker });
   }

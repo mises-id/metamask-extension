@@ -37,6 +37,7 @@ export const MESSAGE_TYPE = {
   ETH_DECRYPT: 'eth_decrypt',
   ETH_GET_ENCRYPTION_PUBLIC_KEY: 'eth_getEncryptionPublicKey',
   ETH_REQUEST_ACCOUNTS: 'eth_requestAccounts',
+  MISES_REQUEST_ACCOUNTS: 'mises_requestAccounts',
   ETH_SIGN: 'eth_sign',
   ETH_SIGN_TYPED_DATA: 'eth_signTypedData',
   GET_PROVIDER_STATE: 'metamask_getProviderState',
@@ -46,6 +47,18 @@ export const MESSAGE_TYPE = {
   SWITCH_ETHEREUM_CHAIN: 'wallet_switchEthereumChain',
   WATCH_ASSET: 'wallet_watchAsset',
   WATCH_ASSET_LEGACY: 'metamask_watchAsset',
+  // mises
+  MISES_GETMISESACCOUNT: 'mises_getMisesAccount',
+  MISES_SETUSERINFO: 'mises_setUserInfo',
+  MISES_USERFOLLOW: 'mises_userFollow',
+  MISES_USERUNFOLLOW: 'mises_userUnFollow',
+  MISES_GETACTIVE: 'mises_getActive',
+  MISES_OPENRESTORE: 'mises_openRestore',
+  MISES_OPENNFTPAGE: 'mises_openNFTPage',
+  MISES_CONNECT: 'mises_connect',
+  MISES_DISCONNECT: 'mises_disconnect',
+  MISES_GETADDRESSTOMISESID: 'mises_getAddressToMisesId',
+  MISES_GETCOLLECTIBLES: 'mises_getCollectibles',
   ///: BEGIN:ONLY_INCLUDE_IN(flask)
   SNAP_CONFIRM: RestrictedMethods.snap_confirm,
   ///: END:ONLY_INCLUDE_IN

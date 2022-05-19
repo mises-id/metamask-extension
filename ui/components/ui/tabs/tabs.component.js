@@ -26,7 +26,6 @@ export default class Tabs extends Component {
   handleTabClick(tabIndex, tabName) {
     const { onTabClick } = this.props;
     const { activeTabIndex } = this.state;
-
     if (tabIndex !== activeTabIndex) {
       this.setState(
         {
@@ -60,7 +59,20 @@ export default class Tabs extends Component {
   renderActiveTabContent() {
     const children = this._getValidChildren();
     const { activeTabIndex } = this.state;
-
+    const { onTabClick } = this.props;
+    if (activeTabIndex + 1 > children.length) {
+      this.setState(
+        {
+          activeTabIndex: 0,
+        },
+        () => {
+          if (onTabClick) {
+            onTabClick('Assets');
+          }
+        },
+      );
+      return children[0].props.children;
+    }
     if (
       (Array.isArray(children) && !children[activeTabIndex]) ||
       (!Array.isArray(children) && activeTabIndex !== 0)

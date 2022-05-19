@@ -28,6 +28,7 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
       }
     });
     this.getNetwork = options.getNetwork;
+    this.getMisesAccount = options.getMisesAccount;
   }
 
   getOwnerCollectiblesApi(address, offset) {
@@ -50,13 +51,17 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
   }
 
   async getOwnerCollectibles(address) {
+    const { token } = this.getMisesAccount(address);
     try {
       const openSeaApiKey = this.getOpenSeaApiKey();
       const api = this.getOwnerCollectiblesApi(address, this.offset);
       const { assets, next } = await request({
         url: api,
         method: 'GET',
-        headers: { 'X-API-KEY': openSeaApiKey },
+        headers: {
+          'X-API-KEY': openSeaApiKey,
+          Authorization: `Bearer ${token}`,
+        },
         isCustom: true,
       });
       this.offset = next || '';

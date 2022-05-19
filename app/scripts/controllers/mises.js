@@ -59,6 +59,17 @@ export default class MisesController {
     return accountList;
   }
 
+  getMisesAccount(address) {
+    if (address) {
+      const accountList = this.getAccountList();
+      const find = accountList.find((item) => item.address === address);
+      if (find) {
+        return find;
+      }
+    }
+    return {};
+  }
+
   clearTimer() {
     if (this.timer) {
       clearTimeout(this.timer);
@@ -257,11 +268,13 @@ export default class MisesController {
   }
 
   setUnFollow(data) {
+    console.log('mises:setUnFollow');
     const activeUser = this.getActive();
     return activeUser.unfollow(data);
   }
 
   setFollow(data) {
+    console.log('mises:setFollow');
     const activeUser = this.getActive();
     return activeUser.follow(data);
   }

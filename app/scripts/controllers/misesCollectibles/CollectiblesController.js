@@ -3,9 +3,15 @@ import {
   MAINNET_CHAIN_ID,
   RINKEBY_CHAIN_ID,
 } from '../../../../shared/constants/network';
+import { request } from '../../../../ui/helpers/utils/fetch';
 import { getBaseApi } from '../../../../ui/misesPages/accountSet/misesNetwork.util';
 
 export default class MisesCollectiblesController extends CollectiblesController {
+  constructor(options, config, state) {
+    super(options, config, state);
+    this.getMisesAccount = options.getMisesAccount;
+  }
+
   getNetwork() {
     const { chainId } = this.config;
     if (chainId === MAINNET_CHAIN_ID) {
@@ -39,7 +45,6 @@ export default class MisesCollectiblesController extends CollectiblesController 
    * @returns Promise resolving the collectible ownership.
    */
   async isCollectibleOwner(ownerAddress, collectibleAddress, collectibleId) {
-    console.log(ownerAddress, collectibleAddress, collectibleId);
     // Checks the ownership for ERC-721.
     try {
       const owner = await this.getERC721OwnerOf(
@@ -70,5 +75,98 @@ export default class MisesCollectiblesController extends CollectiblesController 
     throw new Error(
       'Unable to verify ownership. Probably because the standard is not supported or the chain is incorrect.',
     );
+  }
+
+  /**
+   * Request individual collectible information from OpenSea API.
+   *
+   * @param contractAddress - Hex address of the collectible contract.
+   * @param tokenId - The collectible identifier.
+   * @returns Promise resolving to the current collectible name and image.
+   */
+  async getCollectibleInformationFromApi(contractAddress, tokenId) {
+    try {
+      const tokenURI = this.getCollectibleApi(contractAddress, tokenId);
+      const { token } = this.getMisesAccount(contractAddress);
+      const collectibleInformation = this.openSeaApiKey
+        ? await request({
+            url: tokenURI,
+            method: 'GET',
+            headers: {
+              'X-API-KEY': this.openSeaApiKey,
+              Authorization: `Bearer ${token}`,
+            },
+            isCustom: true,
+          })
+        : await request({
+            url: tokenURI,
+            method: 'GET',
+            isCustom: true,
+          });
+      const {
+        num_sales: numSales,
+        background_color: backgroundColor,
+        image_url: imageUrl,
+        image_preview_url: imagePreviewUrl,
+        image_thumbnail_url: imageThumbnailUrl,
+        image_original_url: imageOriginalUrl,
+        animation_url: animationUrl,
+        animation_original_url: animationOriginalUrl,
+        name,
+        description,
+        external_link: externalLink,
+        creator,
+        last_sale: lastSale,
+        asset_contract: { schema_name: schemaName },
+      } = collectibleInformation;
+      /* istanbul ignore next */
+      const collectibleMetadata = {
+        name: name || null,
+        description: description || null,
+        image: imageUrl || null,
+        ...(creator && { creator }),
+        ...(numSales && { numberOfSales: numSales }),
+        ...(backgroundColor && { backgroundColor }),
+        ...(imagePreviewUrl && { imagePreview: imagePreviewUrl }),
+        ...(imageThumbnailUrl && { imageThumbnail: imageThumbnailUrl }),
+        ...(imageOriginalUrl && { imageOriginal: imageOriginalUrl }),
+        ...(animationUrl && { animation: animationUrl }),
+        ...(animationOriginalUrl && {
+          animationOriginal: animationOriginalUrl,
+        }),
+        ...(externalLink && { externalLink }),
+        ...(lastSale && { lastSale }),
+        ...(schemaName && { standard: schemaName }),
+      };
+      return collectibleMetadata;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  /**
+   * Request collectible contract information from OpenSea API.
+   *
+   * @param contractAddress - Hex address of the collectible contract.
+   * @returns Promise resolving to the current collectible name and image.
+   */
+  async getCollectibleContractInformationFromApi(contractAddress) {
+    const api = this.getCollectibleContractInformationApi(contractAddress);
+    const { token } = this.getMisesAccount(contractAddress);
+    return this.openSeaApiKey
+      ? await request({
+          url: api,
+          method: 'GET',
+          headers: {
+            'X-API-KEY': this.openSeaApiKey,
+            Authorization: `Bearer ${token}`,
+          },
+          isCustom: true,
+        })
+      : await request({
+          url: api,
+          method: 'GET',
+          isCustom: true,
+        });
   }
 }

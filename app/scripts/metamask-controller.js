@@ -238,26 +238,6 @@ export default class MetamaskController extends EventEmitter {
     });
     this.networkController = new NetworkController({
       ...initState.NetworkController,
-      // Web3 mises-related
-      setInfo: this.misesController.setUserInfo.bind(this.misesController),
-      setUnFollow: this.misesController.setUnFollow.bind(this.misesController),
-      setFollow: this.misesController.setFollow.bind(this.misesController),
-      getActive: this.misesController.getActive.bind(this.misesController),
-      generateAuth: this.misesController.generateAuth.bind(
-        this.misesController,
-      ),
-      exportAccount: this.keyringController.exportAccount.bind(
-        this.keyringController,
-      ),
-      restorePage: this.restorePage.bind(this),
-      connect: this.misesController.connect.bind(this.misesController),
-      disconnect: this.misesController.disconnect.bind(this.misesController),
-      addressToMisesId: this.misesController.addressToMisesId.bind(
-        this.misesController,
-      ),
-      getAccountFlag: this.misesController.getAccountFlag.bind(
-        this.misesController,
-      ),
     });
     this.networkController.setInfuraProjectId(opts.infuraProjectId);
 
@@ -340,6 +320,9 @@ export default class MetamaskController extends EventEmitter {
         getERC1155TokenURI: this.assetsContractController.getERC1155TokenURI.bind(
           this.assetsContractController,
         ),
+        getMisesAccount: this.misesController.getMisesAccount.bind(
+          this.misesController,
+        ),
       },
       {},
       initState.CollectiblesController,
@@ -366,13 +349,12 @@ export default class MetamaskController extends EventEmitter {
           ),
           getCollectiblesState: () => this.collectiblesController.state,
           isUnlocked: this.isUnlocked.bind(this),
-<<<<<<< HEAD
           getNetwork: this.collectiblesController.getNetwork.bind(
             this.collectiblesController,
           ),
-=======
-          getNetwork: this.collectiblesController.getNetwork.bind(this),
->>>>>>> 5995d00b123c7680b720a8893090051aef4edfeb
+          getMisesAccount: this.misesController.getMisesAccount.bind(
+            this.misesController,
+          ),
         },
       ));
 
@@ -3598,40 +3580,33 @@ export default class MetamaskController extends EventEmitter {
         setWeb3ShimUsageRecorded: this.alertController.setWeb3ShimUsageRecorded.bind(
           this.alertController,
         ),
+
+        // Web3 mises-related
+        setInfo: this.misesController.setUserInfo.bind(this.misesController),
+        setUnFollow: this.misesController.setUnFollow.bind(
+          this.misesController,
+        ),
+        setFollow: this.misesController.setFollow.bind(this.misesController),
+        getActive: this.misesController.getActive.bind(this.misesController),
+        generateAuth: this.misesController.generateAuth.bind(
+          this.misesController,
+        ),
+        exportAccount: this.keyringController.exportAccount.bind(
+          this.keyringController,
+        ),
+        restorePage: this.restorePage.bind(this),
+        NFTPage: this.NFTPage.bind(this),
+        connect: this.misesController.connect.bind(this.misesController),
+        disconnect: this.misesController.disconnect.bind(this.misesController),
+        addressToMisesId: this.misesController.addressToMisesId.bind(
+          this.misesController,
+        ),
+        getAccountFlag: this.misesController.getAccountFlag.bind(
+          this.misesController,
+        ),
+        getCollectibles: this.getCollectibles.bind(this),
       }),
     );
-    const getAccountsFn = async (originStr) => {
-      if (originStr.indexOf('mises') > -1) {
-        if (this.isUnlocked()) {
-          console.log(originStr, 'originStroriginStr');
-          return this.getPermittedAccounts(originStr);
-        }
-        return [];
-      }
-      console.log(originStr);
-      if (originStr.indexOf('metamask') > -1) {
-        const selectedAddress = this.preferencesController.getSelectedAddress();
-        console.log(selectedAddress, 'selectedAddressmetamask');
-        return selectedAddress ? [selectedAddress] : [];
-      }
-      return []; // changing this is a breaking change
-    };
-    this.networkController.mergeNetworkOpts({
-      hasPermission: this.permissionController.hasPermission.bind(
-        this.permissionController,
-        origin,
-      ),
-      requestAccountsPermission: this.permissionController.requestPermissions.bind(
-        this.permissionController,
-        { origin },
-        { eth_accounts: {} },
-      ),
-      getUnlockPromise: this.appStateController.getUnlockPromise.bind(
-        this.appStateController,
-      ),
-      getAccounts: getAccountsFn.bind(this, origin),
-      getCollectibles: this.getCollectibles.bind(this),
-    });
     ///: BEGIN:ONLY_INCLUDE_IN(flask)
     engine.push(
       createSnapMethodMiddleware(subjectType === SUBJECT_TYPES.SNAP, {
@@ -4278,6 +4253,14 @@ export default class MetamaskController extends EventEmitter {
     this.opts.restoreAccount();
   }
 
+  /**
+   * open NFT page
+   */
+  NFTPage() {
+    this.opts.openNFTPage();
+    this.appStateController.setDefaultHomeActiveTabName('NFTs');
+  }
+
   initMisesBalance() {
     return this.misesController.initMisesBalance();
   }
@@ -4330,7 +4313,7 @@ export default class MetamaskController extends EventEmitter {
   async getCollectibles() {
     const selectedAddress = this.preferencesController.getSelectedAddress();
     const { allCollectibles } = this.collectiblesController.state;
-    if (selectedAddress) {
+    if (selectedAddress && allCollectibles[selectedAddress]) {
       const rpcList = this.preferencesController
         .getFrequentRpcListDetail()
         .filter((val) => val.rpcUrl !== LOCALHOST_RPC_URL);
