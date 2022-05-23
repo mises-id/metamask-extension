@@ -5,7 +5,6 @@ import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 import Box from '../../ui/box';
 import Typography from '../../ui/typography/typography';
-import Card from '../../ui/card';
 import {
   COLORS,
   TYPOGRAPHY,

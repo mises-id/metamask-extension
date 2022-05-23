@@ -99,4 +99,7 @@ window.misesModule = {
     console.log({ url, icon, title });
     return { url, icon, title };
   },
+  getMetamaskVersion() {
+    return '10.14.0';
+  },
 };

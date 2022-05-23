@@ -274,7 +274,7 @@ export default class ExtensionPlatform {
 
   switchToTab(tabId) {
     console.log('switchToTab', tabId);
-    return browser.tabs.update(tabId, { highlighted: true });
+    return browser.tabs.update(tabId, { highlighted: true, active: true });
   }
 
   closeTab(tabId) {
