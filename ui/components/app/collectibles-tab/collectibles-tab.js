@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -53,6 +53,10 @@ export default function CollectiblesTab({ onAddNFT }) {
     checkAndUpdateAllCollectiblesOwnershipStatus();
   };
 
+  useEffect(() => {
+    onRefresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   if (collectiblesLoading) {
     return <div className="collectibles-tab__loading">{t('loadingNFTs')}</div>;
   }

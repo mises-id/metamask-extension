@@ -52,14 +52,17 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
 
   async getOwnerCollectibles(address) {
     const { token } = this.getMisesAccount(address);
+    if (!token) {
+      return Promise.resolve([]);
+    }
     try {
-      const openSeaApiKey = this.getOpenSeaApiKey();
+      // const openSeaApiKey = this.getOpenSeaApiKey();
       const api = this.getOwnerCollectiblesApi(address, this.offset);
       const { assets, next } = await request({
         url: api,
         method: 'GET',
         headers: {
-          'X-API-KEY': openSeaApiKey,
+          // 'X-API-KEY': openSeaApiKey,
           Authorization: `Bearer ${token}`,
         },
         isCustom: true,

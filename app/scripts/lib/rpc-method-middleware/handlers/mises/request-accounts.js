@@ -81,11 +81,12 @@ async function requestEthereumAccountsHandler(
       if (accounts.length > 0) {
         const nonce = new Date().getTime();
         const key = await exportAccount(accounts[0]);
-        const auth = await generateAuth(nonce, key); // get mises auth
+        const data = await generateAuth(nonce, key); // get mises auth
         console.log('first, just try to get accounts');
         res.result = {
           accounts,
-          auth,
+          auth: data.auth,
+          misesId: data.misesId,
         };
       }
       end();

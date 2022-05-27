@@ -139,7 +139,12 @@ export default class MisesController {
         auth,
       };
     }
-    if (!account.token) {
+    const nowTimeStamp = new Date().getTime();
+    const expireTokenFlag =
+      account.token &&
+      account.timestamp &&
+      nowTimeStamp - account.timestamp > 604800000; // 6 days
+    if (!account.token || expireTokenFlag) {
       try {
         const referrer = await this.getinstallreferrer();
         const { token } = await this.getServerToken({
@@ -148,6 +153,7 @@ export default class MisesController {
           referrer,
         });
         account.token = token;
+        account.timestamp = new Date().getTime();
       } catch (error) {
         return Promise.reject(error, 'get token Error');
       }
@@ -190,7 +196,11 @@ export default class MisesController {
       if (!activeUser) {
         activeUser = await this.activate(key);
       }
-      return activeUser.generateAuth(nonce);
+      const auth = await activeUser.generateAuth(nonce);
+      return {
+        auth,
+        misesId: activeUser.address(),
+      };
     } catch (error) {
       console.log(error);
       return error;
@@ -304,13 +314,14 @@ export default class MisesController {
 
   async getAccountMisesBalance() {
     const keyringList = await this.getKeyringAccounts();
+    const accountList = this.getAccountList();
     return keyringList.map(async (val) => {
       const misesBalance = await this.getUserBalance(val);
-      const user = await this.getMisesUser(val);
+      const cacheObj = accountList.find((item) => item.address === val) || {};
       return {
         address: val,
         misesBalance,
-        misesId: user.address(),
+        ...cacheObj,
       };
     });
   }

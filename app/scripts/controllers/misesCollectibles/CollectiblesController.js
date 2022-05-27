@@ -88,21 +88,15 @@ export default class MisesCollectiblesController extends CollectiblesController 
     try {
       const tokenURI = this.getCollectibleApi(contractAddress, tokenId);
       const { token } = this.getMisesAccount(contractAddress);
-      const collectibleInformation = this.openSeaApiKey
-        ? await request({
-            url: tokenURI,
-            method: 'GET',
-            headers: {
-              'X-API-KEY': this.openSeaApiKey,
-              Authorization: `Bearer ${token}`,
-            },
-            isCustom: true,
-          })
-        : await request({
-            url: tokenURI,
-            method: 'GET',
-            isCustom: true,
-          });
+      const collectibleInformation = await request({
+        url: tokenURI,
+        method: 'GET',
+        headers: {
+          // 'X-API-KEY': this.openSeaApiKey,
+          Authorization: `Bearer ${token}`,
+        },
+        isCustom: true,
+      });
       const {
         num_sales: numSales,
         background_color: backgroundColor,
@@ -150,23 +144,17 @@ export default class MisesCollectiblesController extends CollectiblesController 
    * @param contractAddress - Hex address of the collectible contract.
    * @returns Promise resolving to the current collectible name and image.
    */
-  async getCollectibleContractInformationFromApi(contractAddress) {
+  getCollectibleContractInformationFromApi(contractAddress) {
     const api = this.getCollectibleContractInformationApi(contractAddress);
     const { token } = this.getMisesAccount(contractAddress);
-    return this.openSeaApiKey
-      ? await request({
-          url: api,
-          method: 'GET',
-          headers: {
-            'X-API-KEY': this.openSeaApiKey,
-            Authorization: `Bearer ${token}`,
-          },
-          isCustom: true,
-        })
-      : await request({
-          url: api,
-          method: 'GET',
-          isCustom: true,
-        });
+    return request({
+      url: api,
+      method: 'GET',
+      headers: {
+        // 'X-API-KEY': this.openSeaApiKey,
+        Authorization: `Bearer ${token}`,
+      },
+      isCustom: true,
+    });
   }
 }

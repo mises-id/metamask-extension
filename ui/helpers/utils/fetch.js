@@ -11,7 +11,6 @@ export function request(options) {
       .then(async (response) => {
         if (response.status === 200) {
           const res = await response.json();
-          console.log(res);
           if (options.isCustom) {
             resolve(res);
           }
