@@ -1617,6 +1617,7 @@ export default class MetamaskController extends EventEmitter {
       lockAll: this.lockAll.bind(this),
       initMisesBalance: this.initMisesBalance.bind(this),
       setMisesBook: this.setMisesBook.bind(this),
+      postTx: this.postTx.bind(this),
       recentTransactions: this.recentTransactions.bind(this),
       updataBalance: this.updataBalance.bind(this),
       resetMisesAccount: this.resetMisesAccount.bind(this),
@@ -3182,9 +3183,9 @@ export default class MetamaskController extends EventEmitter {
         estimateGasParams,
         (err, res) => {
           if (err) {
+            console.log(err, 'estimateGasestimateGasestimateGas===');
             return reject(err);
           }
-
           return resolve(res.toString(16));
         },
       );
@@ -4349,4 +4350,8 @@ export default class MetamaskController extends EventEmitter {
     );
   }
   ///: END:ONLY_INCLUDE_IN
+
+  postTx(params) {
+    return this.misesController.postTx(params);
+  }
 }

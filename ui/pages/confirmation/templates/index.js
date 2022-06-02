@@ -1,6 +1,7 @@
 import { omit, pick } from 'lodash';
 import { MESSAGE_TYPE } from '../../../../shared/constants/app';
 import {
+  postTx,
   rejectPendingApproval,
   resolvePendingApproval,
 } from '../../../store/actions';
@@ -9,10 +10,12 @@ import switchEthereumChain from './switch-ethereum-chain';
 ///: BEGIN:ONLY_INCLUDE_IN(flask)
 import snapConfirm from './flask/snap-confirm/snap-confirm';
 ///: END:ONLY_INCLUDE_IN
+import misesPostTx from './mises-post-tx';
 
 const APPROVAL_TEMPLATES = {
   [MESSAGE_TYPE.ADD_ETHEREUM_CHAIN]: addEthereumChain,
   [MESSAGE_TYPE.SWITCH_ETHEREUM_CHAIN]: switchEthereumChain,
+  [MESSAGE_TYPE.MISES_STAKINGPOSTTX]: misesPostTx,
   ///: BEGIN:ONLY_INCLUDE_IN(flask)
   [MESSAGE_TYPE.SNAP_CONFIRM]: snapConfirm,
   ///: END:ONLY_INCLUDE_IN
@@ -106,6 +109,7 @@ function getAttenuatedDispatch(dispatch) {
       dispatch(rejectPendingApproval(...args)),
     resolvePendingApproval: (...args) =>
       dispatch(resolvePendingApproval(...args)),
+    postTx: (...args) => dispatch(postTx(...args)),
   };
 }
 

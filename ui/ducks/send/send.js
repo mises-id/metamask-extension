@@ -1723,6 +1723,8 @@ export function updateSendHexData(hexData) {
  * As a result, the amount.value will change to either '0x0' when moving from
  * MAX to INPUT, or to the maximum allowable amount based on current asset when
  * moving from INPUT to MAX.
+ *
+ * @param misesGas
  */
 export function toggleSendMaxMode(misesGas) {
   return async (dispatch, getState) => {

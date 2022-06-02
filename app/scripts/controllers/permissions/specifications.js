@@ -273,4 +273,5 @@ export const unrestrictedMethods = Object.freeze([
   'mises_getAddressToMisesId',
   'mises_getCollectibles',
   'mises_openNFTPage',
+  'mises_stakingPostTx',
 ]);

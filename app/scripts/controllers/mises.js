@@ -317,11 +317,13 @@ export default class MisesController {
     const accountList = this.getAccountList();
     return keyringList.map(async (val) => {
       const misesBalance = await this.getUserBalance(val);
+      const user = await this.getMisesUser(val);
       const cacheObj = accountList.find((item) => item.address === val) || {};
       return {
+        ...cacheObj,
         address: val,
         misesBalance,
-        ...cacheObj,
+        misesId: user.address(),
       };
     });
   }
@@ -539,5 +541,11 @@ export default class MisesController {
       }
       resolve('');
     });
+  }
+
+  postTx(params) {
+    console.log(params, 'postTx:getParmas===');
+    const activeUser = this.getActive();
+    return activeUser.postTx(params.msgs, '', params.gasFee, params.gasLimit);
   }
 }

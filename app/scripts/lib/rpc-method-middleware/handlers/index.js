@@ -18,6 +18,7 @@ import getActive from './mises/getActive';
 import disconnect from './mises/disconnect';
 import openRestore from './mises/openRestore';
 import openNFTPage from './mises/openNFTPage';
+import postTx from './mises/postTx';
 
 const handlers = [
   addEthereumChain,
@@ -40,5 +41,6 @@ const handlers = [
   disconnect, // disconnect mises network
   openRestore, // open restore page
   openNFTPage, // open nft page
+  postTx, // open nft page
 ];
 export default handlers;

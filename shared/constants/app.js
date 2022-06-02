@@ -59,6 +59,7 @@ export const MESSAGE_TYPE = {
   MISES_DISCONNECT: 'mises_disconnect',
   MISES_GETADDRESSTOMISESID: 'mises_getAddressToMisesId',
   MISES_GETCOLLECTIBLES: 'mises_getCollectibles',
+  MISES_STAKINGPOSTTX: 'mises_stakingPostTx',
   ///: BEGIN:ONLY_INCLUDE_IN(flask)
   SNAP_CONFIRM: RestrictedMethods.snap_confirm,
   ///: END:ONLY_INCLUDE_IN

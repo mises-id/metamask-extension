@@ -3731,3 +3731,22 @@ export function getMisesGasfee() {
     });
   };
 }
+/**
+ * @type msgs
+ * @property {Array} msgs - array of the msgs
+ */
+
+export function postTx(params) {
+  return async (dispatch) => {
+    dispatch(showLoadingIndication());
+    return new Promise((resolve, reject) => {
+      promisifiedBackground
+        .postTx(params)
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
+          dispatch(hideLoadingIndication());
+        });
+    });
+  };
+}
