@@ -129,7 +129,7 @@ export default class MisesController {
     const misesId = activeUser ? activeUser.address() : '';
     let account = accountList.find((val) => val.address === address) || null;
     const nonce = new Date().getTime();
-    const auth = await this.generateAuth(nonce);
+    const {auth} = await this.generateAuth(nonce);
     if (!account) {
       const misesBalance = await this.getUserBalance(address);
       account = {

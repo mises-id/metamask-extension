@@ -81,12 +81,12 @@ async function requestEthereumAccountsHandler(
       if (accounts.length > 0) {
         const nonce = new Date().getTime();
         const key = await exportAccount(accounts[0]);
-        const data = await generateAuth(nonce, key); // get mises auth
+        const {auth, misesId} = await generateAuth(nonce, key); // get mises auth
         console.log('first, just try to get accounts');
         res.result = {
           accounts,
-          auth: data.auth,
-          misesId: data.misesId,
+          auth,
+          misesId,
         };
       }
       end();
@@ -112,11 +112,12 @@ async function requestEthereumAccountsHandler(
   if (accounts.length > 0) {
     const nonce = new Date().getTime();
     const key = await exportAccount(accounts[0]);
-    const auth = await generateAuth(nonce, key); // get mises auth
+    const {auth, misesId} = await generateAuth(nonce, key); // get mises auth
     console.log('first, just try to get accounts');
     res.result = {
       accounts,
       auth,
+      misesId,
     };
   } else {
     // This should never happen, because it should be caught in the
