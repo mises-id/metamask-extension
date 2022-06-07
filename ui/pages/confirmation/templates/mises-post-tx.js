@@ -3,6 +3,12 @@ import { ethErrors } from 'eth-rpc-errors';
 
 function getValues(pendingApproval, t, actions) {
   console.log(pendingApproval);
+  const msgs = pendingApproval.requestData.tx.map((msg) => {
+    return {
+      ...msg,
+      typeUrl: actions.msgReader(msg),
+    };
+  });
   return {
     content: [
       {
@@ -107,7 +113,7 @@ function getValues(pendingApproval, t, actions) {
                 element: 'TxMessage',
                 key: 'TxMessage',
                 props: {
-                  msgs: pendingApproval.requestData.tx,
+                  msgs,
                 },
               },
             ],

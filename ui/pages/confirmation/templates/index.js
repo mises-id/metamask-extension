@@ -1,6 +1,7 @@
 import { omit, pick } from 'lodash';
 import { MESSAGE_TYPE } from '../../../../shared/constants/app';
 import {
+  msgReader,
   postTx,
   rejectPendingApproval,
   resolvePendingApproval,
@@ -110,6 +111,7 @@ function getAttenuatedDispatch(dispatch) {
     resolvePendingApproval: (...args) =>
       dispatch(resolvePendingApproval(...args)),
     postTx: (...args) => dispatch(postTx(...args)),
+    msgReader,
   };
 }
 

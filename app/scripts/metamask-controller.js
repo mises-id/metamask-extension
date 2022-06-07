@@ -1618,6 +1618,7 @@ export default class MetamaskController extends EventEmitter {
       initMisesBalance: this.initMisesBalance.bind(this),
       setMisesBook: this.setMisesBook.bind(this),
       postTx: this.postTx.bind(this),
+      getReader: this.getReader.bind(this),
       recentTransactions: this.recentTransactions.bind(this),
       updataBalance: this.updataBalance.bind(this),
       resetMisesAccount: this.resetMisesAccount.bind(this),
@@ -4353,5 +4354,9 @@ export default class MetamaskController extends EventEmitter {
 
   postTx(params) {
     return this.misesController.postTx(params);
+  }
+
+  getReader(params) {
+    return this.misesController.getReader(params);
   }
 }

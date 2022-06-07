@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Accordion,
@@ -18,16 +18,29 @@ function TxMessage({ msgs }) {
       value
     );
   };
+  const [renderMsg, setRenderMsg] = useState([...msgs]);
+  useEffect(() => {
+    if (msgs.length > 0) {
+      msgs.forEach((element, index) => {
+        element.typeUrl &&
+          element.typeUrl.then((res) => {
+            renderMsg[index].type = res;
+            setRenderMsg([...renderMsg]);
+          });
+      });
+    }
+  }, [msgs.length]);
+
   return (
     <>
-      {msgs.map((msg, i) => (
+      {renderMsg.map((msg, i) => (
         <Accordion key={i}>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
-            <Typography>{msg.typeUrl}</Typography>
+            <Typography>{msg.type}</Typography>
           </AccordionSummary>
           <AccordionDetails>{renderValue(msg.value)}</AccordionDetails>
         </Accordion>

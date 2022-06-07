@@ -27,6 +27,7 @@ export default class MisesController {
     });
     this.config = MisesSdk.newConfig();
     this.coinDefine = MisesSdk.newCoinDefine();
+    this.msgReader = MisesSdk.newMsgReader();
     this.coinDefine.load();
     this.config.setLCDEndpoint(MISES_POINT);
     this.misesSdk = MisesSdk.newSdk(this.config);
@@ -547,5 +548,10 @@ export default class MisesController {
     console.log(params, 'postTx:getParmas===');
     const activeUser = this.getActive();
     return activeUser.postTx(params.msgs, '', params.gasFee, params.gasLimit);
+  }
+
+  getReader(msg) {
+    console.log(msg);
+    return this.msgReader.summary(msg);
   }
 }

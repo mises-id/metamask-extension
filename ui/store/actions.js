@@ -3750,3 +3750,12 @@ export function postTx(params) {
     });
   };
 }
+
+/**
+ * @type msgs
+ * @property {Array} msgs - array of the msgs
+ */
+
+export function msgReader(msg) {
+  return promisifiedBackground.getReader(msg);
+}

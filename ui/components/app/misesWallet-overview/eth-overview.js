@@ -173,6 +173,27 @@ const MisesEthOverview = ({ className }) => {
               history.push(SEND_ROUTE);
             }}
           />
+          <IconButton
+            className="eth-overview__button"
+            data-testid="eth-overview-staking"
+            Icon={() => (
+              <img src="./images/staking.jpg" width={36} height={36} />
+            )}
+            label="Staking"
+            onClick={() => {
+              trackEvent({
+                event: 'Clicked staking',
+                category: 'Navigation',
+                properties: {
+                  action: 'Home',
+                  legacy_event: true,
+                },
+              });
+              global.platform.openWindow({
+                url: 'https://portal.mises.site/',
+              });
+            }}
+          />
           {/* <IconButton
             className="eth-overview__button"
             disabled={!isSwapsChain}
