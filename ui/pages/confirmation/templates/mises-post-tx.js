@@ -39,8 +39,9 @@ function getValues(pendingApproval, t, actions) {
                 children: 'Timestamp:',
                 props: {
                   style: {
-                    fontSize: '16px',
+                    fontSize: '14px',
                     marginRight: '5px',
+                    color: '#666',
                   },
                 },
               },
@@ -66,12 +67,13 @@ function getValues(pendingApproval, t, actions) {
               {
                 element: 'span',
                 key: 'title',
-                children: 'Fee:',
+                children: 'Gas Fee:',
                 props: {
                   style: {
                     display: 'inline-block',
-                    fontSize: '16px',
+                    fontSize: '14px',
                     marginRight: '5px',
+                    color: '#666',
                   },
                 },
               },
@@ -83,6 +85,7 @@ function getValues(pendingApproval, t, actions) {
                 props: {
                   style: {
                     fontSize: '14px',
+                    color: '#333',
                   },
                 },
               },
@@ -103,9 +106,10 @@ function getValues(pendingApproval, t, actions) {
                 children: 'Message:',
                 props: {
                   style: {
-                    fontSize: '16px',
+                    fontSize: '14px',
                     display: 'block',
                     marginBottom: '16px',
+                    color: '#666',
                   },
                 },
               },

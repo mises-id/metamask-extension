@@ -193,10 +193,7 @@ export default class MisesController {
 
   async generateAuth(nonce, key) {
     try {
-      let activeUser = this.getActive();
-      if (!activeUser) {
-        activeUser = await this.activate(key);
-      }
+      const activeUser = key ? await this.activate(key) : this.getActive();
       const auth = await activeUser.generateAuth(nonce);
       return {
         auth,

@@ -4,18 +4,49 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Typography,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 function TxMessage({ msgs }) {
+  const RenderItem = ({ value }) => {
+    return Object.keys(value).map((key, index) => {
+      return (
+        <div key={index}>
+          <span
+            style={{
+              display: 'inline-block',
+              fontSize: '14px',
+              marginRight: '5px',
+              color: '#333',
+              fontWeight: 'bold',
+            }}
+          >
+            {key}:
+          </span>
+          <p
+            style={{
+              fontSize: '14px',
+              color: '#666',
+              margin: `5px 0`,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              width: '80vw',
+            }}
+          >
+            {key === 'amount'
+              ? `${value.amount.amount}${value.amount.denom}`
+              : value[key]}
+          </p>
+        </div>
+      );
+    });
+  };
   const renderValue = (value) => {
-    return typeof value === 'object' ? (
-      <pre style={{ width: '100%', overflowX: 'auto' }}>
-        {JSON.stringify(value, null, 2)}
-      </pre>
-    ) : (
-      value
+    return (
+      <div>
+        {typeof value === 'object' ? <RenderItem value={value} /> : value}
+      </div>
     );
   };
   const [renderMsg, setRenderMsg] = useState([...msgs]);
@@ -40,7 +71,18 @@ function TxMessage({ msgs }) {
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
-            <Typography>{msg.type}</Typography>
+            <p
+              style={{
+                fontSize: '14px',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                width: '80vw',
+                color: '#333',
+              }}
+            >
+              {msg.type}
+            </p>
           </AccordionSummary>
           <AccordionDetails>{renderValue(msg.value)}</AccordionDetails>
         </Accordion>
