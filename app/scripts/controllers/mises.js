@@ -450,57 +450,56 @@ export default class MisesController {
       amount: amount[0],
       denom: amount[1],
     });
-    const coin =  this.coinDefine.toCoinMIS(currency);
+    const coin = this.coinDefine.toCoinMIS(currency);
     return {
       amount: coin.amount,
-      denom: coin.denom.toUpperCase()
-    }
+      denom: coin.denom.toUpperCase(),
+    };
   }
 
   parseTxEvents(activeUser, tx) {
     const events = tx.raw;
-    return events.reduce((result, event)=>{
-      let amount = {amount:'',denom:''};
+    return events.reduce((result, event) => {
+      let amount = { amount: '', denom: '' };
       let recipient = {};
       let sender = {};
       let category = '';
       let title = '';
       let subtitle = '';
       switch (event.type) {
-        case 'transfer' : {
+        case 'transfer': {
           const amountItem = event.attributes.find(
             (item) => item.key === 'amount',
           );
           if (amountItem) {
-            amount = this.parseAmountItem(amountItem)
+            amount = this.parseAmountItem(amountItem);
           }
-          recipient = event.attributes.find(
-            (item) => item.key === 'recipient',
-          );
-          sender = event.attributes.find(
-            (item) => item.key === 'sender',
-          );
-          category = (recipient && recipient.value === activeUser.address()) ? 'receive' : 'send'
+          recipient = event.attributes.find((item) => item.key === 'recipient');
+          sender = event.attributes.find((item) => item.key === 'sender');
+          category =
+            recipient && recipient.value === activeUser.address()
+              ? 'receive'
+              : 'send';
           break;
         }
-          
+
         case 'withdraw_rewards': {
           const amountItem = event.attributes.find(
             (item) => item.key === 'amount',
           );
           if (amountItem) {
-            amount = this.parseAmountItem(amountItem)
+            amount = this.parseAmountItem(amountItem);
           }
 
           const validator = event.attributes.find(
             (item) => item.key === 'validator',
           );
           if (validator) {
-            subtitle = `from ${validator.value}`
+            subtitle = `from ${validator.value}`;
           }
 
-          category = 'withdraw'
-          title = 'Withdraw Rewards'
+          category = 'withdraw';
+          title = 'Withdraw Rewards';
           break;
         }
         case 'delegate': {
@@ -508,16 +507,16 @@ export default class MisesController {
             (item) => item.key === 'amount',
           );
           if (amountItem) {
-            amount = this.parseAmountItem(amountItem)
+            amount = this.parseAmountItem(amountItem);
           }
           const validator = event.attributes.find(
             (item) => item.key === 'validator',
           );
           if (validator) {
-            subtitle = `to ${validator.value}`
+            subtitle = `to ${validator.value}`;
           }
-          category = 'delegate'
-          title = 'Delegate'
+          category = 'delegate';
+          title = 'Delegate';
           break;
         }
         case 'redelegate': {
@@ -525,17 +524,17 @@ export default class MisesController {
             (item) => item.key === 'amount',
           );
           if (amountItem) {
-            amount = this.parseAmountItem(amountItem)
+            amount = this.parseAmountItem(amountItem);
           }
 
           const validator = event.attributes.find(
             (item) => item.key === 'destination_validator',
           );
           if (validator) {
-            subtitle = `to ${validator.value}`
+            subtitle = `to ${validator.value}`;
           }
-          category = 'redelegate'
-          title = 'Redelegate'
+          category = 'redelegate';
+          title = 'Redelegate';
           break;
         }
         case 'unbond': {
@@ -543,16 +542,16 @@ export default class MisesController {
             (item) => item.key === 'amount',
           );
           if (amountItem) {
-            amount = this.parseAmountItem(amountItem)
+            amount = this.parseAmountItem(amountItem);
           }
           const validator = event.attributes.find(
             (item) => item.key === 'validator',
           );
           if (validator) {
-            subtitle = `from ${validator.value}`
+            subtitle = `from ${validator.value}`;
           }
-          category = 'unbond'
-          title = 'Unbond'
+          category = 'unbond';
+          title = 'Unbond';
           break;
         }
         default:
@@ -560,8 +559,11 @@ export default class MisesController {
       }
 
       return result.concat({
-        category:category,
-        date: result.length == 0 ? `${tx.height}` : `${tx.height}:${result.length}`,
+        category,
+        date:
+          result.length === 0
+            ? `${tx.height}`
+            : `${tx.height}:${result.length}`,
         height: tx.height,
         displayedStatusKey: 'confirmed',
         isPending: false,
@@ -569,9 +571,9 @@ export default class MisesController {
         recipientAddress: recipient.value ?? '',
         secondaryCurrency: `${amount.amount} ${amount.denom}`,
         senderAddress: sender.value ?? '',
-        subtitle: subtitle,
+        subtitle,
         subtitleContainsOrigin: false,
-        title: title,
+        title,
         nonce: '0x0',
         transactionGroupType: 'mises',
         hasCancelled: false,
@@ -579,7 +581,7 @@ export default class MisesController {
         initialTransaction: { id: '0x0' },
         primaryTransaction: { err: {}, status: '' },
       });
-    } , []);
+    }, []);
   }
 
   async recentTransactions(type, selectedAddress) {
@@ -598,12 +600,12 @@ export default class MisesController {
       const activeUser = this.getActive();
       let list = await activeUser.recentTransactions(currentAddress.height);
       console.log(list, 'recentTransactions');
-      list = list.reduce((result, val)=>{
+      list = list.reduce((result, val) => {
         val.rawLog = JSON.parse(val.rawLog);
         val.raw = val.rawLog[0].events;
 
         return result.concat(this.parseTxEvents(activeUser, val));
-      } , []);
+      }, []);
       list.sort((a, b) => b.height - a.height);
       if (index > -1) {
         accountList[index].transactions = list;
