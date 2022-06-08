@@ -602,8 +602,10 @@ export default class MisesController {
       console.log(list, 'recentTransactions');
       list = list.reduce((result, val) => {
         val.rawLog = JSON.parse(val.rawLog);
-        val.raw = val.rawLog[0].events;
-
+        val.raw = [];
+        val.rawLog.forEach((item) => {
+          val.raw = [...val.raw, ...item.events];
+        });
         return result.concat(this.parseTxEvents(activeUser, val));
       }, []);
       list.sort((a, b) => b.height - a.height);
