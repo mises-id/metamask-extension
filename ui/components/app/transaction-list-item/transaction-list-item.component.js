@@ -111,16 +111,21 @@ function TransactionListItemInner({
   const shouldShowSpeedUp = mises ? false : shouldShow;
   const group = useTransactionDisplayData(transactionGroup);
   if (mises) {
-    transactionGroup.title = t(transactionGroup.category);
-    const isreceive = transactionGroup.category === 'receive';
-    transactionGroup.subtitle = t(isreceive ? 'fromAddress' : 'toAddress', [
-      shortenAddress(
-        isreceive
-          ? transactionGroup.senderAddress
-          : transactionGroup.recipientAddress,
-        MISES_TRUNCATED_ADDRESS_START_CHARS,
-      ),
-    ]);
+    if (transactionGroup.title == '') {
+      transactionGroup.title = t(transactionGroup.category);
+    }
+    if (transactionGroup.subtitle == '') {
+      const isreceive = transactionGroup.category === 'receive';
+      transactionGroup.subtitle = t(isreceive ? 'fromAddress' : 'toAddress', [
+        shortenAddress(
+          isreceive
+            ? transactionGroup.senderAddress
+            : transactionGroup.recipientAddress,
+          MISES_TRUNCATED_ADDRESS_START_CHARS,
+        ),
+      ]);
+    }
+
   }
   const {
     title,
