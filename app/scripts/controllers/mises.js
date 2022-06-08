@@ -447,6 +447,144 @@ export default class MisesController {
     });
   }
 
+  parseAmountItem(item) {
+    const amount = item.value.replace('umis', '|umis').split('|');
+    const currency = this.coinDefine.fromCoin({
+      amount: amount[0],
+      denom: amount[1],
+    });
+    const coin =  this.coinDefine.toCoinMIS(currency);
+    return {
+      amount: coin.amount,
+      denom: coin.denom.toUpperCase()
+    }
+  }
+
+  parseTxEvents(activeUser, tx) {
+    const events = tx.raw;
+    return events.reduce((result, event)=>{
+      let amount = {amount:'',denom:''};
+      let recipient = {};
+      let sender = {};
+      let category = '';
+      let title = '';
+      let subtitle = '';
+      switch (event.type) {
+        case 'transfer' : {
+          const amountItem = event.attributes.find(
+            (item) => item.key === 'amount',
+          );
+          if (amountItem) {
+            amount = this.parseAmountItem(amountItem)
+          }
+          recipient = event.attributes.find(
+            (item) => item.key === 'recipient',
+          );
+          sender = event.attributes.find(
+            (item) => item.key === 'sender',
+          );
+          category = (recipient && recipient.value === activeUser.address()) ? 'receive' : 'send'
+          break;
+        }
+          
+        case 'withdraw_rewards': {
+          const amountItem = event.attributes.find(
+            (item) => item.key === 'amount',
+          );
+          if (amountItem) {
+            amount = this.parseAmountItem(amountItem)
+          }
+
+          const validator = event.attributes.find(
+            (item) => item.key === 'validator',
+          );
+          if (validator) {
+            subtitle = `from ${validator.value}`
+          }
+
+          category = 'withdraw'
+          title = 'Withdraw Rewards'
+          break;
+        }
+        case 'delegate': {
+          const amountItem = event.attributes.find(
+            (item) => item.key === 'amount',
+          );
+          if (amountItem) {
+            amount = this.parseAmountItem(amountItem)
+          }
+          const validator = event.attributes.find(
+            (item) => item.key === 'validator',
+          );
+          if (validator) {
+            subtitle = `to ${validator.value}`
+          }
+          category = 'delegate'
+          title = 'Delegate'
+          break;
+        }
+        case 'redelegate': {
+          const amountItem = event.attributes.find(
+            (item) => item.key === 'amount',
+          );
+          if (amountItem) {
+            amount = this.parseAmountItem(amountItem)
+          }
+
+          const validator = event.attributes.find(
+            (item) => item.key === 'destination_validator',
+          );
+          if (validator) {
+            subtitle = `to ${validator.value}`
+          }
+          category = 'redelegate'
+          title = 'Redelegate'
+          break;
+        }
+        case 'unbond': {
+          const amountItem = event.attributes.find(
+            (item) => item.key === 'amount',
+          );
+          if (amountItem) {
+            amount = this.parseAmountItem(amountItem)
+          }
+          const validator = event.attributes.find(
+            (item) => item.key === 'validator',
+          );
+          if (validator) {
+            subtitle = `from ${validator.value}`
+          }
+          category = 'unbond'
+          title = 'Unbond'
+          break;
+        }
+        default:
+          return result;
+      }
+
+      return result.concat({
+        category:category,
+        date: result.length == 0 ? `${tx.height}` : `${tx.height}:${result.length}`,
+        height: tx.height,
+        displayedStatusKey: 'confirmed',
+        isPending: false,
+        primaryCurrency: `${amount.amount} ${amount.denom}`,
+        recipientAddress: recipient.value ?? '',
+        secondaryCurrency: `${amount.amount} ${amount.denom}`,
+        senderAddress: sender.value ?? '',
+        subtitle: subtitle,
+        subtitleContainsOrigin: false,
+        title: title,
+        nonce: '0x0',
+        transactionGroupType: 'mises',
+        hasCancelled: false,
+        hasRetried: false,
+        initialTransaction: { id: '0x0' },
+        primaryTransaction: { err: {}, status: '' },
+      });
+    } , []);
+  }
+
   async recentTransactions(type, selectedAddress) {
     // const selectedAddress = this.getSelectedAddress();
     const accountList = this.getAccountList();
@@ -463,80 +601,12 @@ export default class MisesController {
       const activeUser = this.getActive();
       let list = await activeUser.recentTransactions(currentAddress.height);
       console.log(list, 'recentTransactions');
-      list = list.map((val) => {
+      list = list.reduce((result, val)=>{
         val.rawLog = JSON.parse(val.rawLog);
         val.raw = val.rawLog[0].events;
-        // get message Item
-        const messageItem = val.raw.find((item) => item.type === 'message') || {
-          attributes: [],
-        };
-        // get message type
-        const attrAction = messageItem.attributes.find(
-          (item) => item.key === 'action',
-        );
-        let category = null;
-        if (attrAction) {
-          switch (attrAction.value) {
-            case '/cosmos.bank.v1beta1.MsgSend':
-              // const attrCategory = messageItem.attributes.find(
-              //   (item) => item.key === 'sender',
-              // );
-              // category =
-              //   attrCategory.value === activeUser.address()
-              //     ? 'Receive'
-              //     : 'Send';
-              break;
-            case '/cosmos.staking.v1beta1.MsgDelegate':
-              category = 'Delegate';
-              break;
-            case '/cosmos.staking.v1beta1.MsgUndelegate':
-              category = 'Undelegate';
-              break;
-            case '/cosmos.staking.v1beta1.MsgSend':
-              category = 'Undelegate';
-              break;
 
-            default:
-              break;
-          }
-        }
-
-        const transfers = val.raw[3].attributes;
-        const balanceObj = {};
-        // transfers
-        if (transfers.key === 'amount') {
-          const amount = transfers[2].value.replace('umis', '|umis').split('|');
-          console.log(val, 'amount');
-          const currency = this.coinDefine.fromCoin({
-            amount: amount[0],
-            denom: amount[1],
-          });
-          this.coinDefine.toCoinMIS(currency);
-          balanceObj.denom = balanceObj.denom.toUpperCase();
-        }
-
-        return {
-          category:
-            transfers[0].value === activeUser.address() ? 'receive' : 'send',
-          date: `${val.height}`,
-          height: val.height,
-          displayedStatusKey: 'confirmed',
-          isPending: false,
-          primaryCurrency: `${balanceObj.amount} ${balanceObj.denom}`,
-          recipientAddress: transfers[0].value,
-          secondaryCurrency: `${balanceObj.amount} ${balanceObj.denom}`,
-          senderAddress: transfers[1].value,
-          subtitle: '',
-          subtitleContainsOrigin: false,
-          title: '',
-          nonce: '0x0',
-          transactionGroupType: 'mises',
-          hasCancelled: false,
-          hasRetried: false,
-          initialTransaction: { id: '0x0' },
-          primaryTransaction: { err: {}, status: '' },
-        };
-      });
+        return result.concat(this.parseTxEvents(activeUser, val));
+      } , []);
       list.sort((a, b) => b.height - a.height);
       if (index > -1) {
         accountList[index].transactions = list;

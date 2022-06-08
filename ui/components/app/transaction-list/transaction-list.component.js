@@ -132,13 +132,13 @@ export default function TransactionList({
     const uniqueArr = [];
     if (Array.isArray(arr)) {
       arr.forEach((val) => {
-        const flag = uniqueArr.some((item) => item.height === val.height);
+        const flag = uniqueArr.some((item) => item.date === val.date);
         if (!flag) {
           uniqueArr.push(val);
         }
       });
     }
-    return uniqueArr.sort((a, b) => b.height - a.height);
+    return uniqueArr.sort((a, b) => b.date > a.date);
   };
   const getMisesTransactions = () => {
     setloading('loading');

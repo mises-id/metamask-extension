@@ -2614,6 +2614,18 @@
   "receive": {
     "message": "Receive"
   },
+  "withdraw": {
+    "message": "Withdraw Rewards"
+  },
+  "delegate": {
+    "message": "Delegate"
+  },
+  "redelegate": {
+    "message": "Redelegate"
+  },
+  "unbond": {
+    "message": "Unbond"
+  },
   "recents": {
     "message": "Recents"
   },
