@@ -130,7 +130,7 @@ export default class MisesController {
     const misesId = activeUser ? activeUser.address() : '';
     let account = accountList.find((val) => val.address === address) || null;
     const nonce = new Date().getTime();
-    const {auth} = await this.generateAuth(nonce);
+    const { auth } = await this.generateAuth(nonce);
     if (!account) {
       const misesBalance = await this.getUserBalance(address);
       account = {
@@ -462,17 +462,59 @@ export default class MisesController {
     try {
       const activeUser = this.getActive();
       let list = await activeUser.recentTransactions(currentAddress.height);
+      console.log(list, 'recentTransactions');
       list = list.map((val) => {
         val.rawLog = JSON.parse(val.rawLog);
         val.raw = val.rawLog[0].events;
+        // get message Item
+        const messageItem = val.raw.find((item) => item.type === 'message') || {
+          attributes: [],
+        };
+        // get message type
+        const attrAction = messageItem.attributes.find(
+          (item) => item.key === 'action',
+        );
+        let category = null;
+        if (attrAction) {
+          switch (attrAction.value) {
+            case '/cosmos.bank.v1beta1.MsgSend':
+              // const attrCategory = messageItem.attributes.find(
+              //   (item) => item.key === 'sender',
+              // );
+              // category =
+              //   attrCategory.value === activeUser.address()
+              //     ? 'Receive'
+              //     : 'Send';
+              break;
+            case '/cosmos.staking.v1beta1.MsgDelegate':
+              category = 'Delegate';
+              break;
+            case '/cosmos.staking.v1beta1.MsgUndelegate':
+              category = 'Undelegate';
+              break;
+            case '/cosmos.staking.v1beta1.MsgSend':
+              category = 'Undelegate';
+              break;
+
+            default:
+              break;
+          }
+        }
+
         const transfers = val.raw[3].attributes;
-        const amount = transfers[2].value.replace('umis', '|umis').split('|');
-        const currency = this.coinDefine.fromCoin({
-          amount: amount[0],
-          denom: amount[1],
-        });
-        const balanceObj = this.coinDefine.toCoinMIS(currency);
-        balanceObj.denom = balanceObj.denom.toUpperCase();
+        const balanceObj = {};
+        // transfers
+        if (transfers.key === 'amount') {
+          const amount = transfers[2].value.replace('umis', '|umis').split('|');
+          console.log(val, 'amount');
+          const currency = this.coinDefine.fromCoin({
+            amount: amount[0],
+            denom: amount[1],
+          });
+          this.coinDefine.toCoinMIS(currency);
+          balanceObj.denom = balanceObj.denom.toUpperCase();
+        }
+
         return {
           category:
             transfers[0].value === activeUser.address() ? 'receive' : 'send',
