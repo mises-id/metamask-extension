@@ -16,8 +16,11 @@ import {
   NETWORK_TYPE_TO_ID_MAP,
   INFURA_BLOCKED_KEY,
   MISESNETWORK,
+  MISES_DISPLAY_NAME,
   MISES_CHAIN_ID,
   MISES_SYMBOL,
+  MISES_RPC_URL,
+  ETH_SYMBOL
 } from '../../../../shared/constants/network';
 import { SECOND } from '../../../../shared/constants/time';
 import {
@@ -39,15 +42,18 @@ if (process.env.IN_TEST) {
     rpcUrl: 'http://localhost:8545',
     chainId: '0x539',
     nickname: 'Localhost 8545',
+    ticker: ETH_SYMBOL,
   };
-} else if (process.env.METAMASK_DEBUG || env === 'test') {
-  defaultProviderConfigOpts = { type: MISESNETWORK, chainId: MISES_CHAIN_ID };
 } else {
-  defaultProviderConfigOpts = { type: MISESNETWORK, chainId: MISES_CHAIN_ID };
+  defaultProviderConfigOpts = { 
+    type: MISESNETWORK, 
+    chainId: MISES_CHAIN_ID,
+    ticker: MISES_SYMBOL,
+    rpcUrl: MISES_RPC_URL,
+  };
 }
 
 const defaultProviderConfig = {
-  ticker: MISES_SYMBOL,
   ...defaultProviderConfigOpts,
 };
 
@@ -358,10 +364,10 @@ export default class NetworkController extends EventEmitter {
     const { chainId } = NETWORK_TYPE_TO_ID_MAP[type];
     this.setProviderConfig({
       type,
-      rpcUrl: '',
+      rpcUrl: mises ? MISES_RPC_URL:'',
       chainId,
       ticker: mises ? 'MIS' : 'ETH',
-      nickname: '',
+      nickname: mises ? MISES_DISPLAY_NAME:'',
     });
   }
 
@@ -463,7 +469,6 @@ export default class NetworkController extends EventEmitter {
       const blockTracker = new DummyBlockTracker();
       const networkMiddleware = createMisesMiddleware();
       this._setNetworkClient({ networkMiddleware, blockTracker });
-      console.log(this);
     } else {
       throw new Error(
         `NetworkController - _configureProvider - unknown type "${type}"`,

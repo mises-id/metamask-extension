@@ -63,6 +63,9 @@ export function toChecksumHexAddress(address) {
     // would have resulted in an error on version 5.1.
     return '';
   }
+  if (address.indexOf('mises') === 0) {
+    return address;
+  }
   const hexPrefixed = addHexPrefix(address);
   if (!isHexString(hexPrefixed)) {
     // Version 5.1 of ethereumjs-utils would have returned '0xY' for input 'y'

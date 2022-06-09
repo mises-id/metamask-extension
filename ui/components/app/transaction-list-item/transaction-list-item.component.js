@@ -107,7 +107,9 @@ function TransactionListItemInner({
   );
 
   const shouldShow = useShouldShowSpeedUp(transactionGroup, isEarliestNonce);
-  const mises = transactionGroup.transactionGroupType === 'mises';
+  const misesIn = transactionGroup.transactionGroupType === 'misesIn';
+  const misesOut = transactionGroup.transactionGroupType === 'misesOut';
+  const mises = misesIn || misesOut;
   const shouldShowSpeedUp = mises ? false : shouldShow;
   const group = useTransactionDisplayData(transactionGroup);
   if (mises) {
@@ -115,10 +117,9 @@ function TransactionListItemInner({
       transactionGroup.title = t(transactionGroup.category);
     }
     if (transactionGroup.subtitle == '') {
-      const isreceive = transactionGroup.category === 'receive';
-      transactionGroup.subtitle = t(isreceive ? 'fromAddress' : 'toAddress', [
+      transactionGroup.subtitle = t(misesIn ? 'fromAddress' : 'toAddress', [
         shortenAddress(
-          isreceive
+          misesIn
             ? transactionGroup.senderAddress
             : transactionGroup.recipientAddress,
           MISES_TRUNCATED_ADDRESS_START_CHARS,
@@ -159,9 +160,6 @@ function TransactionListItemInner({
   const toggleShowDetails = useCallback(() => {
     if (isUnapproved) {
       history.push(`${CONFIRM_TRANSACTION_ROUTE}/${id}`);
-      return;
-    }
-    if (transactionGroup.transactionGroupType === 'mises') {
       return;
     }
     setShowDetails((prev) => !prev);
@@ -260,6 +258,7 @@ function TransactionListItemInner({
           onRetry={retryTransaction}
           showRetry={status === TRANSACTION_STATUSES.FAILED && !isSwap}
           showSpeedUp={shouldShowSpeedUp}
+          showBreakDown={!mises}
           isEarliestNonce={isEarliestNonce}
           onCancel={cancelTransaction}
           showCancel={isPending && !hasCancelled}

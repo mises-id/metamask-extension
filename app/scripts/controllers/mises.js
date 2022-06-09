@@ -457,7 +457,7 @@ export default class MisesController {
     };
   }
 
-  parseTxEvents(activeUser, tx) {
+  parseTxEvents(activeUserAddr, tx) {
     const events = tx.raw;
     return events.reduce((result, event) => {
       let amount = { amount: '', denom: '' };
@@ -466,6 +466,7 @@ export default class MisesController {
       let category = '';
       let title = '';
       let subtitle = '';
+      let transactionGroupType = 'misesIn';
       switch (event.type) {
         case 'transfer': {
           const amountItem = event.attributes.find(
@@ -477,9 +478,13 @@ export default class MisesController {
           recipient = event.attributes.find((item) => item.key === 'recipient');
           sender = event.attributes.find((item) => item.key === 'sender');
           category =
-            recipient && recipient.value === activeUser.address()
+            recipient && recipient.value === activeUserAddr
               ? 'receive'
               : 'send';
+          transactionGroupType = 
+            recipient && recipient.value === activeUserAddr
+              ? 'misesIn'
+              : 'misesOut';
           break;
         }
 
@@ -491,15 +496,14 @@ export default class MisesController {
             amount = this.parseAmountItem(amountItem);
           }
 
-          const validator = event.attributes.find(
+          sender = event.attributes.find(
             (item) => item.key === 'validator',
           );
-          if (validator) {
-            subtitle = `from ${validator.value}`;
-          }
+          recipient = {value: activeUserAddr}
 
-          category = 'withdraw';
+          category = 'interaction';
           title = 'Withdraw Rewards';
+          transactionGroupType = 'misesIn';
           break;
         }
         case 'delegate': {
@@ -509,14 +513,13 @@ export default class MisesController {
           if (amountItem) {
             amount = this.parseAmountItem(amountItem);
           }
-          const validator = event.attributes.find(
+          sender = {value: activeUserAddr}
+          recipient = event.attributes.find(
             (item) => item.key === 'validator',
           );
-          if (validator) {
-            subtitle = `to ${validator.value}`;
-          }
-          category = 'delegate';
+          category = 'interaction';
           title = 'Delegate';
+          transactionGroupType = 'misesOut';
           break;
         }
         case 'redelegate': {
@@ -526,15 +529,13 @@ export default class MisesController {
           if (amountItem) {
             amount = this.parseAmountItem(amountItem);
           }
-
-          const validator = event.attributes.find(
+          sender = {value: activeUserAddr}
+          recipient = event.attributes.find(
             (item) => item.key === 'destination_validator',
           );
-          if (validator) {
-            subtitle = `to ${validator.value}`;
-          }
-          category = 'redelegate';
+          category = 'interaction';
           title = 'Redelegate';
+          transactionGroupType = 'misesOut';
           break;
         }
         case 'unbond': {
@@ -544,14 +545,13 @@ export default class MisesController {
           if (amountItem) {
             amount = this.parseAmountItem(amountItem);
           }
-          const validator = event.attributes.find(
+          sender = event.attributes.find(
             (item) => item.key === 'validator',
           );
-          if (validator) {
-            subtitle = `from ${validator.value}`;
-          }
-          category = 'unbond';
+          recipient = {value: activeUserAddr}
+          category = 'interaction';
           title = 'Unbond';
+          transactionGroupType = 'misesIn';
           break;
         }
         default:
@@ -575,11 +575,11 @@ export default class MisesController {
         subtitleContainsOrigin: false,
         title,
         nonce: '0x0',
-        transactionGroupType: 'mises',
+        transactionGroupType,
         hasCancelled: false,
         hasRetried: false,
-        initialTransaction: { id: '0x0' },
-        primaryTransaction: { err: {}, status: '' },
+        initialTransaction: { id: '0x0', hash: tx.hash },
+        primaryTransaction: { err: {}, status: '', hash: tx.hash },
       });
     }, []);
   }
@@ -606,7 +606,7 @@ export default class MisesController {
         val.rawLog.forEach((item) => {
           val.raw = [...val.raw, ...item.events];
         });
-        return result.concat(this.parseTxEvents(activeUser, val));
+        return result.concat(this.parseTxEvents(activeUser.address(), val));
       }, []);
       // list.sort((a, b) => b.height - a.height);
       if (index > -1) {

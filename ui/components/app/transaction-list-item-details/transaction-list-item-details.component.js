@@ -32,6 +32,7 @@ export default class TransactionListItemDetails extends PureComponent {
     showCancel: PropTypes.bool,
     showSpeedUp: PropTypes.bool,
     showRetry: PropTypes.bool,
+    showBreakDown: PropTypes.bool,
     isEarliestNonce: PropTypes.bool,
     primaryCurrency: PropTypes.string,
     transactionGroup: PropTypes.object,
@@ -134,6 +135,7 @@ export default class TransactionListItemDetails extends PureComponent {
       onClose,
       recipientNickname,
       showCancel,
+      showBreakDown,
       transactionStatus: TransactionStatus,
     } = this.props;
     const {
@@ -248,6 +250,7 @@ export default class TransactionListItemDetails extends PureComponent {
               />
             </div>
             <div className="transaction-list-item-details__cards-container">
+            {showBreakDown && (
               <TransactionBreakdown
                 nonce={
                   transactionGroup.initialTransaction.txParams &&
@@ -258,6 +261,7 @@ export default class TransactionListItemDetails extends PureComponent {
                 primaryCurrency={primaryCurrency}
                 className="transaction-list-item-details__transaction-breakdown"
               />
+            )}
               {transactionGroup.initialTransaction.type !==
                 TRANSACTION_TYPES.INCOMING && (
                 <Disclosure title={t('activityLog')} size="small">
