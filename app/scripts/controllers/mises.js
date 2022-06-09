@@ -550,7 +550,7 @@ export default class MisesController {
           );
           recipient = {value: activeUserAddr}
           category = 'interaction';
-          title = 'Unbond';
+          title = 'Undelegate';
           transactionGroupType = 'misesIn';
           break;
         }

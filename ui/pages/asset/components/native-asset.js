@@ -59,6 +59,11 @@ export default function NativeAsset({ nativeCurrency }) {
             onViewAccountDetails={() => {
               dispatch(showModal({ name: 'ACCOUNT_DETAILS' }));
             }}
+
+            onViewTokenDetails={() => {
+            }}
+            onRemove={() => {
+            }}
           />
         }
       />
