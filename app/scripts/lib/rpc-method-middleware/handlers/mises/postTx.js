@@ -33,11 +33,19 @@ async function postTxHandler(req, res, _next, end, { requestUserApproval }) {
   const { params, origin } = req;
   try {
     // const result = await postTx(params[0]);
-    res.result = await requestUserApproval({
+    const data = await requestUserApproval({
       origin,
       type: MESSAGE_TYPE.MISES_STAKINGPOSTTX,
       requestData: params[0],
     });
+    if (data.code) {
+      res.error = {
+        code: data.code,
+        message: data.data.originalError,
+      };
+    } else {
+      res.result = data;
+    }
   } catch (error) {
     console.log(error);
     res.error = error;

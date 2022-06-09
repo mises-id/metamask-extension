@@ -138,14 +138,13 @@ function getValues(pendingApproval, t, actions) {
           gasLimit: pendingApproval.requestData.gasLimit,
           gasFee: pendingApproval.requestData.gasFee,
         });
+        console.log(data, 'xxxxxx====');
         return actions.resolvePendingApproval(pendingApproval.id, {
           txHash: data.transactionHash,
         });
       } catch (error) {
         console.log(error, 'errorerrorerrorerror===');
-        return actions.resolvePendingApproval(pendingApproval.id, {
-          requestData: error,
-        });
+        return actions.resolvePendingApproval(pendingApproval.id, error);
       }
     },
 

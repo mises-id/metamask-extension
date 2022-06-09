@@ -608,7 +608,7 @@ export default class MisesController {
         });
         return result.concat(this.parseTxEvents(activeUser, val));
       }, []);
-      list.sort((a, b) => b.height - a.height);
+      // list.sort((a, b) => b.height - a.height);
       if (index > -1) {
         accountList[index].transactions = list;
         this.store.updateState({
@@ -657,14 +657,22 @@ export default class MisesController {
     });
   }
 
-  postTx(params) {
+  async postTx(params) {
     console.log(params, 'postTx:getParmas===');
     const activeUser = this.getActive();
-    return activeUser.postTx(params.msgs, '', params.gasFee, params.gasLimit);
+    const data = await activeUser.postTx(
+      params.msgs,
+      '',
+      params.gasFee,
+      params.gasLimit,
+    );
+    if (data.code !== 0) {
+      return Promise.reject(data.rawLog);
+    }
+    return data;
   }
 
   getReader(msg) {
-    console.log(msg);
     return this.msgReader.summary(msg);
   }
 }

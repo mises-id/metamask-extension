@@ -138,7 +138,9 @@ export default function TransactionList({
         }
       });
     }
-    return uniqueArr.sort((a, b) => b.date > a.date);
+    return uniqueArr.sort((a, b) =>
+      b.height === a.height ? b.date > a.date : b.height - a.height,
+    );
   };
   const getMisesTransactions = () => {
     setloading('loading');
