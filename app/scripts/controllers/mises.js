@@ -465,7 +465,7 @@ export default class MisesController {
       let sender = {};
       let category = '';
       let title = '';
-      let subtitle = '';
+      const subtitle = '';
       let transactionGroupType = 'misesIn';
       switch (event.type) {
         case 'transfer': {
@@ -481,7 +481,7 @@ export default class MisesController {
             recipient && recipient.value === activeUserAddr
               ? 'receive'
               : 'send';
-          transactionGroupType = 
+          transactionGroupType =
             recipient && recipient.value === activeUserAddr
               ? 'misesIn'
               : 'misesOut';
@@ -496,10 +496,8 @@ export default class MisesController {
             amount = this.parseAmountItem(amountItem);
           }
 
-          sender = event.attributes.find(
-            (item) => item.key === 'validator',
-          );
-          recipient = {value: activeUserAddr}
+          sender = event.attributes.find((item) => item.key === 'validator');
+          recipient = { value: activeUserAddr };
 
           category = 'interaction';
           title = 'Withdraw Rewards';
@@ -513,10 +511,8 @@ export default class MisesController {
           if (amountItem) {
             amount = this.parseAmountItem(amountItem);
           }
-          sender = {value: activeUserAddr}
-          recipient = event.attributes.find(
-            (item) => item.key === 'validator',
-          );
+          sender = { value: activeUserAddr };
+          recipient = event.attributes.find((item) => item.key === 'validator');
           category = 'interaction';
           title = 'Delegate';
           transactionGroupType = 'misesOut';
@@ -529,7 +525,7 @@ export default class MisesController {
           if (amountItem) {
             amount = this.parseAmountItem(amountItem);
           }
-          sender = {value: activeUserAddr}
+          sender = { value: activeUserAddr };
           recipient = event.attributes.find(
             (item) => item.key === 'destination_validator',
           );
@@ -545,12 +541,10 @@ export default class MisesController {
           if (amountItem) {
             amount = this.parseAmountItem(amountItem);
           }
-          sender = event.attributes.find(
-            (item) => item.key === 'validator',
-          );
-          recipient = {value: activeUserAddr}
+          sender = event.attributes.find((item) => item.key === 'validator');
+          recipient = { value: activeUserAddr };
           category = 'interaction';
-          title = 'Unbond';
+          title = 'Undelegate';
           transactionGroupType = 'misesIn';
           break;
         }
