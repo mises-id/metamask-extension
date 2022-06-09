@@ -2624,7 +2624,7 @@
     "message": "Redelegate"
   },
   "unbond": {
-    "message": "Unbond"
+    "message": "Undelegate"
   },
   "recents": {
     "message": "Recents"
