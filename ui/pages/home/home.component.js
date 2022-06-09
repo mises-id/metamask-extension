@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route } from 'react-router-dom';
-import { MISESNETWORK } from '../../helpers/constants/mises/common';
 import MisesAssetList from '../../components/app/mises-asset-list';
 import { MisesEthOverview } from '../../components/app/misesWallet-overview';
 ///: BEGIN:ONLY_INCLUDE_IN(main)
@@ -49,6 +48,7 @@ import {
   CONFIRMATION_V_NEXT_ROUTE,
   ADD_COLLECTIBLE_ROUTE,
 } from '../../helpers/constants/routes';
+import { MISESNETWORK } from '../../../shared/constants/network';
 ///: BEGIN:ONLY_INCLUDE_IN(beta)
 // import BetaHomeFooter from './beta/beta-home-footer.component';
 ///: END:ONLY_INCLUDE_IN
