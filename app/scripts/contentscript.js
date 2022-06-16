@@ -32,14 +32,21 @@ const LEGACY_PUBLIC_CONFIG = 'publicConfig';
  *
  * @param {string} content - Code to be executed in the current document
  */
+let isInject = false;
 function injectScript(content) {
+  if (isInject) {
+    // if already injected, do nothing
+    return;
+  }
   try {
     const container = document.head || document.documentElement;
     const scriptTag = document.createElement('script');
     scriptTag.setAttribute('async', 'false');
     scriptTag.textContent = content;
+    scriptTag.id = 'metamask-inject-script';
     container.insertBefore(scriptTag, container.children[0]);
     container.removeChild(scriptTag);
+    isInject = true;
     console.error('MetaMask: Provider injection success.');
   } catch (error) {
     console.error('MetaMask: Provider injection failed.', error);
@@ -52,74 +59,78 @@ function injectScript(content) {
  *
  */
 async function setupStreams() {
-  // the transport-specific streams for communication between inpage and background
-  const pageStream = new WindowPostMessageStream({
-    name: CONTENT_SCRIPT,
-    target: INPAGE,
-  });
-  const extensionPort = browser.runtime.connect({ name: CONTENT_SCRIPT });
-  const extensionStream = new PortStream(extensionPort);
+  try {
+    // the transport-specific streams for communication between inpage and background
+    const pageStream = new WindowPostMessageStream({
+      name: CONTENT_SCRIPT,
+      target: INPAGE,
+    });
+    const extensionPort = browser.runtime.connect({ name: CONTENT_SCRIPT });
+    const extensionStream = new PortStream(extensionPort);
 
-  // create and connect channel muxers
-  // so we can handle the channels individually
-  const pageMux = new ObjectMultiplex();
-  pageMux.setMaxListeners(25);
-  const extensionMux = new ObjectMultiplex();
-  extensionMux.setMaxListeners(25);
-  extensionMux.ignoreStream(LEGACY_PUBLIC_CONFIG); // TODO:LegacyProvider: Delete
+    // create and connect channel muxers
+    // so we can handle the channels individually
+    const pageMux = new ObjectMultiplex();
+    pageMux.setMaxListeners(25);
+    const extensionMux = new ObjectMultiplex();
+    extensionMux.setMaxListeners(25);
+    extensionMux.ignoreStream(LEGACY_PUBLIC_CONFIG); // TODO:LegacyProvider: Delete
 
-  pump(pageMux, pageStream, pageMux, (err) =>
-    logStreamDisconnectWarning('MetaMask Inpage Multiplex', err),
-  );
-  pump(extensionMux, extensionStream, extensionMux, (err) => {
-    logStreamDisconnectWarning('MetaMask Background Multiplex', err);
-    notifyInpageOfStreamFailure();
-  });
-
-  // forward communication across inpage-background for these channels only
-  forwardTrafficBetweenMuxes(PROVIDER, pageMux, extensionMux);
-
-  // connect "phishing" channel to warning system
-  const phishingStream = extensionMux.createStream('phishing');
-  phishingStream.once('data', redirectToPhishingWarning);
-
-  // TODO:LegacyProvider: Delete
-  // handle legacy provider
-  const legacyPageStream = new WindowPostMessageStream({
-    name: LEGACY_CONTENT_SCRIPT,
-    target: LEGACY_INPAGE,
-  });
-
-  const legacyPageMux = new ObjectMultiplex();
-  legacyPageMux.setMaxListeners(25);
-  const legacyExtensionMux = new ObjectMultiplex();
-  legacyExtensionMux.setMaxListeners(25);
-
-  pump(legacyPageMux, legacyPageStream, legacyPageMux, (err) =>
-    logStreamDisconnectWarning('MetaMask Legacy Inpage Multiplex', err),
-  );
-  pump(
-    legacyExtensionMux,
-    extensionStream,
-    getNotificationTransformStream(),
-    legacyExtensionMux,
-    (err) => {
-      logStreamDisconnectWarning('MetaMask Background Legacy Multiplex', err);
+    pump(pageMux, pageStream, pageMux, (err) =>
+      logStreamDisconnectWarning('MetaMask Inpage Multiplex', err),
+    );
+    pump(extensionMux, extensionStream, extensionMux, (err) => {
+      logStreamDisconnectWarning('MetaMask Background Multiplex', err);
       notifyInpageOfStreamFailure();
-    },
-  );
+    });
 
-  forwardNamedTrafficBetweenMuxes(
-    LEGACY_PROVIDER,
-    PROVIDER,
-    legacyPageMux,
-    legacyExtensionMux,
-  );
-  forwardTrafficBetweenMuxes(
-    LEGACY_PUBLIC_CONFIG,
-    legacyPageMux,
-    legacyExtensionMux,
-  );
+    // forward communication across inpage-background for these channels only
+    forwardTrafficBetweenMuxes(PROVIDER, pageMux, extensionMux);
+
+    // connect "phishing" channel to warning system
+    const phishingStream = extensionMux.createStream('phishing');
+    phishingStream.once('data', redirectToPhishingWarning);
+
+    // TODO:LegacyProvider: Delete
+    // handle legacy provider
+    const legacyPageStream = new WindowPostMessageStream({
+      name: LEGACY_CONTENT_SCRIPT,
+      target: LEGACY_INPAGE,
+    });
+
+    const legacyPageMux = new ObjectMultiplex();
+    legacyPageMux.setMaxListeners(25);
+    const legacyExtensionMux = new ObjectMultiplex();
+    legacyExtensionMux.setMaxListeners(25);
+
+    pump(legacyPageMux, legacyPageStream, legacyPageMux, (err) =>
+      logStreamDisconnectWarning('MetaMask Legacy Inpage Multiplex', err),
+    );
+    pump(
+      legacyExtensionMux,
+      extensionStream,
+      getNotificationTransformStream(),
+      legacyExtensionMux,
+      (err) => {
+        logStreamDisconnectWarning('MetaMask Background Legacy Multiplex', err);
+        notifyInpageOfStreamFailure();
+      },
+    );
+
+    forwardNamedTrafficBetweenMuxes(
+      LEGACY_PROVIDER,
+      PROVIDER,
+      legacyPageMux,
+      legacyExtensionMux,
+    );
+    forwardTrafficBetweenMuxes(
+      LEGACY_PUBLIC_CONFIG,
+      legacyPageMux,
+      legacyExtensionMux,
+    );
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function forwardTrafficBetweenMuxes(channelName, muxA, muxB) {
@@ -309,6 +320,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     console.log(sender, 'browser.runtime.onMessage:sender');
     sendResponse({ message: 'injected' });
     if (shouldInjectProvider()) {
+      console.log('MetaMask: Injecting provider.111');
       injectScript(inpageBundle);
       setupStreams();
     }
@@ -321,6 +333,7 @@ browser.extension.sendMessage(
     // code to initialize my extension
     if (response) {
       if (shouldInjectProvider()) {
+        console.log('MetaMask: Injecting provider.');
         injectScript(inpageBundle);
         setupStreams();
       }

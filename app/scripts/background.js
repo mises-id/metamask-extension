@@ -721,10 +721,14 @@ function injectDynamic() {
   for (const cs of browser.runtime.getManifest().content_scripts) {
     console.log('executeScript', cs);
     for (const csjs of cs.js) {
-      browser.tabs.executeScript({
-        file: csjs,
-        runAt: cs.run_at,
-      });
+      try {
+        browser.tabs.executeScript({
+          file: csjs,
+          runAt: cs.run_at,
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
     break;
   }
@@ -736,16 +740,18 @@ async function checkAndInject() {
   if (!activeTab) {
     return;
   }
-
-  browser.tabs
-    .sendMessage(activeTab.id, { check: 'contentscript' })
-    .then((response) => {
-      if (response) {
-        console.log('contentscript already there');
-      } else {
-        injectDynamic();
-      }
+  try {
+    const response = browser.tabs.sendMessage(activeTab.id, {
+      check: 'contentscript',
     });
+    if (response) {
+      console.log('contentscript already there');
+    } else {
+      injectDynamic();
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {

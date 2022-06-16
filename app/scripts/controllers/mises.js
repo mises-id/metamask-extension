@@ -1,5 +1,5 @@
 import MisesSdk from 'mises-js-sdk';
-import { ObservableStore } from '@metamask/obs-store';
+// import { ObservableStore } from '@metamask/obs-store';
 import BigNumber from 'bignumber.js';
 import {
   getBaseApi,
@@ -16,15 +16,16 @@ export default class MisesController {
 
   misesGasfee;
 
-  constructor({ exportAccount, getKeyringAccounts }) {
+  constructor({ exportAccount, getKeyringAccounts, preferencesStore }) {
     this.exportAccount = exportAccount;
     this.getKeyringAccounts = getKeyringAccounts;
     // this.getSelectedAddress = getSelectedAddress;
-    this.store = new ObservableStore({
-      priKeyHex: '',
-      accountList: [],
-      transformFlag: 'loading',
-    });
+    // this.store = new ObservableStore({
+    //   priKeyHex: '',
+    //   accountList: [],
+    //   transformFlag: 'loading',
+    // });
+    this.store = preferencesStore;
     this.config = MisesSdk.newConfig();
     this.coinDefine = MisesSdk.newCoinDefine();
     this.msgReader = MisesSdk.newMsgReader();

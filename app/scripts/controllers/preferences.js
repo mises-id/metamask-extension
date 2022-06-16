@@ -69,6 +69,8 @@ export default class PreferencesController {
         ? LEDGER_TRANSPORT_TYPES.WEBHID
         : LEDGER_TRANSPORT_TYPES.U2F,
       theme: 'default',
+      accountList: [],
+      transformFlag: 'loading',
       ...opts.initState,
     };
 

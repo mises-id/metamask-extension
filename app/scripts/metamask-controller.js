@@ -225,17 +225,6 @@ export default class MetamaskController extends EventEmitter {
       initState: initState.KeyringController,
       encryptor: opts.encryptor || undefined,
     });
-    this.misesController = new MisesController({
-      exportAccount: this.keyringController.exportAccount.bind(
-        this.keyringController,
-      ),
-      getKeyringAccounts: this.keyringController.getAccounts.bind(
-        this.keyringController,
-      ),
-      // getSelectedAddress: this.preferencesController.getSelectedAddress.bind(
-      //   this.preferencesController,
-      // ),
-    });
     this.networkController = new NetworkController({
       ...initState.NetworkController,
     });
@@ -254,6 +243,18 @@ export default class MetamaskController extends EventEmitter {
       migrateAddressBookState: this.migrateAddressBookState.bind(this),
     });
 
+    this.misesController = new MisesController({
+      exportAccount: this.keyringController.exportAccount.bind(
+        this.keyringController,
+      ),
+      getKeyringAccounts: this.keyringController.getAccounts.bind(
+        this.keyringController,
+      ),
+      preferencesStore: this.preferencesController.store,
+      // getSelectedAddress: this.preferencesController.getSelectedAddress.bind(
+      //   this.preferencesController,
+      // ),
+    });
     this.tokensController = new TokensController({
       onPreferencesStateChange: this.preferencesController.store.subscribe.bind(
         this.preferencesController.store,
@@ -3184,7 +3185,6 @@ export default class MetamaskController extends EventEmitter {
         estimateGasParams,
         (err, res) => {
           if (err) {
-            console.log(err, 'estimateGasestimateGasestimateGas===');
             return reject(err);
           }
           return resolve(res.toString(16));

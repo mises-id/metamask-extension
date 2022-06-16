@@ -132,8 +132,11 @@ export default class ExtensionPlatform {
         const closeId = windowDetails[0].id;
         browser.tabs.get(closeId).then((e) => {
           if (e && closeId === id) {
-            console.log(id, 'closeCurrentWindow=closeCurrentWindow');
-            browser.tabs.remove(id);
+            try {
+              browser.tabs.remove(id);
+            } catch (error) {
+              console.log(error);
+            }
           }
         });
       });

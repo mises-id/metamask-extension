@@ -628,10 +628,10 @@ export function getTargetSubjectMetadata(state, origin) {
 
 export function getRpcPrefsForCurrentProvider(state) {
   const { frequentRpcListDetail, provider } = state.metamask;
-  if (provider.rpcUrl == MISES_RPC_URL || provider.type == MISESNETWORK) {
+  if (provider.rpcUrl === MISES_RPC_URL || provider.type === MISESNETWORK) {
     return {
       blockExplorerUrl: 'https://gw.mises.site',
-    }
+    };
   }
   const selectRpcInfo = frequentRpcListDetail.find(
     (rpcInfo) => rpcInfo.rpcUrl === provider.rpcUrl,
