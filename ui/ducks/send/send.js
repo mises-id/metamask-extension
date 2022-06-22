@@ -757,6 +757,10 @@ const slice = createSlice({
       });
       // draftTransaction update happens in updateSendAmount
     },
+    updateMemo: (state, action) => {
+      state.memo = action.payload;
+      slice.caseReducers.validateSendState(state);
+    },
     updateMiseAmountToMax: (state, action) => {
       slice.caseReducers.updateMisesSendAmount(state, {
         payload: action.payload,
@@ -1236,10 +1240,16 @@ const slice = createSlice({
           state.asset.details === null:
         case state.stage === SEND_STAGES.ADD_RECIPIENT:
         case state.stage === SEND_STAGES.INACTIVE:
-        case state.gas.isGasEstimateLoading:
-        case new BigNumber(state.gas.gasLimit, 16).lessThan(
-          new BigNumber(state.gas.minimumGasLimit),
-        ):
+          // case state.gas.isGasEstimateLoading:
+          // case new BigNumber(state.gas.gasLimit, 16).lessThan(
+          //   new BigNumber(state.gas.minimumGasLimit),
+          // ):
+          // console.log(
+          //   state.gas.isGasEstimateLoading,
+          //   new BigNumber(state.gas.gasLimit, 16).lessThan(
+          //     new BigNumber(state.gas.minimumGasLimit),
+          //   ),
+          // );
           state.status = SEND_STATUSES.INVALID;
           break;
         default:
@@ -1758,7 +1768,11 @@ export function toggleSendMaxMode(misesGas) {
     }
   };
 }
-
+export function SendMemo(memo) {
+  return async (dispatch) => {
+    await dispatch(actions.updateMemo(memo));
+  };
+}
 /**
  * Signs a transaction or updates a transaction in state if editing.
  * This method is called when a user clicks the next button in the footer of

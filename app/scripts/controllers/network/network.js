@@ -20,7 +20,7 @@ import {
   MISES_CHAIN_ID,
   MISES_SYMBOL,
   MISES_RPC_URL,
-  ETH_SYMBOL
+  ETH_SYMBOL,
 } from '../../../../shared/constants/network';
 import { SECOND } from '../../../../shared/constants/time';
 import {
@@ -32,7 +32,7 @@ import createMetamaskMiddleware from './createMetamaskMiddleware';
 import createInfuraClient from './createInfuraClient';
 import createJsonRpcClient from './createJsonRpcClient';
 
-const env = process.env.METAMASK_ENV;
+// const env = process.env.METAMASK_ENV;
 const fetchWithTimeout = getFetchWithTimeout(SECOND * 30);
 let globalOptions = {};
 let defaultProviderConfigOpts;
@@ -45,8 +45,8 @@ if (process.env.IN_TEST) {
     ticker: ETH_SYMBOL,
   };
 } else {
-  defaultProviderConfigOpts = { 
-    type: MISESNETWORK, 
+  defaultProviderConfigOpts = {
+    type: MISESNETWORK,
     chainId: MISES_CHAIN_ID,
     ticker: MISES_SYMBOL,
     rpcUrl: MISES_RPC_URL,
@@ -364,10 +364,10 @@ export default class NetworkController extends EventEmitter {
     const { chainId } = NETWORK_TYPE_TO_ID_MAP[type];
     this.setProviderConfig({
       type,
-      rpcUrl: mises ? MISES_RPC_URL:'',
+      rpcUrl: mises ? MISES_RPC_URL : '',
       chainId,
       ticker: mises ? 'MIS' : 'ETH',
-      nickname: mises ? MISES_DISPLAY_NAME:'',
+      nickname: mises ? MISES_DISPLAY_NAME : '',
     });
   }
 

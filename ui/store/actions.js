@@ -2036,7 +2036,7 @@ export function addToMisesBook(address) {
 
   return async (dispatch, getState) => {
     const {
-      send: { amount },
+      send: { amount, memo },
     } = getState();
     const misesId =
       address.indexOf('mises') > -1
@@ -2044,7 +2044,12 @@ export function addToMisesBook(address) {
         : await promisifiedBackground.addressToMisesId(address);
     let set;
     try {
-      await promisifiedBackground.setMisesBook(misesId, amount.value);
+      await promisifiedBackground.setMisesBook(
+        misesId,
+        amount.value,
+        false,
+        memo,
+      );
       set = true;
     } catch (error) {
       log.error(error);

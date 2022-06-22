@@ -387,20 +387,26 @@ export default class MisesController {
     }
   }
 
-  async setMisesBook(misesId, amount, simulate = false) {
+  async setMisesBook(misesId, amount, simulate = false, memo = '') {
     const activeUser = this.getActive();
     const amountLong = this.coinDefine.fromCoin({
       amount,
       denom: 'mis',
     });
     console.log(simulate, 'simulate');
+    console.log(memo, 'getMemo');
     if (!simulate) {
       try {
-        const res = await activeUser.sendUMIS(misesId, amountLong);
+        const res = await activeUser.sendUMIS(
+          misesId,
+          amountLong,
+          simulate,
+          memo,
+        );
         this.store.updateState({
           transformFlag: res.code === 0 ? 'success' : 'error',
         });
-        console.log(res, 'success-setMisesBook');
+        console.log(res, memo, 'success-setMisesBook');
         return true;
       } catch (error) {
         this.store.updateState({
@@ -416,7 +422,13 @@ export default class MisesController {
         console.log('get cache misesGasfee');
         return this.misesGasfee;
       }
-      const res = await activeUser.sendUMIS(misesId, amountLong, simulate);
+
+      const res = await activeUser.sendUMIS(
+        misesId,
+        amountLong,
+        simulate,
+        memo,
+      );
 
       const proposeGasprice = await this.gasPriceAndLimit();
 

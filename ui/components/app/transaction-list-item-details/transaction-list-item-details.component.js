@@ -250,18 +250,20 @@ export default class TransactionListItemDetails extends PureComponent {
               />
             </div>
             <div className="transaction-list-item-details__cards-container">
-            {showBreakDown && (
-              <TransactionBreakdown
-                nonce={
-                  transactionGroup.initialTransaction.txParams &&
-                  transactionGroup.initialTransaction.txParams.nonce
-                }
-                isTokenApprove={type === TRANSACTION_TYPES.TOKEN_METHOD_APPROVE}
-                transaction={transaction}
-                primaryCurrency={primaryCurrency}
-                className="transaction-list-item-details__transaction-breakdown"
-              />
-            )}
+              {showBreakDown && (
+                <TransactionBreakdown
+                  nonce={
+                    transactionGroup.initialTransaction.txParams &&
+                    transactionGroup.initialTransaction.txParams.nonce
+                  }
+                  isTokenApprove={
+                    type === TRANSACTION_TYPES.TOKEN_METHOD_APPROVE
+                  }
+                  transaction={transaction}
+                  primaryCurrency={primaryCurrency}
+                  className="transaction-list-item-details__transaction-breakdown"
+                />
+              )}
               {transactionGroup.initialTransaction.type !==
                 TRANSACTION_TYPES.INCOMING && (
                 <Disclosure title={t('activityLog')} size="small">

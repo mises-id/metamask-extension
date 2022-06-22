@@ -4267,8 +4267,8 @@ export default class MetamaskController extends EventEmitter {
     return this.misesController.initMisesBalance();
   }
 
-  setMisesBook(address, amount, simulate) {
-    return this.misesController.setMisesBook(address, amount, simulate);
+  setMisesBook(address, amount, simulate, memo) {
+    return this.misesController.setMisesBook(address, amount, simulate, memo);
   }
 
   getMisesUser(address) {

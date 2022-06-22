@@ -8,6 +8,7 @@ import {
   MISES_SEND_CONFIRM_ROUTE,
 } from '../../../helpers/constants/routes';
 import { SEND_STAGES } from '../../../ducks/send';
+import { MISESNETWORK } from '../../../../shared/constants/network';
 
 export default class SendFooter extends Component {
   static propTypes = {
@@ -72,7 +73,7 @@ export default class SendFooter extends Component {
     } = this.props;
     const { trackEvent } = this.context;
     // let promise = null;
-    if (provider.type === 'MisesTestNet') {
+    if (provider.type === MISESNETWORK) {
       addToMisesBookIfNew(to);
       trackEvent({
         category: 'Transactions',

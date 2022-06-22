@@ -15,6 +15,7 @@ import SendAmountRow from './send-amount-row';
 import SendHexDataRow from './send-hex-data-row';
 import SendAssetRow from './send-asset-row';
 import SendGasRow from './send-gas-row';
+import SendMemoTxt from './seed-memo-row';
 
 export default class SendContent extends Component {
   state = {
@@ -53,11 +54,13 @@ export default class SendContent extends Component {
   };
 
   componentDidMount() {
-    this.props.getMisesGasfee().then((res) => {
-      this.setState({
-        misesGas: res,
+    if (this.props.provider.type === MISESNETWORK) {
+      this.props.getMisesGasfee().then((res) => {
+        this.setState({
+          misesGas: res,
+        });
       });
-    });
+    }
   }
 
   render() {
@@ -76,10 +79,13 @@ export default class SendContent extends Component {
 
     let gasError;
     if (provider.type !== MISESNETWORK) {
-      if (gasIsExcessive) gasError = GAS_PRICE_EXCESSIVE_ERROR_KEY;
-      else if (noGasPrice) gasError = GAS_PRICE_FETCH_FAILURE_ERROR_KEY;
-      else if (getIsBalanceInsufficient)
+      if (gasIsExcessive) {
+        gasError = GAS_PRICE_EXCESSIVE_ERROR_KEY;
+      } else if (noGasPrice) {
+        gasError = GAS_PRICE_FETCH_FAILURE_ERROR_KEY;
+      } else if (getIsBalanceInsufficient) {
         gasError = INSUFFICIENT_FUNDS_FOR_GAS_ERROR_KEY;
+      }
     }
     const showHexData =
       this.props.showHexData &&
@@ -101,6 +107,7 @@ export default class SendContent extends Component {
           <SendAmountRow misesGas={this.state.misesGas} />
           {networkOrAccountNotSupports1559 ? <SendGasRow /> : null}
           {showHexData ? <SendHexDataRow /> : null}
+          {provider.type === MISESNETWORK && <SendMemoTxt />}
         </div>
       </PageContainerContent>
     );

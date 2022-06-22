@@ -97,9 +97,9 @@ export default function SendTransactionScreen() {
           console.log(address);
           dispatch(updateRecipientUserInput(address));
         }}
-        onValidAddressTyped={(address) =>
-          dispatch(updateRecipient({ address, nickname: '' }))
-        }
+        onValidAddressTyped={(address) => {
+          dispatch(updateRecipient({ address, nickname: '' }));
+        }}
         internalSearch={isUsingMyAccountsForRecipientSearch}
         selectedAddress={recipient.misesId || recipient.address}
         selectedName={recipient.nickname}
