@@ -21,7 +21,7 @@ index 808ef5b..060292e 100644
      checkForLatestBlock(): Promise<string>;
      protected _start(): void;
 diff --git a/node_modules/eth-block-tracker/dist/PollingBlockTracker.js b/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
-index 4229a09..a5b488a 100644
+index 4229a09..ac8074d 100644
 --- a/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
 +++ b/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
 @@ -24,6 +24,16 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
@@ -29,15 +29,15 @@ index 4229a09..a5b488a 100644
          this._keepEventLoopActive = opts.keepEventLoopActive === undefined ? true : opts.keepEventLoopActive;
          this._setSkipCacheFlag = opts.setSkipCacheFlag || false;
 +        this._isUnlocked = opts.isUnlocked || this.defaultIsUnlocked;
-+        this._isBackground = opts.isBackground || this.defaultIsbackground;
++        this._isBackground = opts.isBackground || this.defaultIsBackground;
 +        this._updateLatestBlockSuccessCount = 0
 +        this._updateLatestBlockFailCount = 0
 +    }
-+    defaultIsbackground(){
++    defaultIsBackground(){
 +        return Promise.resolve(false);
 +    }
 +    defaultIsUnlocked(){
-+        return Promise.resolve(true);
++        return true;
      }
      // trigger block polling
      async checkForLatestBlock() {
