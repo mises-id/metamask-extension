@@ -65,7 +65,7 @@ async function requestEthereumAccountsHandler(
 ) {
   if (locks.has(origin)) {
     res.error = ethErrors.rpc.resourceUnavailable(
-      `Already processing ${MESSAGE_TYPE.ETH_REQUEST_ACCOUNTS}. Please wait.`,
+      `Already processing ${MESSAGE_TYPE.ETH_ACCOUNTS}. Please wait.`,
     );
     return end();
   }

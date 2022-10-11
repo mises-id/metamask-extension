@@ -92,8 +92,11 @@ export default class NotificationManager extends EventEmitter {
     }
     if (this._openerTab) {
       console.log('closePopup');
-      await this.platform.switchToTab(this._openerTab.id);
-      this._openerTab = undefined;
+      const hasTab = await this.platform.getTab(this._openerTab.id);
+      if (hasTab) {
+        await this.platform.switchToTab(this._openerTab.id);
+        this._openerTab = undefined;
+      }
     }
   }
 

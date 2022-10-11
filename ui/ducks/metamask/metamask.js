@@ -16,7 +16,7 @@ import { setCustomGasLimit, setCustomGasPrice } from '../gas/gas.duck';
 import { decGWEIToHexWEI } from '../../helpers/utils/conversions.util';
 
 import { KEYRING_TYPES } from '../../../shared/constants/hardware-wallets';
-import { MIS } from '../../helpers/constants/common';
+import { ETH } from '../../helpers/constants/common';
 import { isEqualCaseInsensitive } from '../../../shared/modules/string-utils';
 
 export default function reduceMetamask(state = {}, action) {
@@ -48,7 +48,7 @@ export default function reduceMetamask(state = {}, action) {
     participateInMetaMetrics: null,
     nextNonce: null,
     conversionRate: null,
-    nativeCurrency: MIS,
+    nativeCurrency: ETH,
     ...state,
   };
 
@@ -308,7 +308,7 @@ export function getConversionRate(state) {
 }
 
 export function getNativeCurrency(state) {
-  return state.metamask.nativeCurrency;
+  return state.metamask.nativeCurrency || ETH;
 }
 
 export function getSendHexDataFeatureFlagState(state) {

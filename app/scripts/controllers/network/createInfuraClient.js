@@ -13,7 +13,12 @@ import { PollingBlockTracker } from 'eth-block-tracker';
 
 import { NETWORK_TYPE_TO_ID_MAP } from '../../../../shared/constants/network';
 
-export default function createInfuraClient({ network, projectId }) {
+export default function createInfuraClient({
+  network,
+  projectId,
+  isUnlocked,
+  isBackground,
+}) {
   const infuraMiddleware = createInfuraMiddleware({
     network,
     projectId,
@@ -21,7 +26,12 @@ export default function createInfuraClient({ network, projectId }) {
     source: 'metamask',
   });
   const infuraProvider = providerFromMiddleware(infuraMiddleware);
-  const blockTracker = new PollingBlockTracker({ provider: infuraProvider });
+  const blockTracker = new PollingBlockTracker({
+    provider: infuraProvider,
+    retryTimeout: 1000 * 20,
+    isUnlocked,
+    isBackground,
+  });
 
   const networkMiddleware = mergeMiddleware([
     createNetworkAndChainIdMiddleware({ network }),

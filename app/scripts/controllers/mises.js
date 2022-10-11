@@ -458,7 +458,7 @@ export default class MisesController {
   }
 
   parseAmountItem(item) {
-    const amount = item.value.replace('umis', '|umis').split('|');
+    const amount = item.value?.replace('umis', '|umis').split('|');
     const currency = this.coinDefine.fromCoin({
       amount: amount[0],
       denom: amount[1],

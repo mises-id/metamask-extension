@@ -1301,7 +1301,6 @@ export function updateMetamaskState(newState) {
     // 这里判断还有点问题
     if (
       newState.provider &&
-      newState.provider &&
       newState.provider.ticker !== newState.nativeCurrency
     ) {
       newState.nativeCurrency = newState.provider.ticker;

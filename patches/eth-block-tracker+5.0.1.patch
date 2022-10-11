@@ -1,0 +1,82 @@
+diff --git a/node_modules/eth-block-tracker/dist/PollingBlockTracker.d.ts b/node_modules/eth-block-tracker/dist/PollingBlockTracker.d.ts
+index 808ef5b..060292e 100644
+--- a/node_modules/eth-block-tracker/dist/PollingBlockTracker.d.ts
++++ b/node_modules/eth-block-tracker/dist/PollingBlockTracker.d.ts
+@@ -5,6 +5,8 @@ interface PollingBlockTrackerArgs {
+     retryTimeout: number;
+     keepEventLoopActive: boolean;
+     setSkipCacheFlag: boolean;
++    isUnlocked: ()=> boolean;
++    isBackground: ()=> boolean;
+ }
+ export declare class PollingBlockTracker extends BaseBlockTracker {
+     private _provider;
+@@ -12,6 +14,8 @@ export declare class PollingBlockTracker extends BaseBlockTracker {
+     private _retryTimeout;
+     private _keepEventLoopActive;
+     private _setSkipCacheFlag;
++    private _isUnlocked;
++    private _isBackground;
+     constructor(opts?: Partial<PollingBlockTrackerArgs>);
+     checkForLatestBlock(): Promise<string>;
+     protected _start(): void;
+diff --git a/node_modules/eth-block-tracker/dist/PollingBlockTracker.js b/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
+index 4229a09..a5b488a 100644
+--- a/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
++++ b/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
+@@ -24,6 +24,16 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
+         this._retryTimeout = opts.retryTimeout || this._pollingInterval / 10;
+         this._keepEventLoopActive = opts.keepEventLoopActive === undefined ? true : opts.keepEventLoopActive;
+         this._setSkipCacheFlag = opts.setSkipCacheFlag || false;
++        this._isUnlocked = opts.isUnlocked || this.defaultIsUnlocked;
++        this._isBackground = opts.isBackground || this.defaultIsbackground;
++        this._updateLatestBlockSuccessCount = 0
++        this._updateLatestBlockFailCount = 0
++    }
++    defaultIsbackground(){
++        return Promise.resolve(false);
++    }
++    defaultIsUnlocked(){
++        return Promise.resolve(true);
+     }
+     // trigger block polling
+     async checkForLatestBlock() {
+@@ -36,8 +46,16 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
+     async _synchronize() {
+         while (this._isRunning) {
+             try {
+-                await this._updateLatestBlock();
++                const isBackground = await this._isBackground();
++                if(this._isUnlocked() && !isBackground) {
++                    console.error('unlock')
++                    await this._updateLatestBlock();
++                    this._updateLatestBlockSuccessCount += 1
++                }else{
++                    console.error('lock')
++                }
+                 await timeout(this._pollingInterval, !this._keepEventLoopActive);
++                console.error(this._updateLatestBlockSuccessCount, 'this._updateLatestBlockSuccessCount')
+             }
+             catch (err) {
+                 const newErr = new Error(`PollingBlockTracker - encountered an error while attempting to update latest block:\n${err.stack}`);
+@@ -48,12 +66,20 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
+                     console.error(newErr);
+                 }
+                 await timeout(this._retryTimeout, !this._keepEventLoopActive);
++                // if(err.message !== 'Request is being rate limited.'){
++                    
++                // }else{
++                //     console.error('clear timeout');
++                // }
++                this._updateLatestBlockFailCount += 1
++                console.error(this._updateLatestBlockFailCount, 'this._updateLatestBlockFailCount')
+             }
+         }
+     }
+     async _updateLatestBlock() {
+         // fetch + set latest block
+         const latestBlock = await this._fetchLatestBlock();
++        console.error(latestBlock, '_updateLatestBlock: latestBlockNumber')
+         this._newPotentialLatest(latestBlock);
+     }
+     async _fetchLatestBlock() {

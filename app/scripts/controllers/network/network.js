@@ -17,10 +17,10 @@ import {
   INFURA_BLOCKED_KEY,
   MISESNETWORK,
   MISES_DISPLAY_NAME,
-  MISES_CHAIN_ID,
-  MISES_SYMBOL,
   MISES_RPC_URL,
   ETH_SYMBOL,
+  MAINNET,
+  MAINNET_CHAIN_ID,
 } from '../../../../shared/constants/network';
 import { SECOND } from '../../../../shared/constants/time';
 import {
@@ -28,6 +28,7 @@ import {
   isSafeChainId,
 } from '../../../../shared/modules/network.utils';
 import getFetchWithTimeout from '../../../../shared/modules/fetch-with-timeout';
+import { isMobile } from '../../../../ui/helpers/utils/is-mobile-view';
 import createMetamaskMiddleware from './createMetamaskMiddleware';
 import createInfuraClient from './createInfuraClient';
 import createJsonRpcClient from './createJsonRpcClient';
@@ -45,12 +46,7 @@ if (process.env.IN_TEST) {
     ticker: ETH_SYMBOL,
   };
 } else {
-  defaultProviderConfigOpts = {
-    type: MISESNETWORK,
-    chainId: MISES_CHAIN_ID,
-    ticker: MISES_SYMBOL,
-    rpcUrl: MISES_RPC_URL,
-  };
+  defaultProviderConfigOpts = { type: MAINNET, chainId: MAINNET_CHAIN_ID };
 }
 
 const defaultProviderConfig = {
@@ -165,6 +161,28 @@ export default class NetworkController extends EventEmitter {
     this._blockTrackerProxy = null;
     globalOptions = opts;
     this.on(NETWORK_EVENTS.NETWORK_DID_CHANGE, this.lookupNetwork);
+    this.isUnlocked = opts.isUnlocked;
+  }
+
+  /**
+   * Sets the Infura project ID
+   *
+   * @returns {Error} app is active.
+   */
+  isBackground() {
+    return new Promise((resolve) => {
+      console.log(chrome);
+      if(!chrome.misesPrivate){
+        resolve(false);
+      }
+      isMobile()
+        ? chrome.misesPrivate &&
+          chrome.misesPrivate.getAppState((res) => {
+            console.log(res, 'getAppState');
+            resolve(res !== chrome.misesPrivate.AppState.RUNNING);
+          })
+        : resolve(false);
+    });
   }
 
   /**
@@ -481,6 +499,8 @@ export default class NetworkController extends EventEmitter {
     const networkClient = createInfuraClient({
       network: type,
       projectId,
+      isUnlocked: this.isUnlocked,
+      isBackground: this.isBackground,
     });
     this._setNetworkClient(networkClient);
   }

@@ -227,6 +227,7 @@ export default class MetamaskController extends EventEmitter {
     });
     this.networkController = new NetworkController({
       ...initState.NetworkController,
+      isUnlocked: this.isUnlocked.bind(this),
     });
     this.networkController.setInfuraProjectId(opts.infuraProjectId);
 
@@ -2010,11 +2011,13 @@ export default class MetamaskController extends EventEmitter {
 
       const ethQuery = new EthQuery(this.provider);
       accounts = await keyringController.getAccounts();
-      lastBalance = await this.getBalance(
-        accounts[accounts.length - 1],
-        ethQuery,
-      );
-
+      console.log(accounts, 'accounts');
+      // lastBalance = await this.getBalance(
+      //   accounts[accounts.length - 1],
+      //   ethQuery,
+      // );
+      lastBalance = '0x0';
+      console.log(lastBalance, 'const ethQuery = new EthQuery(this.provider);');
       const primaryKeyring = keyringController.getKeyringsByType(
         'HD Key Tree',
       )[0];
@@ -2028,6 +2031,10 @@ export default class MetamaskController extends EventEmitter {
         lastBalance = await this.getBalance(
           accounts[accounts.length - 1],
           ethQuery,
+        );
+        console.log(
+          lastBalance,
+          'await keyringController.addNewAccount(primaryKeyring)',
         );
       }
 

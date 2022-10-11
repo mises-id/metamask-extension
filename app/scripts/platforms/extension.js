@@ -129,16 +129,18 @@ export default class ExtensionPlatform {
     if (isMobile()) {
       return this.getActiveTabs().then((windowDetails) => {
         console.log(windowDetails, id, 'closeCurrentWindow');
-        const closeId = windowDetails[0].id;
-        browser.tabs.get(closeId).then((e) => {
-          if (e && closeId === id) {
-            try {
-              browser.tabs.remove(id);
-            } catch (error) {
-              console.log(error);
+        if (windowDetails.length && id) {
+          const closeId = windowDetails[0].id;
+          browser.tabs.get(closeId).then((e) => {
+            if (e && closeId === id) {
+              try {
+                browser.tabs.remove(id);
+              } catch (error) {
+                console.log(error);
+              }
             }
-          }
-        });
+          });
+        }
       });
     }
     return browser.windows.getCurrent().then((windowDetails) => {
@@ -278,6 +280,11 @@ export default class ExtensionPlatform {
   switchToTab(tabId) {
     console.log('switchToTab', tabId);
     return browser.tabs.update(tabId, { highlighted: true, active: true });
+  }
+
+  getTab(tabId) {
+    console.log('getTab', tabId);
+    return browser.tabs.get(tabId);
   }
 
   closeTab(tabId) {
