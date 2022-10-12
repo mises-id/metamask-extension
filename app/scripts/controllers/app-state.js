@@ -164,6 +164,7 @@ export default class AppStateController extends EventEmitter {
    * @param {number} timeoutMinutes - The inactive timeout in minutes.
    */
   _setInactiveTimeout(timeoutMinutes) {
+    console.log(timeoutMinutes);
     this.store.updateState({
       timeoutMinutes,
     });

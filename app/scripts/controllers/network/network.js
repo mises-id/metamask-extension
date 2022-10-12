@@ -171,8 +171,7 @@ export default class NetworkController extends EventEmitter {
    */
   isBackground() {
     return new Promise((resolve) => {
-      console.log(chrome);
-      if(!chrome.misesPrivate){
+      if (!chrome.misesPrivate) {
         resolve(false);
       }
       isMobile()
@@ -228,6 +227,7 @@ export default class NetworkController extends EventEmitter {
           if (err) {
             return reject(err);
           }
+          console.log('getLatestBlock:eth_getBlockByNumber', block);
           return resolve(block);
         },
       );

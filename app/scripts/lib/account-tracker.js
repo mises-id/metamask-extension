@@ -70,7 +70,7 @@ export default class AccountTracker {
     // bind function for easier listener syntax
     this._updateForBlock = this._updateForBlock.bind(this);
     this.getCurrentChainId = opts.getCurrentChainId;
-
+    this.getBlockByNumberCount = 0;
     this.web3 = new Web3(this._provider);
   }
 
@@ -177,6 +177,12 @@ export default class AccountTracker {
 
     // block gasLimit polling shouldn't be in account-tracker shouldn't be here...
     const currentBlock = await this._query.getBlockByNumber(blockNumber, false);
+    this.getBlockByNumberCount += 1;
+    console.log(
+      'currentBlock:getBlockByNumber-log==========',
+      currentBlock,
+      this.getBlockByNumberCount,
+    );
     if (!currentBlock) {
       return;
     }
@@ -268,6 +274,7 @@ export default class AccountTracker {
     const ethContract = this.web3.eth
       .contract(SINGLE_CALL_BALANCES_ABI)
       .at(deployedContractAddress);
+    console.log('getbalances-log=========', ethContract);
     const ethBalance = ['0x0'];
 
     ethContract.balances(addresses, ethBalance, (error, result) => {

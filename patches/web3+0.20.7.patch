@@ -12,10 +12,37 @@ index 6eb151c..6aa4516 100644
      if (name.length > 1) {
          obj[name[0]] = obj[name[0]] || {};
 diff --git a/node_modules/web3/lib/web3/function.js b/node_modules/web3/lib/web3/function.js
-index 863a10a..ffcd23c 100644
+index 863a10a..fde8877 100644
 --- a/node_modules/web3/lib/web3/function.js
 +++ b/node_modules/web3/lib/web3/function.js
-@@ -269,7 +269,7 @@ SolidityFunction.prototype.execute = function () {
+@@ -124,15 +124,16 @@ SolidityFunction.prototype.unpackOutput = function (output) {
+  *   error and result.
+  * @return {String} output bytes
+  */
++let callCount = 0;
+ SolidityFunction.prototype.call = function () {
+     var args = Array.prototype.slice.call(arguments).filter(function (a) {return a !== undefined; });
+     var callback = this.extractCallback(args);
+     var defaultBlock = this.extractDefaultBlock(args);
+     var payload = this.toPayload(args);
+-
+-
++    callCount+=1;
+     if (!callback) {
+         var output = this._eth.call(payload, defaultBlock);
++        console.error('eth_call1-log==========', output, callCount)
+         return this.unpackOutput(output);
+     }
+ 
+@@ -148,6 +149,7 @@ SolidityFunction.prototype.call = function () {
+             error = e;
+         }
+ 
++        console.error('eth_call2-log==========', output, callCount)
+         callback(error, unpacked);
+     });
+ };
+@@ -269,7 +271,7 @@ SolidityFunction.prototype.execute = function () {
  SolidityFunction.prototype.attachToContract = function (contract) {
      var execute = this.execute.bind(this);
      execute.request = this.request.bind(this);

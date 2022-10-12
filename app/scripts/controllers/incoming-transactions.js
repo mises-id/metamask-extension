@@ -134,6 +134,7 @@ export default class IncomingTransactionsController {
       const address = this.preferencesController.getSelectedAddress();
       await this._update(address);
     });
+    this.getTxListcount = 0;
   }
 
   start() {
@@ -238,6 +239,8 @@ export default class IncomingTransactionsController {
     }
     const response = await fetchWithTimeout(url);
     const { status, result } = await response.json();
+    this.getTxListcount += 1;
+    console.log('gettxlist-log==========', url, result, this.getTxListcount);
     let newIncomingTxs = [];
     if (status === '1' && Array.isArray(result) && result.length > 0) {
       const remoteTxList = {};

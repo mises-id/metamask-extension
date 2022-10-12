@@ -58,7 +58,6 @@ export default class MisesCollectiblesController extends CollectiblesController 
       // eslint-disable-next-line no-empty
     } catch (_a) {
       // Ignore ERC-721 contract error
-      console.log(_a, 'isCollectibleOwner');
     }
     // Checks the ownership for ERC-1155.
     try {
