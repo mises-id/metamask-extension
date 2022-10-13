@@ -88,6 +88,9 @@ export default class MisesCollectiblesController extends CollectiblesController 
     try {
       const tokenURI = this.getCollectibleApi(contractAddress, tokenId);
       const { token } = this.getMisesAccount(contractAddress);
+      if (!token) {
+        return Promise.resolve({});
+      }
       const collectibleInformation = await request({
         url: tokenURI,
         method: 'GET',
@@ -147,6 +150,9 @@ export default class MisesCollectiblesController extends CollectiblesController 
   getCollectibleContractInformationFromApi(contractAddress) {
     const api = this.getCollectibleContractInformationApi(contractAddress);
     const { token } = this.getMisesAccount(contractAddress);
+    if (!token) {
+      return Promise.resolve({});
+    }
     return request({
       url: api,
       method: 'GET',
