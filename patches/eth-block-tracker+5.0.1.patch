@@ -1,3 +1,22 @@
+diff --git a/node_modules/eth-block-tracker/dist/BaseBlockTracker.js b/node_modules/eth-block-tracker/dist/BaseBlockTracker.js
+index 49a5754..ac418fc 100644
+--- a/node_modules/eth-block-tracker/dist/BaseBlockTracker.js
++++ b/node_modules/eth-block-tracker/dist/BaseBlockTracker.js
+@@ -75,12 +75,14 @@ class BaseBlockTracker extends safe_event_emitter_1.default {
+         this.on('removeListener', this._onRemoveListener);
+     }
+     _onNewListener(eventName) {
++        console.error(eventName,'_onNewListener')
+         // `newListener` is called *before* the listener is added
+         if (blockTrackerEvents.includes(eventName)) {
+             this._maybeStart();
+         }
+     }
+     _onRemoveListener() {
++        console.error('_onRemoveListener', this._getBlockTrackerEventCount())
+         // `removeListener` is called *after* the listener is removed
+         if (this._getBlockTrackerEventCount() > 0) {
+             return;
 diff --git a/node_modules/eth-block-tracker/dist/PollingBlockTracker.d.ts b/node_modules/eth-block-tracker/dist/PollingBlockTracker.d.ts
 index 808ef5b..060292e 100644
 --- a/node_modules/eth-block-tracker/dist/PollingBlockTracker.d.ts
@@ -21,7 +40,7 @@ index 808ef5b..060292e 100644
      checkForLatestBlock(): Promise<string>;
      protected _start(): void;
 diff --git a/node_modules/eth-block-tracker/dist/PollingBlockTracker.js b/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
-index 4229a09..ac8074d 100644
+index 4229a09..369d998 100644
 --- a/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
 +++ b/node_modules/eth-block-tracker/dist/PollingBlockTracker.js
 @@ -24,6 +24,16 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
@@ -41,7 +60,7 @@ index 4229a09..ac8074d 100644
      }
      // trigger block polling
      async checkForLatestBlock() {
-@@ -36,8 +46,16 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
+@@ -36,8 +46,24 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
      async _synchronize() {
          while (this._isRunning) {
              try {
@@ -52,14 +71,22 @@ index 4229a09..ac8074d 100644
 +                    await this._updateLatestBlock();
 +                    this._updateLatestBlockSuccessCount += 1
 +                }else{
-+                    console.error('lock')
++                    // await this._updateLatestBlock();
++                    if(this._currentBlock){
++                        this.emit('latest', this._currentBlock);
++                        console.error('clear timeout')
++                    }else{
++                        await this._updateLatestBlock();
++                        console.error('init _currentBlock')
++                    }
++                    console.error('lock', this._currentBlock)
 +                }
                  await timeout(this._pollingInterval, !this._keepEventLoopActive);
 +                console.error(this._updateLatestBlockSuccessCount, 'this._updateLatestBlockSuccessCount')
              }
              catch (err) {
                  const newErr = new Error(`PollingBlockTracker - encountered an error while attempting to update latest block:\n${err.stack}`);
-@@ -48,12 +66,20 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
+@@ -48,12 +74,20 @@ class PollingBlockTracker extends BaseBlockTracker_1.BaseBlockTracker {
                      console.error(newErr);
                  }
                  await timeout(this._retryTimeout, !this._keepEventLoopActive);

@@ -10,6 +10,7 @@ import {
 } from 'swappable-obj-proxy';
 import EthQuery from 'eth-query';
 import SafeEventEmitter from 'safe-event-emitter';
+import browser from 'webextension-polyfill';
 import {
   INFURA_PROVIDER_TYPES,
   NETWORK_TYPE_RPC,
@@ -171,15 +172,28 @@ export default class NetworkController extends EventEmitter {
    */
   isBackground() {
     return new Promise((resolve) => {
-      console.log(chrome);
-      if(!chrome.misesPrivate){
-        resolve(false);
+      if (!browser.misesPrivate) {
+        browser.tabs
+          .query({ active: true, currentWindow: true })
+          .then((res) => {
+            if (Array.isArray(res) && res.length > 0) {
+              const [tab] = res;
+              resolve(
+                tab.url.indexOf(
+                  'chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn',
+                ) === -1,
+              );
+            } else {
+              resolve(false);
+            }
+            console.log(res);
+          });
       }
       isMobile()
-        ? chrome.misesPrivate &&
-          chrome.misesPrivate.getAppState((res) => {
+        ? browser.misesPrivate &&
+          browser.misesPrivate.getAppState((res) => {
             console.log(res, 'getAppState');
-            resolve(res !== chrome.misesPrivate.AppState.RUNNING);
+            resolve(res !== browser.misesPrivate.AppState.RUNNING);
           })
         : resolve(false);
     });
