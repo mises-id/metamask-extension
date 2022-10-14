@@ -230,7 +230,6 @@ export default class MisesController {
    * reset account list
    */
   lockAll() {
-    // console.log('清除了mises数据');
     // this.misesUser.lockAll();
   }
 
