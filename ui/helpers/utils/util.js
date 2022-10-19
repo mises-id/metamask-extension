@@ -230,6 +230,7 @@ export function exportAsFile(filename, data, type = 'text/csv') {
  * Example output: 0xabcd...1234
  *
  * @param {string} address - The address to shorten.
+ * @param prefix
  * @returns {string} The shortened address, or the original if it was no longer
  * than 10 characters.
  */

@@ -38,7 +38,10 @@ import {
   ///: END:ONLY_INCLUDE_IN
 } from '../../shared/constants/app';
 
-import { TRUNCATED_NAME_CHAR_LIMIT } from '../../shared/constants/labels';
+import {
+  MISES_TRUNCATED_ADDRESS_START_CHARS,
+  TRUNCATED_NAME_CHAR_LIMIT,
+} from '../../shared/constants/labels';
 
 import {
   SWAPS_CHAINID_DEFAULT_TOKEN_MAP,
@@ -461,15 +464,21 @@ export function accountsWithSendEtherInfoSelector(state) {
 
 export function getAccountsWithLabels(state) {
   return getMetaMaskAccountsOrdered(state).map(
-    ({ address, name, balance }) => ({
+    ({ address, name, balance, misesBalance, misesId }) => ({
       address,
       addressLabel: `${
         name.length < TRUNCATED_NAME_CHAR_LIMIT
           ? name
           : `${name.slice(0, TRUNCATED_NAME_CHAR_LIMIT - 1)}...`
       } (${shortenAddress(address)})`,
+      misesAddressLabel: `${
+        name.length < TRUNCATED_NAME_CHAR_LIMIT
+          ? name
+          : `${name.slice(0, TRUNCATED_NAME_CHAR_LIMIT - 1)}...`
+      } (${shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS)})`,
       label: name,
       balance,
+      misesBalance,
     }),
   );
 }

@@ -79,7 +79,7 @@ async function queryCurrentActiveTab(windowType) {
 
     browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       const [activeTab] = tabs;
-      const { id, title, url } = activeTab;
+      const { id, title, url } = activeTab || {};
       const { origin, protocol } = url ? new URL(url) : {};
 
       if (!origin || origin === 'null') {

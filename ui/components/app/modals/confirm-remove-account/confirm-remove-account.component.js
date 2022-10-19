@@ -2,8 +2,14 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { getAccountLink } from '@metamask/etherscan-link';
 import Modal from '../../modal';
-import { addressSummary, getURLHostName } from '../../../../helpers/utils/util';
+import {
+  addressSummary,
+  getURLHostName,
+  shortenAddress,
+} from '../../../../helpers/utils/util';
 import Identicon from '../../../ui/identicon';
+import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../../../shared/constants/labels';
+import { MISES_CHAIN_ID } from '../../../../../shared/constants/network';
 
 export default class ConfirmRemoveAccount extends Component {
   static propTypes = {
@@ -12,6 +18,7 @@ export default class ConfirmRemoveAccount extends Component {
     identity: PropTypes.object.isRequired,
     chainId: PropTypes.string.isRequired,
     rpcPrefs: PropTypes.object.isRequired,
+    accountList: PropTypes.array.isRequired,
   };
 
   static contextTypes = {
@@ -31,7 +38,12 @@ export default class ConfirmRemoveAccount extends Component {
 
   renderSelectedAccount() {
     const { t } = this.context;
-    const { identity, rpcPrefs, chainId } = this.props;
+    const { identity, rpcPrefs, chainId, accountList } = this.props;
+    const account = accountList.find(
+      (item) => item.address === identity.address,
+    );
+    const isMises = chainId === MISES_CHAIN_ID;
+    const address = isMises ? account.misesId : identity.address;
     return (
       <div className="confirm-remove-account__account">
         <div className="confirm-remove-account__account__identicon">
@@ -48,17 +60,17 @@ export default class ConfirmRemoveAccount extends Component {
             {t('publicAddress')}
           </span>
           <span className="account_value">
-            {addressSummary(identity.address, 4, 4)}
+            {isMises
+              ? shortenAddress(address, MISES_TRUNCATED_ADDRESS_START_CHARS)
+              : addressSummary(address, 4, 4)}
           </span>
         </div>
         <div className="confirm-remove-account__account__link">
           <a
             onClick={() => {
-              const accountLink = getAccountLink(
-                identity.address,
-                chainId,
-                rpcPrefs,
-              );
+              const accountLink = isMises
+                ? `${rpcPrefs.blockExplorerUrl}/holders/${address}`
+                : getAccountLink(address, chainId, rpcPrefs);
               this.context.trackEvent({
                 category: 'Accounts',
                 event: 'Clicked Block Explorer Link',

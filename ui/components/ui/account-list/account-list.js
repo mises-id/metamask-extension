@@ -5,8 +5,9 @@ import { useI18nContext } from '../../../hooks/useI18nContext';
 import CheckBox, { CHECKED, INDETERMINATE, UNCHECKED } from '../check-box';
 import Identicon from '../identicon';
 import UserPreferencedCurrencyDisplay from '../../app/user-preferenced-currency-display';
-import { PRIMARY } from '../../../helpers/constants/common';
+import { MIS, PRIMARY } from '../../../helpers/constants/common';
 import Tooltip from '../tooltip';
+import MisesUserPreferencedCurrencyDisplay from '../../app/mises-user-preferenced-currency-display';
 
 const AccountList = ({
   selectNewAccountViaModal,
@@ -79,8 +80,15 @@ const AccountList = ({
       <div className="choose-account-list__wrapper">
         <div className="choose-account-list__list">
           {accounts.map((account, index) => {
-            const { address, addressLabel, balance } = account;
+            const {
+              address,
+              addressLabel,
+              balance,
+              misesBalance,
+              misesAddressLabel,
+            } = account;
             const isSelectedAccount = selectedAccounts.has(address);
+            console.log(account);
             return (
               <div
                 key={`choose-account-list-${index}`}
@@ -96,15 +104,27 @@ const AccountList = ({
                   <Identicon diameter={34} address={address} />
                   <div className="choose-account-list__account__info">
                     <div className="choose-account-list__account__label">
-                      {addressLabel}
+                      {nativeCurrency === MIS
+                        ? misesAddressLabel
+                        : addressLabel}
                     </div>
-                    <UserPreferencedCurrencyDisplay
-                      className="choose-account-list__account__balance"
-                      type={PRIMARY}
-                      value={balance}
-                      style={{ color: 'var(--color-text-alternative)' }}
-                      suffix={nativeCurrency}
-                    />
+                    {nativeCurrency === MIS && misesBalance ? (
+                      <MisesUserPreferencedCurrencyDisplay
+                        className="choose-account-list__account__balance"
+                        misesBalance={misesBalance}
+                        type={PRIMARY}
+                        style={{ color: 'var(--color-text-alternative)' }}
+                        suffix={nativeCurrency}
+                      />
+                    ) : (
+                      <UserPreferencedCurrencyDisplay
+                        className="choose-account-list__account__balance"
+                        type={PRIMARY}
+                        value={balance}
+                        style={{ color: 'var(--color-text-alternative)' }}
+                        suffix={nativeCurrency}
+                      />
+                    )}
                   </div>
                 </div>
                 {addressLastConnectedMap[address] ? (

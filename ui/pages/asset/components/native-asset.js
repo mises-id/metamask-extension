@@ -10,6 +10,7 @@ import {
   getCurrentChainId,
   getRpcPrefsForCurrentProvider,
   getSelectedAddress,
+  getMisesSelectedAccount,
 } from '../../../selectors/selectors';
 import { showModal } from '../../../store/actions';
 import { DEFAULT_ROUTE } from '../../../helpers/constants/routes';
@@ -28,10 +29,14 @@ export default function NativeAsset({ nativeCurrency }) {
   const chainId = useSelector(getCurrentChainId);
   const rpcPrefs = useSelector(getRpcPrefsForCurrentProvider);
   const address = useSelector(getSelectedAddress);
+  const account = useSelector(getMisesSelectedAccount);
   const history = useHistory();
-  const accountLink = getAccountLink(address, chainId, rpcPrefs);
   const trackEvent = useContext(MetaMetricsContext);
   const isMisesNetwork = nativeCurrency === 'MIS';
+  const accountLink = isMisesNetwork
+    ? `${rpcPrefs.blockExplorerUrl}/holders/${account[address].misesId}`
+    : getAccountLink(address, chainId, rpcPrefs);
+  console.log(accountLink);
   return (
     <>
       <AssetNavigation
@@ -59,11 +64,8 @@ export default function NativeAsset({ nativeCurrency }) {
             onViewAccountDetails={() => {
               dispatch(showModal({ name: 'ACCOUNT_DETAILS' }));
             }}
-
-            onViewTokenDetails={() => {
-            }}
-            onRemove={() => {
-            }}
+            onViewTokenDetails={() => {}}
+            onRemove={() => {}}
           />
         }
       />

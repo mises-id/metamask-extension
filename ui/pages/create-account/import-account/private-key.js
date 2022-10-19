@@ -148,8 +148,16 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    importNewAccount: (strategy, [privateKey]) => {
-      return dispatch(actions.importNewAccount(strategy, [privateKey]));
+    importNewAccount: async (strategy, [privateKey]) => {
+      const state = await dispatch(
+        actions.importNewAccount(strategy, [privateKey]),
+      );
+      const account = state.identities[state.selectedAddress];
+      if (account) {
+        dispatch(actions.setAccountLabel(account.address, account.name));
+        dispatch(actions.showAccountDetail(account.address));
+      }
+      return state;
     },
     displayWarning: (message) =>
       dispatch(actions.displayWarning(message || null)),
