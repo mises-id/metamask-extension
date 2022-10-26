@@ -1,8 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { useSelector } from 'react-redux';
 import Identicon from '../../../ui/identicon';
 import { ellipsify } from '../../../../pages/send/send.utils';
+import { getProvider } from '../../../../selectors';
+import { MISESNETWORK } from '../../../../../shared/constants/network';
+import { shortenAddress } from '../../../../helpers/utils/util';
+import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../../../shared/constants/labels';
 
 function addressesEqual(address1, address2) {
   return String(address1).toLowerCase() === String(address2).toLowerCase();
@@ -14,6 +19,8 @@ export default function RecipientGroup({
   onSelect,
   selectedAddress,
 }) {
+  const provider = useSelector(getProvider);
+  const isMises = provider.type === MISESNETWORK;
   if (!items || !items.length) {
     return null;
   }
@@ -28,7 +35,7 @@ export default function RecipientGroup({
           {label}
         </div>
       )}
-      {items.map(({ address, name }) => (
+      {items.map(({ address, name, misesId }) => (
         <div
           key={address}
           onClick={() => onSelect(address, name)}
@@ -53,7 +60,12 @@ export default function RecipientGroup({
             </div>
             {name && (
               <div className="send__select-recipient-wrapper__group-item__subtitle">
-                {ellipsify(address)}
+                {isMises
+                  ? shortenAddress(
+                      misesId,
+                      MISES_TRUNCATED_ADDRESS_START_CHARS,
+                    ) || ellipsify(address)
+                  : ellipsify(address)}
               </div>
             )}
           </div>

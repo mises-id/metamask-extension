@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import {
   getAccountToConnectToActiveTab,
+  getMisesOpt,
   getOrderedConnectedAccountsForActiveTab,
   getOriginOfCurrentTab,
   getPermissionsForActiveTab,
@@ -32,6 +33,7 @@ const mapStateToProps = (state) => {
     mostRecentOverviewPage: getMostRecentOverviewPage(state),
     permissions,
     selectedAddress,
+    misesOpt: getMisesOpt(state),
   };
 };
 

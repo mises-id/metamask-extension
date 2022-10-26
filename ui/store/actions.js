@@ -2292,6 +2292,15 @@ export function setAccountLabel(account, label) {
     });
   };
 }
+export function loadMisesUserInfo() {
+  return (dispatch) => {
+    dispatch(showLoadingIndication());
+    return new Promise((resolve) => {
+      promisifiedBackground.initMisesBalance();
+      resolve();
+    });
+  };
+}
 
 export function clearAccountDetails() {
   return {

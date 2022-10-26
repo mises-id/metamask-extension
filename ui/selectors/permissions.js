@@ -1,4 +1,5 @@
 import { CaveatTypes } from '../../shared/constants/permissions';
+import { getMisesOpt } from './selectors';
 import {
   getMetaMaskAccountsOrdered,
   getOriginOfCurrentTab,
@@ -6,7 +7,6 @@ import {
   getSubjectMetadata,
   getTargetSubjectMetadata,
 } from '.';
-
 // selectors
 
 /**
@@ -184,7 +184,7 @@ function subjectSelector(state, origin) {
 export function getAccountToConnectToActiveTab(state) {
   const selectedAddress = getSelectedAddress(state);
   const connectedAccounts = getPermittedAccountsForCurrentTab(state);
-
+  const misesOpt = getMisesOpt(state);
   const {
     metamask: { identities },
   } = state;
@@ -198,7 +198,7 @@ export function getAccountToConnectToActiveTab(state) {
       connectedAccounts.findIndex((address) => address === selectedAddress) ===
       -1
     ) {
-      return identities[selectedAddress];
+      return { ...identities[selectedAddress], ...misesOpt.account };
     }
   }
 

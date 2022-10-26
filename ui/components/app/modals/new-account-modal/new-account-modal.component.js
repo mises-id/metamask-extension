@@ -17,6 +17,7 @@ export default class NewAccountModal extends Component {
     alias: this.context.t('newAccountNumberName', [
       this.props.newAccountNumber,
     ]),
+    loading: false,
   };
 
   onChange = (e) => {
@@ -26,7 +27,22 @@ export default class NewAccountModal extends Component {
   };
 
   onSubmit = () => {
-    this.props.onSave(this.state.alias).then(this.props.hideModal);
+    this.setState({
+      loading: true,
+    });
+    this.props
+      .onSave(this.state.alias)
+      .then(() => {
+        this.props.hideModal();
+        this.setState({
+          loading: false,
+        });
+      })
+      .catch(() => {
+        this.setState({
+          loading: false,
+        });
+      });
   };
 
   onKeyPress = (e) => {
@@ -68,7 +84,7 @@ export default class NewAccountModal extends Component {
           <Button
             type="primary"
             onClick={this.onSubmit}
-            disabled={!this.state.alias}
+            disabled={!this.state.alias || this.state.loading}
           >
             {t('save')}
           </Button>

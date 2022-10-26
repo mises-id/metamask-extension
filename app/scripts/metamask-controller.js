@@ -1616,6 +1616,7 @@ export default class MetamaskController extends EventEmitter {
       // misesController
       setSelectedAddress: this.setSelectedAddress.bind(this),
       setMisesUser: this.setMisesUser.bind(this),
+      getMisesUserInfo: this.getMisesUserInfo.bind(this),
       lockAll: this.lockAll.bind(this),
       initMisesBalance: this.initMisesBalance.bind(this),
       setMisesBook: this.setMisesBook.bind(this),
@@ -4227,6 +4228,10 @@ export default class MetamaskController extends EventEmitter {
       console.log('Switching users');
       this.setMisesUser(address); // set mises userinfo
     }
+  }
+
+  async getMisesUserInfo(address) {
+    return this.misesController.getMisesUserInfo(address);
   }
 
   /**

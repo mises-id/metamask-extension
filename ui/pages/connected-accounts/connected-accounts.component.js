@@ -27,6 +27,7 @@ export default class ConnectedAccounts extends PureComponent {
     removePermittedAccount: PropTypes.func.isRequired,
     setSelectedAddress: PropTypes.func.isRequired,
     history: PropTypes.object.isRequired,
+    misesOpt: PropTypes.object.isRequired,
   };
 
   render() {
@@ -42,6 +43,7 @@ export default class ConnectedAccounts extends PureComponent {
       selectedAddress,
       removePermittedAccount,
       setSelectedAddress,
+      misesOpt,
     } = this.props;
     const { t } = this.context;
 
@@ -73,6 +75,7 @@ export default class ConnectedAccounts extends PureComponent {
           selectedAddress={selectedAddress}
           removePermittedAccount={removePermittedAccount}
           setSelectedAddress={setSelectedAddress}
+          isMises={misesOpt.isMises}
           shouldRenderListOptions
         />
       </Popover>

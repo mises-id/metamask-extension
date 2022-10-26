@@ -14,6 +14,7 @@ function mapDispatchToProps(dispatch) {
     createAccount: (newAccountName) => {
       return dispatch(actions.addNewAccount()).then((newAccountAddress) => {
         if (newAccountName) {
+          dispatch(actions.loadMisesUserInfo(newAccountAddress));
           dispatch(actions.setAccountLabel(newAccountAddress, newAccountName));
         }
         return newAccountAddress;

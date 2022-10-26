@@ -17,6 +17,7 @@ export default class ConnectedAccountsList extends PureComponent {
     accountToConnect: PropTypes.shape({
       address: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
+      misesId: PropTypes.string.isRequired,
     }),
     connectedAccounts: PropTypes.arrayOf(
       PropTypes.shape({
@@ -29,6 +30,7 @@ export default class ConnectedAccountsList extends PureComponent {
     selectedAddress: PropTypes.string.isRequired,
     removePermittedAccount: PropTypes.func,
     setSelectedAddress: PropTypes.func.isRequired,
+    isMises: PropTypes.bool,
     shouldRenderListOptions: (props, propName, componentName) => {
       if (typeof props[propName] !== 'boolean') {
         return new Error(
@@ -68,19 +70,21 @@ export default class ConnectedAccountsList extends PureComponent {
   };
 
   renderUnconnectedAccount() {
-    const { accountToConnect, connectAccount } = this.props;
+    const { accountToConnect, connectAccount, isMises } = this.props;
     const { t } = this.context;
 
     if (!accountToConnect) {
       return null;
     }
 
-    const { address, name } = accountToConnect;
+    const { address, name, misesId } = accountToConnect;
+    console.log(accountToConnect);
+    const subAddress = isMises ? misesId : address;
     return (
       <ConnectedAccountsListItem
         className="connected-accounts-list__row--highlight"
         address={address}
-        name={`${name} (…${address.substr(-4, 4)})`}
+        name={`${name} (…${subAddress?.substr(-4, 4)})`}
         status={t('statusNotConnected')}
         action={
           <a
@@ -129,6 +133,7 @@ export default class ConnectedAccountsList extends PureComponent {
       connectedAccounts,
       selectedAddress,
       shouldRenderListOptions,
+      isMises,
     } = this.props;
     const { t } = this.context;
 
@@ -136,12 +141,14 @@ export default class ConnectedAccountsList extends PureComponent {
       <>
         <main className="connected-accounts-list">
           {this.renderUnconnectedAccount()}
-          {connectedAccounts.map(({ address, name }, index) => {
+          {connectedAccounts.map(({ address, name, misesId }, index) => {
+            console.log(connectedAccounts);
+            const subAddress = isMises ? misesId : address;
             return (
               <ConnectedAccountsListItem
                 key={address}
                 address={address}
-                name={`${name} (…${address.substr(-4, 4)})`}
+                name={`${name} (…${subAddress?.substr(-4, 4)})`}
                 status={index === 0 ? t('active') : null}
                 options={
                   shouldRenderListOptions

@@ -16,6 +16,7 @@ export default class PermissionPageContainerContent extends PureComponent {
     selectedPermissions: PropTypes.object.isRequired,
     selectedIdentities: PropTypes.array,
     allIdentitiesSelected: PropTypes.bool,
+    isMises: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -72,6 +73,7 @@ export default class PermissionPageContainerContent extends PureComponent {
       selectedIdentities,
       allIdentitiesSelected,
       selectedPermissions,
+      isMises,
     } = this.props;
     const { t } = this.context;
 
@@ -90,7 +92,11 @@ export default class PermissionPageContainerContent extends PureComponent {
         ),
       ]);
     }
-    return t('connectTo', [selectedIdentities[0]?.addressLabel]);
+    return t('connectTo', [
+      isMises
+        ? selectedIdentities[0]?.misesAddressLabel
+        : selectedIdentities[0]?.addressLabel,
+    ]);
   }
 
   render() {

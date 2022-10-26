@@ -88,7 +88,6 @@ const AccountList = ({
               misesAddressLabel,
             } = account;
             const isSelectedAccount = selectedAccounts.has(address);
-            console.log(account);
             return (
               <div
                 key={`choose-account-list-${index}`}

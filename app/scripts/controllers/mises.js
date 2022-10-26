@@ -186,6 +186,7 @@ export default class MisesController {
         : shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS),
       avatar: account.userInfo && account.userInfo.avatarUrl,
       misesId,
+      misesBalance: account.misesBalance,
       token: account.token,
     };
     console.log(userinfo, 'method:getMisesUserInfo');

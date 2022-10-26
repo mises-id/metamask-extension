@@ -20,6 +20,7 @@ export default class PermissionPageContainer extends Component {
       extensionId: PropTypes.string,
       iconUrl: PropTypes.string,
     }),
+    misesOpt: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
@@ -113,6 +114,7 @@ export default class PermissionPageContainer extends Component {
       targetSubjectMetadata,
       selectedIdentities,
       allIdentitiesSelected,
+      misesOpt,
     } = this.props;
 
     return (
@@ -122,6 +124,7 @@ export default class PermissionPageContainer extends Component {
           subjectMetadata={targetSubjectMetadata}
           selectedPermissions={this.state.selectedPermissions}
           selectedIdentities={selectedIdentities}
+          isMises={misesOpt.isMises}
           allIdentitiesSelected={allIdentitiesSelected}
         />
         <div className="permission-approval-container__footers">

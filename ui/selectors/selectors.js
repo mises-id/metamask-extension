@@ -267,8 +267,9 @@ export const getMetaMaskAccounts = createSelector(
         let find = {};
         if (provider.type === MISESNETWORK) {
           find =
-            accountList.find((val) => val.address.indexOf(accountID) > -1) ||
-            {};
+            accountList.find(
+              (val) => val.address && val.address.indexOf(accountID) > -1,
+            ) || {};
         }
         if (account.balance === null || account.balance === undefined) {
           return {
@@ -316,7 +317,8 @@ export const getMisesOpt = createSelector(
 export function getSelectedIdentity(state) {
   const selectedAddress = getSelectedAddress(state);
   const { identities } = state.metamask;
-  return identities[selectedAddress];
+  const misesOpt = getMisesOpt(state);
+  return { ...identities[selectedAddress], ...misesOpt.account };
 }
 export function getNumberOfAccounts(state) {
   return Object.keys(state.metamask.accounts).length;
@@ -464,22 +466,27 @@ export function accountsWithSendEtherInfoSelector(state) {
 
 export function getAccountsWithLabels(state) {
   return getMetaMaskAccountsOrdered(state).map(
-    ({ address, name, balance, misesBalance, misesId }) => ({
-      address,
-      addressLabel: `${
+    ({ address, name, balance, misesBalance, misesId }) => {
+      const addressLabel = `${
         name.length < TRUNCATED_NAME_CHAR_LIMIT
           ? name
           : `${name.slice(0, TRUNCATED_NAME_CHAR_LIMIT - 1)}...`
-      } (${shortenAddress(address)})`,
-      misesAddressLabel: `${
-        name.length < TRUNCATED_NAME_CHAR_LIMIT
-          ? name
-          : `${name.slice(0, TRUNCATED_NAME_CHAR_LIMIT - 1)}...`
-      } (${shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS)})`,
-      label: name,
-      balance,
-      misesBalance,
-    }),
+      } (${shortenAddress(address)})`;
+      return {
+        address,
+        addressLabel,
+        misesAddressLabel: misesId
+          ? `${
+              name.length < TRUNCATED_NAME_CHAR_LIMIT
+                ? name
+                : `${name.slice(0, TRUNCATED_NAME_CHAR_LIMIT - 1)}...`
+            } (${shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS)})`
+          : addressLabel,
+        label: name,
+        balance,
+        misesBalance,
+      };
+    },
   );
 }
 

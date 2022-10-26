@@ -14,6 +14,7 @@ import {
   getOrderedConnectedAccountsForActiveTab,
   getSelectedAddress,
   getSelectedIdentity,
+  getMisesOpt,
 } from '../../../../selectors';
 import { isExtensionUrl, getURLHost } from '../../../../helpers/utils/util';
 import Popover from '../../../ui/popover';
@@ -35,6 +36,8 @@ const UnconnectedAccountAlert = () => {
   const origin = useSelector(getOriginOfCurrentTab);
   const selectedIdentity = useSelector(getSelectedIdentity);
   const selectedAddress = useSelector(getSelectedAddress);
+  const misesOpt = useSelector(getMisesOpt);
+  console.log(misesOpt);
   const [dontShowThisAgain, setDontShowThisAgain] = useState(false);
 
   const onClose = async () => {
@@ -100,6 +103,7 @@ const UnconnectedAccountAlert = () => {
         accountToConnect={selectedIdentity}
         connectAccount={() => dispatch(connectAccount(selectedAddress))}
         connectedAccounts={connectedAccounts}
+        isMises={misesOpt.isMises}
         selectedAddress={selectedAddress}
         setSelectedAddress={(address) => dispatch(switchToAccount(address))}
         shouldRenderListOptions={false}
