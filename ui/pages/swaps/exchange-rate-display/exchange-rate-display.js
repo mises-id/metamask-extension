@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import BigNumber from 'bignumber.js';
 import classnames from 'classnames';
-import { calcTokenAmount } from '../../../helpers/utils/token-util';
 import { formatSwapsValueForDisplay } from '../swaps.util';
+import { calcTokenAmount } from '../../../../shared/lib/transactions-controller-utils';
 
 export default function ExchangeRateDisplay({
   primaryTokenValue,
@@ -12,7 +12,7 @@ export default function ExchangeRateDisplay({
   secondaryTokenValue,
   secondaryTokenDecimals = 18,
   secondaryTokenSymbol,
-  arrowColor = 'var(--color-icon-default)',
+  arrowColor = 'var(--color-primary-default)',
   boldSymbols = true,
   className,
 }) {

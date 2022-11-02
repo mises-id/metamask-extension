@@ -5,7 +5,7 @@ import {
   AccordionDetails,
   AccordionSummary,
 } from '@material-ui/core';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 function TxMessage({ msgs }) {
   const RenderItem = ({ value }) => {
@@ -60,6 +60,7 @@ function TxMessage({ msgs }) {
           });
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [msgs.length]);
 
   return (

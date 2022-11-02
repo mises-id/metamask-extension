@@ -21,8 +21,7 @@ export default function MisesSend() {
     },
     error: {
       icon: 'warning-icon.png',
-      txt:
-        'Some problems have been encountered, resulting in transaction failure. Please try again later',
+      txt: 'Some problems have been encountered, resulting in transaction failure. Please try again later',
     },
     success: {
       icon: 'tada.png',

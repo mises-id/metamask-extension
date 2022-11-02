@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Button from '../../components/ui/button';
+import { EVENT, EVENT_NAMES } from '../../../shared/constants/metametrics';
 
 export default class NewAccountCreateForm extends Component {
   static defaultProps = {
@@ -17,43 +18,36 @@ export default class NewAccountCreateForm extends Component {
 
   render() {
     const { newAccountName, defaultAccountName } = this.state;
-    const {
-      history,
-      createAccount,
-      mostRecentOverviewPage,
-      accounts,
-    } = this.props;
+    const { history, createAccount, mostRecentOverviewPage, accounts } =
+      this.props;
 
-    const createClick = (_) => {
+    const createClick = (event) => {
+      event.preventDefault();
       createAccount(newAccountName || defaultAccountName)
         .then(() => {
           this.context.trackEvent({
-            category: 'Accounts',
-            event: 'Added New Account',
+            category: EVENT.CATEGORIES.ACCOUNTS,
+            event: EVENT_NAMES.ACCOUNT_ADDED,
             properties: {
-              action: 'Add New Account',
-              legacy_event: true,
+              account_type: EVENT.ACCOUNT_TYPES.DEFAULT,
             },
           });
           history.push(mostRecentOverviewPage);
         })
         .catch((e) => {
           this.context.trackEvent({
-            category: 'Accounts',
-            event: 'Error',
+            category: EVENT.CATEGORIES.ACCOUNTS,
+            event: EVENT_NAMES.ACCOUNT_ADD_FAILED,
             properties: {
-              action: 'Add New Account',
-              legacy_event: true,
-              errorMessage: e.message,
+              account_type: EVENT.ACCOUNT_TYPES.DEFAULT,
+              error: e.message,
             },
           });
         });
     };
 
     const accountNameExists = (allAccounts, accountName) => {
-      const accountsNames = allAccounts.map((item) => item.name);
-
-      return accountsNames.includes(accountName);
+      return Boolean(allAccounts.find((item) => item.name === accountName));
     };
 
     const existingAccountName = accountNameExists(accounts, newAccountName);

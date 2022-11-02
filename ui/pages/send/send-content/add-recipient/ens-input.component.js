@@ -6,11 +6,12 @@ import {
   isValidDomainName,
   isValidMisesId,
 } from '../../../../helpers/utils/util';
+import { addHexPrefix } from '../../../../../app/scripts/lib/util';
 import {
   isBurnAddress,
   isValidHexAddress,
 } from '../../../../../shared/modules/hexstring-utils';
-import { MISESNETWORK } from '../../../../../shared/constants/network';
+import { NETWORK_TYPES } from '../../../../../shared/constants/network';
 
 export default class EnsInput extends Component {
   static contextTypes = {
@@ -54,7 +55,7 @@ export default class EnsInput extends Component {
           !isBurnAddress(input) &&
           isValidHexAddress(input, { mixedCaseUseChecksum: true })
         ) {
-          this.props.onPaste(input);
+          this.props.onPaste(addHexPrefix(input));
         }
       });
     }
@@ -91,7 +92,7 @@ export default class EnsInput extends Component {
         !isBurnAddress(input) &&
         isValidHexAddress(input, { mixedCaseUseChecksum: true })
       ) {
-        onValidAddressTyped(input);
+        onValidAddressTyped(addHexPrefix(input));
       }
     }
 
@@ -100,13 +101,8 @@ export default class EnsInput extends Component {
 
   render() {
     const { t } = this.context;
-    const {
-      className,
-      selectedAddress,
-      selectedName,
-      userInput,
-      provider,
-    } = this.props;
+    const { className, selectedAddress, selectedName, userInput, provider } =
+      this.props;
 
     const hasSelectedAddress = Boolean(selectedAddress);
 
@@ -162,7 +158,7 @@ export default class EnsInput extends Component {
                 type="text"
                 dir="auto"
                 placeholder={
-                  provider.type === MISESNETWORK
+                  provider.type === NETWORK_TYPES.MISES
                     ? 'Search Mises ID'
                     : t('recipientAddressPlaceholder')
                 }

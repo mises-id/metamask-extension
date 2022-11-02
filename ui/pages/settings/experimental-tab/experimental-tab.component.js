@@ -5,9 +5,7 @@ import {
   getNumberOfSettingsInSection,
   handleSettingsRefs,
 } from '../../../helpers/utils/settings-search';
-import Dropdown from '../../../components/ui/dropdown';
-
-import { THEME_TYPE } from './experimental-tab.constant';
+import { EVENT } from '../../../../shared/constants/metametrics';
 
 export default class ExperimentalTab extends PureComponent {
   static contextTypes = {
@@ -16,16 +14,12 @@ export default class ExperimentalTab extends PureComponent {
   };
 
   static propTypes = {
-    useTokenDetection: PropTypes.bool,
-    setUseTokenDetection: PropTypes.func,
     useCollectibleDetection: PropTypes.bool,
     setUseCollectibleDetection: PropTypes.func,
     setOpenSeaEnabled: PropTypes.func,
     openSeaEnabled: PropTypes.bool,
     eip1559V2Enabled: PropTypes.bool,
     setEIP1559V2Enabled: PropTypes.func,
-    theme: PropTypes.string,
-    setTheme: PropTypes.func,
   };
 
   settingsRefs = Array(
@@ -47,42 +41,6 @@ export default class ExperimentalTab extends PureComponent {
   componentDidMount() {
     const { t } = this.context;
     handleSettingsRefs(t, t('experimental'), this.settingsRefs);
-  }
-
-  renderTokenDetectionToggle() {
-    const { t } = this.context;
-    const { useTokenDetection, setUseTokenDetection } = this.props;
-
-    return (
-      <div ref={this.settingsRefs[0]} className="settings-page__content-row">
-        <div className="settings-page__content-item">
-          <span>{t('useTokenDetection')}</span>
-          <div className="settings-page__content-description">
-            {t('useTokenDetectionDescription')}
-          </div>
-        </div>
-        <div className="settings-page__content-item">
-          <div className="settings-page__content-item-col">
-            <ToggleButton
-              value={useTokenDetection}
-              onToggle={(value) => {
-                this.context.trackEvent({
-                  category: 'Settings',
-                  event: 'Token Detection',
-                  properties: {
-                    action: 'Token Detection',
-                    legacy_event: true,
-                  },
-                });
-                setUseTokenDetection(!value);
-              }}
-              offLabel={t('off')}
-              onLabel={t('on')}
-            />
-          </div>
-        </div>
-      </div>
-    );
   }
 
   renderCollectibleDetectionToggle() {
@@ -115,7 +73,7 @@ export default class ExperimentalTab extends PureComponent {
               value={useCollectibleDetection}
               onToggle={(value) => {
                 this.context.trackEvent({
-                  category: 'Settings',
+                  category: EVENT.CATEGORIES.SETTINGS,
                   event: 'Collectible Detection',
                   properties: {
                     action: 'Collectible Detection',
@@ -165,7 +123,7 @@ export default class ExperimentalTab extends PureComponent {
               value={openSeaEnabled}
               onToggle={(value) => {
                 this.context.trackEvent({
-                  category: 'Settings',
+                  category: EVENT.CATEGORIES.SETTINGS,
                   event: 'Enabled/Disable OpenSea',
                   properties: {
                     action: 'Enabled/Disable OpenSea',
@@ -214,10 +172,10 @@ export default class ExperimentalTab extends PureComponent {
               value={eip1559V2Enabled}
               onToggle={(value) => {
                 this.context.trackEvent({
-                  category: 'Settings',
-                  event: 'Enabled/Disable OpenSea',
+                  category: EVENT.CATEGORIES.SETTINGS,
+                  event: 'Enable/Disable Advanced Gas UI',
                   properties: {
-                    action: 'Enabled/Disable OpenSea',
+                    action: 'Enable/Disable Advanced Gas UI',
                     legacy_event: true,
                   },
                 });
@@ -232,65 +190,12 @@ export default class ExperimentalTab extends PureComponent {
     );
   }
 
-  renderTheme() {
-    const { t } = this.context;
-    const { theme, setTheme } = this.props;
-
-    const themesOptions = [
-      {
-        name: t('defaultTheme'),
-        value: THEME_TYPE.DEFAULT,
-      },
-      {
-        name: t('darkTheme'),
-        value: THEME_TYPE.DARK,
-      },
-    ];
-
-    const onChange = (newTheme) => {
-      this.context.trackEvent({
-        category: 'Settings',
-        event: 'Theme Changed',
-        properties: {
-          theme_selected: newTheme,
-        },
-      });
-      setTheme(newTheme);
-    };
-
-    return (
-      <div className="settings-page__content-row">
-        <div className="settings-page__content-item">
-          <span>{this.context.t('theme')}</span>
-          <div className="settings-page__content-description">
-            {this.context.t('themeDescription')}
-          </div>
-        </div>
-        <div className="settings-page__content-item">
-          <div className="settings-page__content-item-col">
-            <Dropdown
-              id="select-theme"
-              options={themesOptions}
-              selectedOption={theme}
-              onChange={onChange}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   render() {
     return (
       <div className="settings-page__body">
-        {/* TODO: Remove during TOKEN_DETECTION_V2 feature flag clean up */}
-        {process.env.TOKEN_DETECTION_V2
-          ? null
-          : this.renderTokenDetectionToggle()}
         {this.renderOpenSeaEnabledToggle()}
         {this.renderCollectibleDetectionToggle()}
         {this.renderEIP1559V2EnabledToggle()}
-        {this.renderTheme()}
       </div>
     );
   }

@@ -10,6 +10,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 16px;
   }
 
   &__title {
@@ -17,7 +18,6 @@
 
     text-align: center;
     color: var(--color-text-default);
-    margin-top: 16px;
     font-weight: bold;
   }
 

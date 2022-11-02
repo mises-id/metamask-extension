@@ -56,7 +56,8 @@ const AccountList = ({
             <Tooltip
               position="bottom"
               html={
-                <div style={{ width: 200, padding: 4 }}>
+                <div 
+                  style={{ width: 200, padding: 4 }}>
                   {t('selectingAllWillAllow')}
                 </div>
               }

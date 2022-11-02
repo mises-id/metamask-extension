@@ -9,7 +9,9 @@ import {
 } from '../../../../helpers/utils/util';
 import Identicon from '../../../ui/identicon';
 import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../../../shared/constants/labels';
-import { MISES_CHAIN_ID } from '../../../../../shared/constants/network';
+import { EVENT } from '../../../../../shared/constants/metametrics';
+import ZENDESK_URLS from '../../../../helpers/constants/zendesk-url';
+import { CHAIN_IDS } from '../../../../../shared/constants/network';
 
 export default class ConfirmRemoveAccount extends Component {
   static propTypes = {
@@ -42,7 +44,7 @@ export default class ConfirmRemoveAccount extends Component {
     const account = accountList.find(
       (item) => item.address === identity.address,
     );
-    const isMises = chainId === MISES_CHAIN_ID;
+    const isMises = chainId === CHAIN_IDS.MISES;
     const address = isMises ? account.misesId : identity.address;
     return (
       <div className="confirm-remove-account__account">
@@ -72,7 +74,7 @@ export default class ConfirmRemoveAccount extends Component {
                 ? `${rpcPrefs.blockExplorerUrl}/holders/${address}`
                 : getAccountLink(address, chainId, rpcPrefs);
               this.context.trackEvent({
-                category: 'Accounts',
+                category: EVENT.CATEGORIES.ACCOUNTS,
                 event: 'Clicked Block Explorer Link',
                 properties: {
                   link_type: 'Account Tracker',
@@ -119,7 +121,7 @@ export default class ConfirmRemoveAccount extends Component {
               className="confirm-remove-account__link"
               rel="noopener noreferrer"
               target="_blank"
-              href="https://metamask.zendesk.com/hc/en-us/articles/360015289932"
+              href={ZENDESK_URLS.IMPORTED_ACCOUNTS}
             >
               {t('learnMore')}
             </a>

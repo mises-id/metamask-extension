@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import PageContainerContent from '../../../components/ui/page-container/page-container-content.component';
 import Dialog from '../../../components/ui/dialog';
+import ActionableMessage from '../../../components/ui/actionable-message';
 import NicknamePopovers from '../../../components/app/modals/nickname-popovers';
 import {
   ETH_GAS_PRICE_FETCH_WARNING_KEY,
@@ -9,8 +10,9 @@ import {
   GAS_PRICE_EXCESSIVE_ERROR_KEY,
   INSUFFICIENT_FUNDS_FOR_GAS_ERROR_KEY,
 } from '../../../helpers/constants/error-keys';
-import { MISESNETWORK } from '../../../../shared/constants/network';
+import { NETWORK_TYPES } from '../../../../shared/constants/network';
 import { ASSET_TYPES } from '../../../../shared/constants/transaction';
+import { CONTRACT_ADDRESS_LINK } from '../../../helpers/constants/common';
 import SendAmountRow from './send-amount-row';
 import SendHexDataRow from './send-hex-data-row';
 import SendAssetRow from './send-asset-row';
@@ -20,6 +22,7 @@ import SendMemoTxt from './seed-memo-row';
 export default class SendContent extends Component {
   state = {
     showNicknamePopovers: false,
+    misesGas: {},
   };
 
   static contextTypes = {
@@ -47,14 +50,13 @@ export default class SendContent extends Component {
     }).isRequired,
     to: PropTypes.string,
     assetError: PropTypes.string,
-  };
-
-  state = {
-    misesGas: {},
+    recipient: PropTypes.object,
+    acknowledgeRecipientWarning: PropTypes.func,
+    recipientWarningAcknowledged: PropTypes.bool,
   };
 
   componentDidMount() {
-    if (this.props.provider.type === MISESNETWORK) {
+    if (this.props.provider.type === NETWORK_TYPES.MISES) {
       this.props.getMisesGasfee().then((res) => {
         this.setState({
           misesGas: res,
@@ -75,10 +77,12 @@ export default class SendContent extends Component {
       asset,
       provider,
       assetError,
+      recipient,
+      recipientWarningAcknowledged,
     } = this.props;
 
     let gasError;
-    if (provider.type !== MISESNETWORK) {
+    if (provider.type !== NETWORK_TYPES.MISES) {
       if (gasIsExcessive) {
         gasError = GAS_PRICE_EXCESSIVE_ERROR_KEY;
       } else if (noGasPrice) {
@@ -92,6 +96,10 @@ export default class SendContent extends Component {
       asset.type !== ASSET_TYPES.TOKEN &&
       asset.type !== ASSET_TYPES.COLLECTIBLE;
 
+    const showKnownRecipientWarning =
+      recipient.warning === 'knownAddressRecipient';
+    const hideAddContactDialog = recipient.warning === 'loading';
+
     return (
       <PageContainerContent>
         <div className="send-v2__form">
@@ -102,12 +110,18 @@ export default class SendContent extends Component {
             : null}
           {error ? this.renderError(error) : null}
           {warning ? this.renderWarning() : null}
-          {/* {this.maybeRenderAddContact()} */}
+          {/* uncertain */}
+          {showKnownRecipientWarning && !recipientWarningAcknowledged
+            ? this.renderRecipientWarning()
+            : null}
+          {showKnownRecipientWarning || hideAddContactDialog
+            ? null
+            : this.maybeRenderAddContact()}
           <SendAssetRow />
           <SendAmountRow misesGas={this.state.misesGas} />
           {networkOrAccountNotSupports1559 ? <SendGasRow /> : null}
           {showHexData ? <SendHexDataRow /> : null}
-          {provider.type === MISESNETWORK && <SendMemoTxt />}
+          {provider.type === NETWORK_TYPES.MISES && <SendMemoTxt />}
         </div>
       </PageContainerContent>
     );
@@ -131,6 +145,7 @@ export default class SendContent extends Component {
         >
           {t('newAccountDetectedDialogMessage')}
         </Dialog>
+
         {showNicknamePopovers ? (
           <NicknamePopovers
             onClose={() => this.setState({ showNicknamePopovers: false })}
@@ -148,6 +163,36 @@ export default class SendContent extends Component {
       <Dialog type="warning" className="send__error-dialog">
         {gasWarning === '' ? t(warning) : t(gasWarning)}
       </Dialog>
+    );
+  }
+
+  renderRecipientWarning() {
+    const { acknowledgeRecipientWarning } = this.props;
+    const { t } = this.context;
+    return (
+      <div className="send__warning-container">
+        <ActionableMessage
+          type="danger"
+          useIcon
+          iconFillColor="#d73a49"
+          primaryActionV2={{
+            label: t('tooltipApproveButton'),
+            onClick: acknowledgeRecipientWarning,
+          }}
+          message={t('sendingToTokenContractWarning', [
+            <a
+              key="contractWarningSupport"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="send__warning-container__link"
+              href={CONTRACT_ADDRESS_LINK}
+            >
+              {t('learnMoreUpperCase')}
+            </a>,
+          ])}
+          roundedButtons
+        />
+      </div>
     );
   }
 

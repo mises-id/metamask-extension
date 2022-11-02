@@ -10,13 +10,15 @@ import {
   getCurrentChainId,
   getRpcPrefsForCurrentProvider,
   getSelectedAddress,
-  getMisesSelectedAccount,
+  getIsCustomNetwork,
 } from '../../../selectors/selectors';
 import { showModal } from '../../../store/actions';
 import { DEFAULT_ROUTE } from '../../../helpers/constants/routes';
 import { getURLHostName } from '../../../helpers/utils/util';
 import { MisesEthOverview } from '../../../components/app/misesWallet-overview';
 import { MetaMetricsContext } from '../../../contexts/metametrics';
+import { EVENT } from '../../../../shared/constants/metametrics';
+import { CHAIN_IDS } from '../../../../shared/constants/network';
 import AssetNavigation from './asset-navigation';
 import AssetOptions from './asset-options';
 
@@ -29,28 +31,24 @@ export default function NativeAsset({ nativeCurrency }) {
   const chainId = useSelector(getCurrentChainId);
   const rpcPrefs = useSelector(getRpcPrefsForCurrentProvider);
   const address = useSelector(getSelectedAddress);
-  const account = useSelector(getMisesSelectedAccount);
+  const accountLink = getAccountLink(address, chainId, rpcPrefs);
   const history = useHistory();
+  const isMisesNetwork = chainId === CHAIN_IDS.MISES;
   const trackEvent = useContext(MetaMetricsContext);
-  const isMisesNetwork = nativeCurrency === 'MIS';
-  const accountLink = isMisesNetwork
-    ? `${rpcPrefs.blockExplorerUrl}/holders/${account[address].misesId}`
-    : getAccountLink(address, chainId, rpcPrefs);
-  console.log(accountLink);
+  const isCustomNetwork = useSelector(getIsCustomNetwork);
   return (
     <>
       <AssetNavigation
         accountName={selectedAccountName}
         assetName={nativeCurrency}
         onBack={() => history.push(DEFAULT_ROUTE)}
-        isEthNetwork={!rpcPrefs.blockExplorerUrl}
         optionsButton={
           <AssetOptions
             isNativeAsset
             onClickBlockExplorer={() => {
               trackEvent({
                 event: 'Clicked Block Explorer Link',
-                category: 'Navigation',
+                category: EVENT.CATEGORIES.NAVIGATION,
                 properties: {
                   link_type: 'Account Tracker',
                   action: 'Asset Options',
@@ -64,8 +62,7 @@ export default function NativeAsset({ nativeCurrency }) {
             onViewAccountDetails={() => {
               dispatch(showModal({ name: 'ACCOUNT_DETAILS' }));
             }}
-            onViewTokenDetails={() => {}}
-            onRemove={() => {}}
+            isCustomNetwork={isCustomNetwork}
           />
         }
       />

@@ -1,5 +1,5 @@
 .first-view-main-wrapper {
-  display: flex;  
+  display: flex;
   width: 100%;
   height: 100%;
   justify-content: center;
@@ -13,7 +13,7 @@
 }
 
 
-@media screen and (min-width: 1281px) {
+@include screen-lg-min {
   .first-view-main {
     width: 62vw;
   }
@@ -35,12 +35,12 @@
   }
 }
 
-@media only screen and (max-width: $break-small) {
+@include screen-sm-max {
   // .import-account {
-  //   // margin: 24px;
+  //   margin: 24px;
   //   display: flex;
   //   flex-flow: column nowrap;
-  //   // width: calc(100vw - 80px);
+  //   width: calc(100vw - 80px);
   // }
 
   .import-account__title {
@@ -141,11 +141,12 @@
     margin-top: 15px;
   }
 
-  .phraseTips{
+  .phraseTips {
     margin-bottom: 10px;
     font-size: 12px;
     color: #cbcbcb;
   }
+
   &__checkbox {
     background: #fff;
     border: 1px solid #cdcdcd;
@@ -156,8 +157,9 @@
     justify-content: center;
     align-items: center;
     border-radius: 3px;
+
     &:hover {
-      border: 1.5px solid #5D61FF;
+      border: 1.5px solid #5d61ff;
     }
 
     .fa-check {
@@ -165,8 +167,9 @@
       font-size: 10px;
     }
   }
-  &__checked{
-    background-color: #5D61FF;
+
+  &__checked {
+    background-color: #5d61ff;
   }
 
   &__checkbox-label {

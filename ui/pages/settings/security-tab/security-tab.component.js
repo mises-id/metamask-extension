@@ -3,11 +3,12 @@ import PropTypes from 'prop-types';
 import ToggleButton from '../../../components/ui/toggle-button';
 import { REVEAL_SEED_ROUTE } from '../../../helpers/constants/routes';
 import Button from '../../../components/ui/button';
-import { MISESNETWORK } from '../../../../shared/constants/network';
+import { NETWORK_TYPES } from '../../../../shared/constants/network';
 import {
   getNumberOfSettingsInSection,
   handleSettingsRefs,
 } from '../../../helpers/utils/settings-search';
+import { EVENT, EVENT_NAMES } from '../../../../shared/constants/metametrics';
 
 export default class SecurityTab extends PureComponent {
   static contextTypes = {
@@ -70,11 +71,11 @@ export default class SecurityTab extends PureComponent {
               onClick={(event) => {
                 event.preventDefault();
                 this.context.trackEvent({
-                  category: 'Settings',
-                  event: 'Reveal Seed Phrase',
+                  category: EVENT.CATEGORIES.SETTINGS,
+                  event: EVENT_NAMES.KEY_EXPORT_SELECTED,
                   properties: {
-                    action: 'Reveal Seed Phrase',
-                    legacy_event: true,
+                    key_type: EVENT.KEY_TYPES.SRP,
+                    location: 'Settings',
                   },
                 });
                 history.push(REVEAL_SEED_ROUTE);
@@ -90,10 +91,8 @@ export default class SecurityTab extends PureComponent {
 
   renderMetaMetricsOptIn() {
     const { t } = this.context;
-    const {
-      participateInMetaMetrics,
-      setParticipateInMetaMetrics,
-    } = this.props;
+    const { participateInMetaMetrics, setParticipateInMetaMetrics } =
+      this.props;
 
     return (
       <div ref={this.settingsRefs[3]} className="settings-page__content-row">
@@ -119,10 +118,8 @@ export default class SecurityTab extends PureComponent {
 
   renderIncomingTransactionsOptIn() {
     const { t } = this.context;
-    const {
-      showIncomingTransactions,
-      setShowIncomingTransactionsFeatureFlag,
-    } = this.props;
+    const { showIncomingTransactions, setShowIncomingTransactionsFeatureFlag } =
+      this.props;
 
     return (
       <div ref={this.settingsRefs[1]} className="settings-page__content-row">
@@ -176,7 +173,7 @@ export default class SecurityTab extends PureComponent {
 
   render() {
     const { warning, provider } = this.props;
-    const isMises = provider.type === MISESNETWORK;
+    const isMises = provider.type === NETWORK_TYPES.MISES;
     return (
       <div className="settings-page__body">
         {warning ? <div className="settings-tab__error">{warning}</div> : null}

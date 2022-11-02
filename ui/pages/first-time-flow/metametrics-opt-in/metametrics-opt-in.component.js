@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import MetaFoxLogo from '../../../components/ui/metafox-logo';
 import PageContainerFooter from '../../../components/ui/page-container/page-container-footer';
+import { EVENT, EVENT_NAMES } from '../../../../shared/constants/metametrics';
+import { INITIALIZE_SELECT_ACTION_ROUTE } from '../../../helpers/constants/routes';
 
 export default class MetaMetricsOptIn extends Component {
   static propTypes = {
     history: PropTypes.object,
     setParticipateInMetaMetrics: PropTypes.func,
-    nextRoute: PropTypes.string,
-    firstTimeSelectionMetaMetricsName: PropTypes.string,
     participateInMetaMetrics: PropTypes.bool,
   };
 
@@ -19,13 +19,8 @@ export default class MetaMetricsOptIn extends Component {
 
   render() {
     const { trackEvent, t } = this.context;
-    const {
-      nextRoute,
-      history,
-      setParticipateInMetaMetrics,
-      firstTimeSelectionMetaMetricsName,
-      participateInMetaMetrics,
-    } = this.props;
+    const { history, setParticipateInMetaMetrics, participateInMetaMetrics } =
+      this.props;
 
     return (
       <div className="metametrics-opt-in">
@@ -104,15 +99,21 @@ export default class MetaMetricsOptIn extends Component {
               onCancel={async () => {
                 await setParticipateInMetaMetrics(false);
 
+                history.push(INITIALIZE_SELECT_ACTION_ROUTE);
+              }}
+              cancelText={t('noThanks')}
+              hideCancel={false}
+              onSubmit={async () => {
+                await setParticipateInMetaMetrics(true);
                 try {
                   if (
                     participateInMetaMetrics === null ||
-                    participateInMetaMetrics === true
+                    participateInMetaMetrics === false
                   ) {
                     await trackEvent(
                       {
-                        category: 'Onboarding',
-                        event: 'Metrics Opt Out',
+                        category: EVENT.CATEGORIES.ONBOARDING,
+                        event: EVENT_NAMES.METRICS_OPT_IN,
                         properties: {
                           action: 'Metrics Option',
                           legacy_event: true,
@@ -125,58 +126,7 @@ export default class MetaMetricsOptIn extends Component {
                     );
                   }
                 } finally {
-                  history.push(nextRoute);
-                }
-              }}
-              cancelText={t('noThanks')}
-              hideCancel={false}
-              onSubmit={async () => {
-                const [, metaMetricsId] = await setParticipateInMetaMetrics(
-                  true,
-                );
-                try {
-                  const metrics = [];
-                  if (
-                    participateInMetaMetrics === null ||
-                    participateInMetaMetrics === false
-                  ) {
-                    metrics.push(
-                      trackEvent(
-                        {
-                          category: 'Onboarding',
-                          event: 'Metrics Opt In',
-                          properties: {
-                            action: 'Metrics Option',
-                            legacy_event: true,
-                          },
-                        },
-                        {
-                          isOptIn: true,
-                          flushImmediately: true,
-                        },
-                      ),
-                    );
-                  }
-                  metrics.push(
-                    trackEvent(
-                      {
-                        category: 'Onboarding',
-                        event: firstTimeSelectionMetaMetricsName,
-                        properties: {
-                          action: 'Import or Create',
-                          legacy_event: true,
-                        },
-                      },
-                      {
-                        isOptIn: true,
-                        metaMetricsId,
-                        flushImmediately: true,
-                      },
-                    ),
-                  );
-                  await Promise.all(metrics);
-                } finally {
-                  history.push(nextRoute);
+                  history.push(INITIALIZE_SELECT_ACTION_ROUTE);
                 }
               }}
               submitText={t('affirmAgree')}

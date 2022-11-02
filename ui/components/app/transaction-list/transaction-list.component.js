@@ -18,7 +18,7 @@ import { TOKEN_CATEGORY_HASH } from '../../../helpers/constants/transactions';
 import { SWAPS_CHAINID_CONTRACT_ADDRESS_MAP } from '../../../../shared/constants/swaps';
 import { TRANSACTION_TYPES } from '../../../../shared/constants/transaction';
 import { isEqualCaseInsensitive } from '../../../../shared/modules/string-utils';
-import { MISESNETWORK } from '../../../../shared/constants/network';
+import { NETWORK_TYPES } from '../../../../shared/constants/network';
 import { recentTransactions } from '../../../store/actions';
 
 const PAGE_INCREMENT = 10;
@@ -171,12 +171,14 @@ export default function TransactionList({
       });
   };
   useEffect(() => {
-    if (provider.type === MISESNETWORK && selectedAddress) {
+    if (provider.type === NETWORK_TYPES.MISES && selectedAddress) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       misesCompletedTransactions = [];
     }
-    provider.type === MISESNETWORK
+    provider.type === NETWORK_TYPES.MISES
       ? getMisesTransactions()
       : setmisesCompletedTransactions([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider.type, selectedAddress]);
 
   return (
@@ -193,6 +195,7 @@ export default function TransactionList({
                 <SmartTransactionListItem
                   isEarliestNonce={index === 0}
                   smartTransaction={transactionGroup.initialTransaction}
+                  transactionGroup={transactionGroup}
                   key={`${transactionGroup.nonce}:${index}`}
                 />
               ) : (
@@ -229,6 +232,7 @@ export default function TransactionList({
                 transactionGroup.initialTransaction?.transactionType ===
                 'smart' ? (
                   <SmartTransactionListItem
+                    transactionGroup={transactionGroup}
                     smartTransaction={transactionGroup.initialTransaction}
                     key={`${transactionGroup.nonce}:${index}`}
                   />

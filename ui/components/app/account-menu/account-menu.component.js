@@ -5,13 +5,17 @@ import Fuse from 'fuse.js';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import classnames from 'classnames';
 import { ENVIRONMENT_TYPE_POPUP } from '../../../../shared/constants/app';
+import {
+  EVENT,
+  EVENT_NAMES,
+  CONTEXT_PROPS,
+} from '../../../../shared/constants/metametrics';
 import { getEnvironmentType } from '../../../../app/scripts/lib/util';
 import Identicon from '../../ui/identicon';
 import SiteIcon from '../../ui/site-icon';
 import UserPreferencedCurrencyDisplay from '../user-preferenced-currency-display';
 import {
   PRIMARY,
-  SUPPORT_LINK,
   ///: BEGIN:ONLY_INCLUDE_IN(beta,flask)
   SUPPORT_REQUEST_LINK,
   ///: END:ONLY_INCLUDE_IN
@@ -22,9 +26,11 @@ import {
   IMPORT_ACCOUNT_ROUTE,
   CONNECT_HARDWARE_ROUTE,
   DEFAULT_ROUTE,
+  ///: BEGIN:ONLY_INCLUDE_IN(flask)
+  NOTIFICATIONS_ROUTE,
+  ///: END:ONLY_INCLUDE_IN
 } from '../../../helpers/constants/routes';
 import TextField from '../../ui/text-field';
-import SearchIcon from '../../ui/search-icon';
 import IconCheck from '../../ui/icon/icon-check';
 import IconSpeechBubbles from '../../ui/icon/icon-speech-bubbles';
 import IconConnect from '../../ui/icon/icon-connect';
@@ -33,8 +39,10 @@ import IconPlus from '../../ui/icon/icon-plus';
 import IconImport from '../../ui/icon/icon-import';
 
 import Button from '../../ui/button';
-import { MISESNETWORK } from '../../../../shared/constants/network';
+import SearchIcon from '../../ui/icon/search-icon';
+import { SUPPORT_LINK } from '../../../../shared/lib/ui-utils';
 import MisesUserPreferencedCurrencyDisplay from '../mises-user-preferenced-currency-display';
+import { NETWORK_TYPES } from '../../../../shared/constants/network';
 import KeyRingLabel from './keyring-label';
 
 export function AccountMenuItem(props) {
@@ -48,13 +56,13 @@ export function AccountMenuItem(props) {
       {children}
     </div>
   ) : (
-    <div className={itemClassName} onClick={onClick}>
+    <button className={itemClassName} onClick={onClick}>
       {icon ? <div className="account-menu__item__icon">{icon}</div> : null}
       {text ? <div className="account-menu__item__text">{text}</div> : null}
       {subText ? (
         <div className="account-menu__item__subtext">{subText}</div>
       ) : null}
-    </div>
+    </button>
   );
 }
 
@@ -91,6 +99,9 @@ export default class AccountMenu extends Component {
       type: PropTypes.string,
       ticker: PropTypes.string,
     }).isRequired,
+    ///: BEGIN:ONLY_INCLUDE_IN(flask)
+    unreadNotificationsCount: PropTypes.number,
+    ///: END:ONLY_INCLUDE_IN
   };
 
   accountsRef;
@@ -101,11 +112,12 @@ export default class AccountMenu extends Component {
   };
 
   addressFuse = new Fuse([], {
-    threshold: 0.45,
+    threshold: 0.55,
     location: 0,
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
+    ignoreFieldNorm: true,
     keys: [
       { name: 'name', weight: 0.5 },
       { name: 'address', weight: 0.5 },
@@ -131,6 +143,11 @@ export default class AccountMenu extends Component {
   }
 
   renderAccountsSearch() {
+    const handleChange = (e) => {
+      const val = e.target.value.length > 1 ? e.target.value : '';
+      this.setSearchQuery(val);
+    };
+
     const inputAdornment = (
       <InputAdornment
         position="start"
@@ -140,7 +157,7 @@ export default class AccountMenu extends Component {
           marginLeft: '8px',
         }}
       >
-        <SearchIcon color="currentColor" />
+        <SearchIcon color="var(--color-icon-muted)" />
       </InputAdornment>
     );
 
@@ -150,8 +167,7 @@ export default class AccountMenu extends Component {
         id="search-accounts"
         placeholder={this.context.t('searchAccounts')}
         type="text"
-        value={this.state.searchQuery}
-        onChange={(e) => this.setSearchQuery(e.target.value)}
+        onChange={handleChange}
         startAdornment={inputAdornment}
         fullWidth
         theme="material-white-padded"
@@ -170,7 +186,7 @@ export default class AccountMenu extends Component {
       originOfCurrentTab,
       provider,
     } = this.props;
-    const isMisesNetwork = provider.type === MISESNETWORK;
+    const isMisesNetwork = provider.type === NETWORK_TYPES.MISES;
     const { searchQuery } = this.state;
 
     let filteredIdentities = accounts;
@@ -186,6 +202,7 @@ export default class AccountMenu extends Component {
         </p>
       );
     }
+
     return filteredIdentities.map((identity) => {
       const isSelected = identity.address === selectedAddress;
 
@@ -202,20 +219,20 @@ export default class AccountMenu extends Component {
       const iconAndNameForOpenSubject = addressSubjects[originOfCurrentTab];
 
       return (
-        <div
+        <button
           className="account-menu__account account-menu__item--clickable"
           onClick={() => {
             this.context.trackEvent({
-              category: 'Navigation',
-              event: 'Switched Account',
+              category: EVENT.CATEGORIES.NAVIGATION,
+              event: EVENT_NAMES.NAV_ACCOUNT_SWITCHED,
               properties: {
-                action: 'Main Menu',
-                legacy_event: true,
+                location: 'Main Menu',
               },
             });
             showAccountDetail(identity.address);
           }}
           key={identity.address}
+          data-testid="account-menu__account"
         >
           <div className="account-menu__check-mark">
             {isSelected ? (
@@ -234,6 +251,7 @@ export default class AccountMenu extends Component {
             ) : (
               <UserPreferencedCurrencyDisplay
                 className="account-menu__balance"
+                data-testid="account-menu__balance"
                 value={identity.balance}
                 type={PRIMARY}
               />
@@ -249,7 +267,7 @@ export default class AccountMenu extends Component {
               />
             </div>
           ) : null}
-        </div>
+        </button>
       );
     });
   }
@@ -310,6 +328,9 @@ export default class AccountMenu extends Component {
       lockMetamask,
       history,
       provider,
+      ///: BEGIN:ONLY_INCLUDE_IN(flask)
+      unreadNotificationsCount,
+      ///: END:ONLY_INCLUDE_IN
     } = this.props;
 
     if (!isAccountMenuOpen) {
@@ -358,98 +379,134 @@ export default class AccountMenu extends Component {
           onClick={() => {
             toggleAccountMenu();
             trackEvent({
-              category: 'Navigation',
-              event: 'Clicked Create Account',
+              category: EVENT.CATEGORIES.NAVIGATION,
+              event: EVENT_NAMES.ACCOUNT_ADD_SELECTED,
               properties: {
-                action: 'Main Menu',
-                legacy_event: true,
+                account_type: EVENT.ACCOUNT_TYPES.DEFAULT,
+                location: 'Main Menu',
               },
             });
             history.push(NEW_ACCOUNT_ROUTE);
           }}
-          icon={<IconPlus color="var(--color-icon-default)" />}
+          icon={<IconPlus color="var(--color-icon-alternative)" />}
           text={t('createAccount')}
         />
         <AccountMenuItem
           onClick={() => {
             toggleAccountMenu();
             trackEvent({
-              category: 'Navigation',
-              event: 'Clicked Import Account',
+              category: EVENT.CATEGORIES.NAVIGATION,
+              event: EVENT_NAMES.ACCOUNT_ADD_SELECTED,
               properties: {
-                action: 'Main Menu',
-                legacy_event: true,
+                account_type: EVENT.ACCOUNT_TYPES.IMPORTED,
+                location: 'Main Menu',
               },
             });
             history.push(IMPORT_ACCOUNT_ROUTE);
           }}
           icon={
             <IconImport
-              color="var(--color-icon-default)"
+              color="var(--color-icon-alternative)"
               ariaLabel={t('importAccount')}
             />
           }
           text={t('importAccount')}
         />
-        {provider.type !== MISESNETWORK && (
-          <AccountMenuItem
-            onClick={() => {
-              toggleAccountMenu();
-              trackEvent({
-                category: 'Navigation',
-                event: 'Clicked Connect Hardware',
-                properties: {
-                  action: 'Main Menu',
-                  legacy_event: true,
-                },
-              });
-              if (getEnvironmentType() === ENVIRONMENT_TYPE_POPUP) {
-                global.platform.openExtensionInBrowser(CONNECT_HARDWARE_ROUTE);
-              } else {
-                history.push(CONNECT_HARDWARE_ROUTE);
+        {provider.type !== NETWORK_TYPES.MISES && (
+          <>
+            <AccountMenuItem
+              onClick={() => {
+                toggleAccountMenu();
+                trackEvent({
+                  category: EVENT.CATEGORIES.NAVIGATION,
+                  event: EVENT_NAMES.ACCOUNT_ADD_SELECTED,
+                  properties: {
+                    account_type: EVENT.ACCOUNT_TYPES.HARDWARE,
+                    location: 'Main Menu',
+                  },
+                });
+                if (getEnvironmentType() === ENVIRONMENT_TYPE_POPUP) {
+                  global.platform.openExtensionInBrowser(
+                    CONNECT_HARDWARE_ROUTE,
+                  );
+                } else {
+                  history.push(CONNECT_HARDWARE_ROUTE);
+                }
+              }}
+              icon={
+                <IconConnect
+                  color="var(--color-icon-alternative)"
+                  ariaLabel={t('connectHardwareWallet')}
+                />
               }
-            }}
-            icon={
-              <IconConnect
-                color="var(--color-icon-default)"
-                ariaLabel={t('connectHardwareWallet')}
-              />
+              text={t('connectHardwareWallet')}
+            />
+            {
+              ///: BEGIN:ONLY_INCLUDE_IN(flask)
+              <>
+                <AccountMenuItem
+                  onClick={() => {
+                    toggleAccountMenu();
+                    history.push(NOTIFICATIONS_ROUTE);
+                  }}
+                  icon={
+                    <div className="account-menu__notifications">
+                      <i className="fa fa-bell fa-xl" />
+                      {unreadNotificationsCount > 0 && (
+                        <div className="account-menu__notifications__count">
+                          {unreadNotificationsCount}
+                        </div>
+                      )}
+                    </div>
+                  }
+                  text={t('notifications')}
+                />
+                <div className="account-menu__divider" />
+              </>
+              ///: END:ONLY_INCLUDE_IN
             }
-            text={t('connectHardwareWallet')}
-          />
+            <AccountMenuItem
+              onClick={() => {
+                trackEvent(
+                  {
+                    category: EVENT.CATEGORIES.NAVIGATION,
+                    event: EVENT_NAMES.SUPPORT_LINK_CLICKED,
+                    properties: {
+                      url: supportLink,
+                    },
+                  },
+                  {
+                    contextPropsIntoEventProperties: [CONTEXT_PROPS.PAGE_TITLE],
+                  },
+                );
+                global.platform.openTab({ url: supportLink });
+              }}
+              icon={
+                <IconSpeechBubbles
+                  color="var(--color-icon-alternative)"
+                  ariaLabel={supportText}
+                />
+              }
+              text={supportText}
+            />
+          </>
         )}
         <div className="account-menu__divider" />
-        {provider.type !== MISESNETWORK && (
-          <AccountMenuItem
-            onClick={() => {
-              global.platform.openTab({ url: supportLink });
-            }}
-            icon={
-              <IconSpeechBubbles
-                color="var(--color-icon-default)"
-                ariaLabel={supportText}
-              />
-            }
-            text={supportText}
-          />
-        )}
-
         <AccountMenuItem
           onClick={() => {
             toggleAccountMenu();
             history.push(SETTINGS_ROUTE);
             this.context.trackEvent({
-              category: 'Navigation',
-              event: 'Opened Settings',
+              category: EVENT.CATEGORIES.NAVIGATION,
+              event: EVENT_NAMES.NAV_SETTINGS_OPENED,
               properties: {
-                action: 'Main Menu',
-                legacy_event: true,
+                location: 'Main Menu',
               },
             });
           }}
           icon={
             <IconCog
-              color="var(--color-icon-default)"
+              color="var(--color-icon-alternative)"
               ariaLabel={t('settings')}
             />
           }

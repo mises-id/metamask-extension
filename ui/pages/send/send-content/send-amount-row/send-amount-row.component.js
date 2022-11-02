@@ -4,7 +4,7 @@ import SendRowWrapper from '../send-row-wrapper';
 import UserPreferencedCurrencyInput from '../../../../components/app/user-preferenced-currency-input';
 import UserPreferencedTokenInput from '../../../../components/app/user-preferenced-token-input';
 import UnitInput from '../../../../components/ui/unit-input';
-import { MISESNETWORK } from '../../../../../shared/constants/network';
+import { NETWORK_TYPES } from '../../../../../shared/constants/network';
 import { ASSET_TYPES } from '../../../../../shared/constants/transaction';
 import AmountMaxButton from './amount-max-button';
 
@@ -39,7 +39,7 @@ export default class SendAmountRow extends Component {
       accounts,
       selectedAddress,
     } = this.props;
-    if (provider.type === MISESNETWORK) {
+    if (provider.type === NETWORK_TYPES.MISES) {
       const { gasWanted } = misesGas;
       const { misesBalance = { amount: 0 } } = accounts[selectedAddress];
       updateMisesSendAmount({
@@ -54,7 +54,7 @@ export default class SendAmountRow extends Component {
 
   renderInput() {
     const { amount, inError, asset, provider } = this.props;
-    if (provider.type === MISESNETWORK) {
+    if (provider.type === NETWORK_TYPES.MISES) {
       return (
         <UnitInput
           onChange={this.handleChange}

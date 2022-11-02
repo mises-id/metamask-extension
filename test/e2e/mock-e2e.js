@@ -1,9 +1,7 @@
 const blacklistedHosts = [
   'goerli.infura.io',
-  'kovan.infura.io',
   'mainnet.infura.io',
-  'rinkeby.infura.io',
-  'ropsten.infura.io',
+  'sepolia.infura.io',
 ];
 
 async function setupMocking(server, testSpecificMock) {
@@ -24,6 +22,46 @@ async function setupMocking(server, testSpecificMock) {
       statusCode: 200,
     };
   });
+
+  await server
+    .forPost('https://sentry.io/api/0000000/envelope/')
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+        json: {},
+      };
+    });
+
+  await server
+    .forPost('https://sentry.io/api/0000000/store/')
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+        json: {},
+      };
+    });
+
+  await server
+    .forGet('https://www.4byte.directory/api/v1/signatures/')
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+        json: {
+          count: 1,
+          next: null,
+          previous: null,
+          results: [
+            {
+              id: 1,
+              created_at: null,
+              text_signature: 'deposit()',
+              hex_signature: null,
+              bytes_signature: null,
+            },
+          ],
+        },
+      };
+    });
 
   await server
     .forGet('https://gas-api.metaswap.codefi.network/networks/1/gasPrices')
@@ -83,36 +121,24 @@ async function setupMocking(server, testSpecificMock) {
         json: [
           {
             ethereum: {
-              mobile_active: true,
-              extension_active: true,
-              fallback_to_v1: false,
+              fallbackToV1: false,
               mobileActive: true,
               extensionActive: true,
             },
             bsc: {
-              mobile_active: true,
-              extension_active: true,
-              fallback_to_v1: false,
+              fallbackToV1: false,
               mobileActive: true,
               extensionActive: true,
             },
             polygon: {
-              mobile_active: true,
-              extension_active: true,
-              fallback_to_v1: false,
+              fallbackToV1: false,
               mobileActive: true,
               extensionActive: true,
             },
             avalanche: {
-              mobile_active: true,
-              extension_active: true,
-              fallback_to_v1: false,
+              fallbackToV1: false,
               mobileActive: true,
               extensionActive: true,
-            },
-            smart_transactions: {
-              mobile_active: false,
-              extension_active: false,
             },
             smartTransactions: {
               mobileActive: false,
@@ -151,6 +177,47 @@ async function setupMocking(server, testSpecificMock) {
             occurrences: 9,
           },
         ],
+      };
+    });
+
+  await server
+    .forGet('https://token-api.metaswap.codefi.network/token/0x539')
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+        json: {},
+      };
+    });
+
+  await server
+    .forGet(
+      'https://static.metaswap.codefi.network/api/v1/tokenIcons/1337/0x0d8775f648430679a709e98d2b0cb6250d2887ef.png',
+    )
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+      };
+    });
+
+  await server
+    .forGet(
+      'https://static.metaswap.codefi.network/api/v1/tokenIcons/1337/0x2efa2cb29c2341d8e5ba7d3262c9e9d6f1bf3711.png',
+    )
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+      };
+    });
+
+  await server
+    .forGet('https://min-api.cryptocompare.com/data/price')
+    .withQuery({ fsym: 'ETH', tsyms: 'USD' })
+    .thenCallback(() => {
+      return {
+        statusCode: 200,
+        json: {
+          USD: '1700',
+        },
       };
     });
 

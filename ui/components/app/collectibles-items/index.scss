@@ -29,9 +29,9 @@
     }
 
     &-item-wrapper {
-      height: calc((80vw - 64px) / 3);
       width: 100%;
-      &-grid{
+
+      &-grid {
         grid-template-columns: 1fr 1fr 1fr;
       }
     }
@@ -47,15 +47,13 @@
     &-item-image {
       border-radius: 4px;
       width: 100%;
-      height: 100%;
+      height: calc((100vw - 64px) / 3);
       object-fit: cover;
       cursor: pointer;
     }
   }
-}
-@media screen and (max-width: 575px){
 
-  .collectibles-items__collection-item-wrapper {
-    height: calc((100vw - 64px) / 3);
+  &__icon-chevron {
+    color: var(--color-icon-default);
   }
 }

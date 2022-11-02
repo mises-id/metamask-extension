@@ -1,7 +1,7 @@
 import { CollectibleDetectionController } from '@metamask/controllers';
 import { getBaseApi } from '../../../../ui/misesPages/accountSet/misesNetwork.util';
 import { request } from '../../../../ui/helpers/utils/fetch';
-import { MISES_CHAIN_ID } from '../../../../shared/constants/network';
+import { CHAIN_IDS } from '../../../../shared/constants/network';
 
 export default class MisesCollectibleDetectionController extends CollectibleDetectionController {
   offset = '';
@@ -10,10 +10,10 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
 
   constructor(options, config, state) {
     super(options, config, state);
-    this.isMainnet = () => ![MISES_CHAIN_ID].includes(this.config.chainId);
+    this.isMainnet = () => ![CHAIN_IDS.MISES].includes(this.config.chainId);
     options.onNetworkStateChange(async ({ provider }) => {
       if (
-        ![MISES_CHAIN_ID].includes(provider.chainId) &&
+        ![CHAIN_IDS.MISES].includes(provider.chainId) &&
         options.isUnlocked() &&
         !this.requestLock
       ) {

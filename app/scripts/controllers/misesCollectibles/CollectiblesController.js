@@ -1,8 +1,5 @@
 import { CollectiblesController } from '@metamask/controllers';
-import {
-  MAINNET_CHAIN_ID,
-  RINKEBY_CHAIN_ID,
-} from '../../../../shared/constants/network';
+import { CHAIN_IDS } from '../../../../shared/constants/network';
 import { request } from '../../../../ui/helpers/utils/fetch';
 import { getBaseApi } from '../../../../ui/misesPages/accountSet/misesNetwork.util';
 
@@ -14,11 +11,8 @@ export default class MisesCollectiblesController extends CollectiblesController 
 
   getNetwork() {
     const { chainId } = this.config;
-    if (chainId === MAINNET_CHAIN_ID) {
+    if (chainId === CHAIN_IDS.MAINNET) {
       return 'main';
-    }
-    if (chainId === RINKEBY_CHAIN_ID) {
-      return 'test';
     }
     return 'unknown';
   }

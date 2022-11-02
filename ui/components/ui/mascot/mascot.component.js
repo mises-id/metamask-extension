@@ -1,10 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { createRef, Component } from 'react';
-import MetaFoxLogo from '../../ui/metafox-logo';
-import MetaMaskLogo from '@metamask/logo';
-import { debounce } from 'lodash';
-
-import { getBuildSpecificAsset } from '../../../helpers/utils/build-types';
 
 const directionTargetGenerator = ({ top, left, height, width }) => {
   const horizontalMiddle = left + width / 2;
@@ -39,8 +34,6 @@ export default class Mascot extends Component {
   constructor(props) {
     super(props);
 
-    const { width, height, followMouse } = props;
-
     // this.logo = MetaMaskLogo({
     //   followMouse,
     //   pxNotRatio: true,
@@ -71,14 +64,14 @@ export default class Mascot extends Component {
     // );
   }
 
-  lookAt(target) {
-    //this.unfollowMouse();
-    //this.logo.lookAt(target);
-    //this.refollowMouse();
+  lookAt() {
+    // this.unfollowMouse();
+    // this.logo.lookAt(target);
+    // this.refollowMouse();
   }
 
   componentDidMount() {
-    //this.mascotContainer.current.appendChild(this.logo.container);
+    // this.mascotContainer.current.appendChild(this.logo.container);
     this.directionTargetMap = directionTargetGenerator(
       this.mascotContainer.current.getBoundingClientRect(),
     );
@@ -92,14 +85,13 @@ export default class Mascot extends Component {
     // }
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
     // const {
     //   lookAtTarget: prevTarget = {},
     //   lookAtDirection: prevDirection = null,
     //   followMouse: prevFollowMouse,
     // } = prevProps;
     // const { lookAtTarget = {}, followMouse, lookAtDirection } = this.props;
-
     // if (lookAtDirection && prevDirection !== lookAtDirection) {
     //   this.logo.lookAtAndRender(this.directionTargetMap[lookAtDirection]);
     // } else if (
@@ -126,14 +118,12 @@ export default class Mascot extends Component {
     // the event emitter is on `this.props`
     // and we dont get that until render
     this.handleAnimationEvents();
-    const { width, height, followMouse } = this.props;
-    const iconProps = { height: height, width: width };
-    return <div ref={this.mascotContainer} style={{ zIndex: 0 }} >
-        <img
-          {...iconProps}
-          src="./images/logo/metamask-fox.svg"
-          alt=""
-        />
-    </div>;
+    const { width, height } = this.props;
+    const iconProps = { height, width };
+    return (
+      <div ref={this.mascotContainer} style={{ zIndex: 0 }}>
+        <img {...iconProps} src="./images/logo/metamask-fox.svg" alt="" />
+      </div>
+    );
   }
 }

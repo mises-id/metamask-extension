@@ -7,8 +7,9 @@ import {
   DEFAULT_ROUTE,
   MISES_SEND_CONFIRM_ROUTE,
 } from '../../../helpers/constants/routes';
+import { EVENT } from '../../../../shared/constants/metametrics';
 import { SEND_STAGES } from '../../../ducks/send';
-import { MISESNETWORK } from '../../../../shared/constants/network';
+import { NETWORK_TYPES } from '../../../../shared/constants/network';
 
 export default class SendFooter extends Component {
   static propTypes = {
@@ -22,7 +23,6 @@ export default class SendFooter extends Component {
     toAccounts: PropTypes.array,
     sendStage: PropTypes.string,
     sendErrors: PropTypes.object,
-    gasEstimateType: PropTypes.string,
     mostRecentOverviewPage: PropTypes.string.isRequired,
     cancelTx: PropTypes.func,
     draftTransactionID: PropTypes.string,
@@ -67,16 +67,15 @@ export default class SendFooter extends Component {
       to,
       toAccounts,
       history,
-      gasEstimateType,
       provider,
       addToMisesBookIfNew,
     } = this.props;
     const { trackEvent } = this.context;
     // let promise = null;
-    if (provider.type === MISESNETWORK) {
+    if (provider.type === NETWORK_TYPES.MISES) {
       addToMisesBookIfNew(to);
       trackEvent({
-        category: 'Transactions',
+        category: EVENT.CATEGORIES.TRANSACTIONS,
         event: 'Complete',
         properties: {
           action: 'Edit Screen',
@@ -92,11 +91,11 @@ export default class SendFooter extends Component {
       const promise = sign();
       Promise.resolve(promise).then(() => {
         trackEvent({
-          category: 'Transactions',
-          action: 'Edit Screen',
-          name: 'Complete',
-          environmentType: {
-            gasChanged: gasEstimateType,
+          category: EVENT.CATEGORIES.TRANSACTIONS,
+          event: 'Complete',
+          properties: {
+            action: 'Edit Screen',
+            legacy_event: true,
           },
         });
         history.push(CONFIRM_TRANSACTION_ROUTE);
@@ -115,7 +114,7 @@ export default class SendFooter extends Component {
       const errorMessage = sendErrors[errorField];
 
       trackEvent({
-        category: 'Transactions',
+        category: EVENT.CATEGORIES.TRANSACTIONS,
         event: 'Error',
         properties: {
           action: 'Edit Screen',
@@ -135,7 +134,7 @@ export default class SendFooter extends Component {
         onCancel={() => this.onCancel()}
         onSubmit={(e) => this.onSubmit(e)}
         disabled={this.props.disabled}
-        submitText={provider.type === 'MisesTestNet' ? 'Send' : ''}
+        submitText={provider.type === NETWORK_TYPES.MISES ? 'Send' : ''}
         cancelText={sendStage === SEND_STAGES.EDIT ? t('reject') : t('cancel')}
       />
     );

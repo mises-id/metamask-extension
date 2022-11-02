@@ -1,5 +1,5 @@
 .reveal-seed-phrase {
-  @media screen and (max-width: $break-small) {
+  @include screen-sm-max {
     display: flex;
     flex-direction: column;
     // width: 96%;
@@ -29,25 +29,29 @@
     &--hidden {
       filter: blur(5px);
     }
-    &-box{
+
+    &-box {
       display: flex;
       flex-wrap: wrap;
     }
   }
-  &__secret_item{
+
+  &__secret_item {
     width: 33.33333%;
     padding: 3px;
   }
-  &__secret_word{
+
+  &__secret_word {
     height: 50px;
     line-height: 50px;
-    background: #F7F7FF;
-    color: #5D61FF;
+    background: #f7f7ff;
+    color: #5d61ff;
     border-radius: 5px;
     text-align: center;
     font-weight: bold;
     font-size: 16px;
   }
+
   &__secret-blocker {
     position: absolute;
     top: 0;

@@ -4,7 +4,6 @@
 @import 'end-of-flow/index';
 @import 'metametrics-opt-in/index';
 
-
 .first-time-flow {
   width: 100%;
   max-width: 755px;
@@ -14,8 +13,9 @@
   // padding: 15px;
   &__wrapper {
     flex: 1;
-    @media screen and (min-width: $break-large) {
-      // max-width: 742px;
+
+    @include screen-sm-min {
+      max-width: 742px;
       display: flex;
       flex-direction: column;
       width: 100%;
@@ -25,7 +25,7 @@
     .app-header__metafox-logo {
       margin-bottom: 40px;
 
-      @media screen and (max-width: $break-small) {
+      @include screen-sm-max {
         margin-bottom: 0;
       }
     }
@@ -39,10 +39,10 @@
 
   &__create-back {
     // margin-bottom: 16px;
-    display: flex ;
+    display: flex;
     height: 44px;
     align-items: center;
-    justify-content: space-between
+    justify-content: space-between;
   }
 
   &__header {
@@ -53,12 +53,13 @@
   }
 
   &__input {
-    &.MuiFormControl-root{
+    &.MuiFormControl-root {
       max-width: 100%;
       display: block;
     }
   }
-  &__back{
+
+  &__back {
     padding-left: 15px;
   }
 
@@ -66,18 +67,20 @@
     margin-bottom: 24px;
     color: var(--color-text-default);
 
-    @media screen and (max-width: $break-small) {
+    @include screen-sm-max {
       @include H6;
 
       margin-bottom: 16px;
     }
   }
-  .phraseTips{
+
+  .phraseTips {
     margin-bottom: 10px;
     font-size: 12px;
     color: #cbcbcb;
   }
-  &__text-block1{
+
+  &__text-block1 {
     line-height: 16px;
     color: #666;
     font-size: 12px;
@@ -105,6 +108,7 @@
     justify-content: center;
     align-items: center;
     border-radius: 3px;
+
     &:hover {
       border: 1.5px solid var(--color-primary-alternative);
     }
@@ -113,9 +117,11 @@
       color: white;
     }
   }
-  &__checked{
-    background-color: #5D61FF;
+
+  &__checked {
+    background-color: #5d61ff;
   }
+
   &__checkbox-label {
     // @include H4;
     color: var(--color-text-alternative);
@@ -126,35 +132,41 @@
   &__link-text {
     color: var(--color-primary-default);
   }
-  &__form-box{
+
+  &__form-box {
     padding: 15px;
   }
-  &__confirm__main{
-    padding:0 15px;
+
+  &__confirm__main {
+    padding: 0 15px;
   }
 }
-.first-time-flow__input .MuiInput-root{
+
+.first-time-flow__input .MuiInput-root {
   background: var(--color-background-default);
-  border-color:var(--color-border-muted);
+  border-color: var(--color-border-muted);
 }
+
 .first-time-flow__wrapper.intro {
-  @media screen and (min-width: $break-large) {
+  padding: 0 20px;
+
+  @include screen-sm-min {
     max-width: 1010px;
   }
+}
 
-  @media screen and (max-width: 1010px) {
-    padding: 0 20px;
-  }
+.phrase-content {
+  padding: 0 15px;
 }
-.phrase-content{
-  padding:0 15px;
-}
-.first-time-flow .MuiFormControl-root{
+
+.first-time-flow .MuiFormControl-root {
   display: block;
 }
-.import-account__selector-label{
+
+.import-account__selector-label {
   padding: 30px 0;
 }
-.first-time-flow__textarea{
+
+.first-time-flow__textarea {
   width: 100%;
 }

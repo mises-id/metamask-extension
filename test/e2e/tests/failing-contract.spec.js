@@ -1,7 +1,9 @@
 const { strict: assert } = require('assert');
 const { convertToHexValue, withFixtures } = require('../helpers');
+const { SMART_CONTRACTS } = require('../seeder/smart-contracts');
 
 describe('Failing contract interaction ', function () {
+  const smartContract = SMART_CONTRACTS.FAILING;
   const ganacheOptions = {
     hardfork: 'london',
     accounts: [
@@ -16,56 +18,27 @@ describe('Failing contract interaction ', function () {
     await withFixtures(
       {
         dapp: true,
-        fixtures: 'imported-account',
+        fixtures: 'connected-state',
         ganacheOptions,
+        smartContract,
         title: this.test.title,
       },
-      async ({ driver }) => {
+      async ({ driver, contractRegistry }) => {
+        const contractAddress = await contractRegistry.getContractAddress(
+          smartContract,
+        );
         await driver.navigate();
         await driver.fill('#password', 'correct horse battery staple');
         await driver.press('#password', driver.Key.ENTER);
 
-        // connects the dapp
-        await driver.openNewPage('http://127.0.0.1:8080/');
-        await driver.clickElement({ text: 'Connect', tag: 'button' });
-        await driver.waitUntilXWindowHandles(3);
+        await driver.openNewPage(
+          `http://127.0.0.1:8080/?contract=${contractAddress}`,
+        );
         let windowHandles = await driver.getAllWindowHandles();
         const extension = windowHandles[0];
-        const dapp = await driver.switchToWindowWithTitle(
-          'E2E Test Dapp',
-          windowHandles,
-        );
-        const popup = windowHandles.find(
-          (handle) => handle !== extension && handle !== dapp,
-        );
-        await driver.switchToWindow(popup);
-        await driver.clickElement({ text: 'Next', tag: 'button' });
-        await driver.clickElement({ text: 'Connect', tag: 'button' });
-        await driver.waitUntilXWindowHandles(2);
 
-        // deploy contract
-        await driver.switchToWindow(dapp);
-        await driver.clickElement('#deployFailingButton');
-        await driver.waitUntilXWindowHandles(3);
-        windowHandles = await driver.getAllWindowHandles();
-        await driver.switchToWindowWithTitle(
-          'MetaMask Notification',
-          windowHandles,
-        );
-        await driver.clickElement({ text: 'Confirm', tag: 'button' });
-        await driver.waitUntilXWindowHandles(2);
-        await driver.switchToWindow(extension);
-        await driver.clickElement('[data-testid="home__activity-tab"]');
-        await driver.waitForSelector(
-          '.transaction-list__completed-transactions .transaction-list-item:nth-of-type(1)',
-          { timeout: 10000 },
-        );
-        const completedTx = await driver.findElement('.list-item__title');
-        const completedTxText = await completedTx.getText();
-        assert.equal(completedTxText, 'Contract Deployment');
-
-        // calls failing contract method
-        await driver.switchToWindow(dapp);
+        // waits for deployed contract and calls failing contract method
+        await driver.findClickableElement('#deployButton');
         await driver.clickElement('#sendFailingButton');
         await driver.waitUntilXWindowHandles(3);
         windowHandles = await driver.getAllWindowHandles();
@@ -94,8 +67,9 @@ describe('Failing contract interaction ', function () {
         await driver.clickElement({ text: 'Confirm', tag: 'button' });
         await driver.waitUntilXWindowHandles(2);
         await driver.switchToWindow(extension);
+        await driver.clickElement({ text: 'Activity', tag: 'button' });
         await driver.waitForSelector(
-          '.transaction-list__completed-transactions .transaction-list-item:nth-of-type(2)',
+          '.transaction-list__completed-transactions .transaction-list-item:nth-of-type(1)',
           { timeout: 10000 },
         );
 

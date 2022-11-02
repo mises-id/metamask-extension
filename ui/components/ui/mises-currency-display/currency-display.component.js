@@ -63,6 +63,6 @@ CurrencyDisplay.propTypes = {
   prefixComponent: PropTypes.node,
   style: PropTypes.object,
   suffix: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   misesBalance: PropTypes.object,
 };

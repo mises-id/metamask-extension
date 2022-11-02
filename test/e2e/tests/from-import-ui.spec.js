@@ -6,9 +6,10 @@ const {
   regularDelayMs,
   largeDelayMs,
   completeImportSRPOnboardingFlow,
+  completeImportSRPOnboardingFlowWordByWord,
 } = require('../helpers');
 
-describe('Metamask Import UI', function () {
+describe('MetaMask Import UI', function () {
   it('Importing wallet using Secret Recovery Phrase', async function () {
     const ganacheOptions = {
       accounts: [
@@ -71,13 +72,14 @@ describe('Metamask Import UI', function () {
         await driver.press('#password', driver.Key.ENTER);
 
         // Create a new account
-        // switches to locakhost
+        // switches to localhost
+        await driver.delay(largeDelayMs);
         await driver.clickElement('.network-display');
         await driver.clickElement({ text: 'Localhost', tag: 'span' });
 
-        // choose Create Account from the account menu
+        // choose Create account from the account menu
         await driver.clickElement('.account-menu__icon');
-        await driver.clickElement({ text: 'Create Account', tag: 'div' });
+        await driver.clickElement({ text: 'Create account', tag: 'div' });
 
         // set account name
         await driver.fill('.new-account-create-form input', '2nd account');
@@ -126,6 +128,53 @@ describe('Metamask Import UI', function () {
     );
   });
 
+  it('Importing wallet using Secret Recovery Phrase with pasting word by word', async function () {
+    const ganacheOptions = {
+      accounts: [
+        {
+          secretKey:
+            '0x53CB0AB5226EEBF4D872113D98332C1555DC304443BEE1CF759D15798D3C55A9',
+          balance: convertToHexValue(25000000000000000000),
+        },
+      ],
+    };
+    const testSeedPhrase =
+      'forum vessel pink push lonely enact gentle tail admit parrot grunt dress';
+    const testPassword = 'correct horse battery staple';
+    const testAddress = '0x0Cc5261AB8cE458dc977078A3623E2BaDD27afD3';
+
+    await withFixtures(
+      {
+        fixtures: 'onboarding',
+        ganacheOptions,
+        title: this.test.title,
+        failOnConsoleError: false,
+      },
+      async ({ driver }) => {
+        await driver.navigate();
+
+        await completeImportSRPOnboardingFlowWordByWord(
+          driver,
+          testSeedPhrase,
+          testPassword,
+        );
+
+        // Show account information
+        await driver.clickElement(
+          '[data-testid="account-options-menu-button"]',
+        );
+        await driver.clickElement(
+          '[data-testid="account-options-menu__account-details"]',
+        );
+        await driver.findVisibleElement('.qr-code__wrapper');
+        // shows the correct account address
+        const address = await driver.findElement('.qr-code__address');
+
+        assert.equal(await address.getText(), testAddress);
+      },
+    );
+  });
+
   it('Import Account using private key', async function () {
     const ganacheOptions = {
       accounts: [
@@ -153,9 +202,9 @@ describe('Metamask Import UI', function () {
         await driver.press('#password', driver.Key.ENTER);
 
         // Imports an account with private key
-        // choose Create Account from the account menu
+        // choose Create account from the account menu
         await driver.clickElement('.account-menu__icon');
-        await driver.clickElement({ text: 'Import Account', tag: 'div' });
+        await driver.clickElement({ text: 'Import account', tag: 'div' });
 
         // enter private key',
         await driver.fill('#private-key-box', testPrivateKey1);
@@ -182,8 +231,8 @@ describe('Metamask Import UI', function () {
         assert.equal(await importedLabel.getText(), 'IMPORTED');
 
         // Imports and removes an account
-        // choose Create Account from the account menu
-        await driver.clickElement({ text: 'Import Account', tag: 'div' });
+        // choose Create account from the account menu
+        await driver.clickElement({ text: 'Import account', tag: 'div' });
         // enter private key
         await driver.fill('#private-key-box', testPrivateKey2);
         await driver.clickElement({ text: 'Import', tag: 'button' });
@@ -257,7 +306,7 @@ describe('Metamask Import UI', function () {
 
         // Imports an account with JSON file
         await driver.clickElement('.account-menu__icon');
-        await driver.clickElement({ text: 'Import Account', tag: 'div' });
+        await driver.clickElement({ text: 'Import account', tag: 'div' });
 
         await driver.clickElement('.new-account-import-form__select');
         await driver.clickElement({ text: 'JSON File', tag: 'option' });
@@ -330,7 +379,7 @@ describe('Metamask Import UI', function () {
 
         // choose Import Account from the account menu
         await driver.clickElement('.account-menu__icon');
-        await driver.clickElement({ text: 'Import Account', tag: 'div' });
+        await driver.clickElement({ text: 'Import account', tag: 'div' });
 
         // enter private key',
         await driver.fill('#private-key-box', testPrivateKey);
@@ -367,10 +416,10 @@ describe('Metamask Import UI', function () {
         await driver.fill('#password', 'correct horse battery staple');
         await driver.press('#password', driver.Key.ENTER);
 
-        // choose Connect Hardware Wallet from the account menu
+        // choose Connect hardware wallet from the account menu
         await driver.clickElement('.account-menu__icon');
         await driver.clickElement({
-          text: 'Connect Hardware Wallet',
+          text: 'Connect hardware wallet',
           tag: 'div',
         });
         await driver.delay(regularDelayMs);

@@ -27,7 +27,6 @@ export default function UserPreferencedCurrencyDisplay({
       )
     );
   }, [currency, showEthLogo, ethLogoHeight]);
-
   return (
     <CurrencyDisplay
       {...restProps}
@@ -43,7 +42,7 @@ UserPreferencedCurrencyDisplay.propTypes = {
   className: PropTypes.string,
   'data-testid': PropTypes.string,
   prefix: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   numberOfDecimals: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   hideLabel: PropTypes.bool,
   hideTitle: PropTypes.bool,

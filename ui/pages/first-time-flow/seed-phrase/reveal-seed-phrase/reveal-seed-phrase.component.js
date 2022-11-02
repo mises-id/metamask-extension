@@ -10,8 +10,12 @@ import {
   DEFAULT_ROUTE,
   // INITIALIZE_SEED_PHRASE_INTRO_ROUTE,
 } from '../../../../helpers/constants/routes';
-import { exportAsFile } from '../../../../helpers/utils/util';
-import { returnToOnboardingInitiator } from '../../onboarding-initiator-util';
+import {
+  EVENT,
+  EVENT_NAMES,
+} from '../../../../../shared/constants/metametrics';
+import { returnToOnboardingInitiatorTab } from '../../onboarding-initiator-util';
+import { exportAsFile } from '../../../../helpers/utils/export-utils';
 import MetafoxLogo from '../../../../components/ui/metafox-logo';
 
 export default class RevealSeedPhrase extends PureComponent {
@@ -44,12 +48,9 @@ export default class RevealSeedPhrase extends PureComponent {
     const { history } = this.props;
 
     this.context.trackEvent({
-      category: 'Onboarding',
-      event: 'Advance to Verify',
-      properties: {
-        action: 'Seed Phrase Setup',
-        legacy_event: true,
-      },
+      category: EVENT.CATEGORIES.ONBOARDING,
+      event: EVENT_NAMES.SRP_TO_CONFIRM_BACKUP,
+      properties: {},
     });
 
     if (!isShowingSeedPhrase) {
@@ -67,19 +68,33 @@ export default class RevealSeedPhrase extends PureComponent {
       onboardingInitiator,
     } = this.props;
 
-    this.context.trackEvent({
-      category: 'Onboarding',
-      event: 'Remind me later',
-      properties: {
-        action: 'Seed Phrase Setup',
-        legacy_event: true,
-      },
-    });
-
-    await Promise.all([setCompletedOnboarding(), setSeedPhraseBackedUp(false)]);
+    await Promise.all([setCompletedOnboarding(), setSeedPhraseBackedUp(false)])
+      .then(() => {
+        this.context.trackEvent({
+          category: EVENT.CATEGORIES.ONBOARDING,
+          event: EVENT_NAMES.WALLET_CREATED,
+          properties: {
+            account_type: EVENT.ACCOUNT_TYPES.DEFAULT,
+            is_backup_skipped: true,
+          },
+        });
+      })
+      .catch((error) => {
+        console.error(error.message);
+        this.context.trackEvent({
+          category: EVENT.CATEGORIES.ONBOARDING,
+          event: EVENT_NAMES.WALLET_SETUP_FAILED,
+          properties: {
+            account_type: EVENT.ACCOUNT_TYPES.DEFAULT,
+            is_backup_skipped: true,
+            reason: 'Seed Phrase Creation Error',
+            error: error.message,
+          },
+        });
+      });
 
     if (onboardingInitiator) {
-      await returnToOnboardingInitiator(onboardingInitiator);
+      await returnToOnboardingInitiatorTab(onboardingInitiator);
     }
     history.replace(DEFAULT_ROUTE);
   };
@@ -112,12 +127,9 @@ export default class RevealSeedPhrase extends PureComponent {
             className="reveal-seed-phrase__secret-blocker"
             onClick={() => {
               this.context.trackEvent({
-                category: 'Onboarding',
-                event: 'Revealed Words',
-                properties: {
-                  action: 'Seed Phrase Setup',
-                  legacy_event: true,
-                },
+                category: EVENT.CATEGORIES.ONBOARDING,
+                event: EVENT_NAMES.KEY_EXPORT_REVEALED,
+                properties: {},
               });
               this.setState({ isShowingSeedPhrase: true });
             }}
@@ -142,7 +154,7 @@ export default class RevealSeedPhrase extends PureComponent {
     const { history, onboardingInitiator } = this.props;
 
     return (
-      <div className="reveal-seed-phrase">
+      <div className="reveal-seed-phrase" data-testid="reveal-seed-phrase">
         <div className="first-time-flow__create-back">
           <a
             className="first-time-flow__back"

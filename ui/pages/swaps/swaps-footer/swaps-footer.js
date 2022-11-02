@@ -38,7 +38,8 @@ export default function SwapsFooter({
           footerButtonClassName={classnames(
             'swaps-footer__custom-page-container-footer-button-class',
             {
-              'swaps-footer__custom-page-container-footer-button-class--single': hideCancel,
+              'swaps-footer__custom-page-container-footer-button-class--single':
+                hideCancel,
             },
           )}
           disabled={disabled}
@@ -48,7 +49,9 @@ export default function SwapsFooter({
         <div
           className="swaps-footer__bottom-text"
           onClick={() =>
-            global.platform.openTab({ url: 'https://www.mises.site/termsofuse' })
+            global.platform.openTab({
+              url: 'https://www.mises.site/termsofuse',
+            })
           }
         >
           {t('termsOfService')}

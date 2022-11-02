@@ -5,10 +5,16 @@ import Identicon from '../../../../components/ui/identicon';
 import TokenBalance from '../../../../components/ui/token-balance';
 import TokenListDisplay from '../../../../components/app/token-list-display';
 import UserPreferencedCurrencyDisplay from '../../../../components/app/user-preferenced-currency-display';
-import { ERC20, ERC721, PRIMARY } from '../../../../helpers/constants/common';
+import { PRIMARY } from '../../../../helpers/constants/common';
 import { isEqualCaseInsensitive } from '../../../../../shared/modules/string-utils';
-import { ASSET_TYPES } from '../../../../../shared/constants/transaction';
+import { EVENT } from '../../../../../shared/constants/metametrics';
+import {
+  ASSET_TYPES,
+  ERC20,
+  ERC721,
+} from '../../../../../shared/constants/transaction';
 import MisesUserPreferencedCurrencyDisplay from '../../../../components/app/mises-user-preferenced-currency-display';
+
 export default class SendAssetRow extends Component {
   static propTypes = {
     tokens: PropTypes.arrayOf(
@@ -88,7 +94,7 @@ export default class SendAssetRow extends Component {
       },
       () => {
         this.context.trackEvent({
-          category: 'Transactions',
+          category: EVENT.CATEGORIES.TRANSACTIONS,
           event: 'User clicks "Assets" dropdown',
           properties: {
             action: 'Send Screen',
@@ -179,12 +185,8 @@ export default class SendAssetRow extends Component {
 
   renderNativeCurrency(insideDropdown = false) {
     const { t } = this.context;
-    const {
-      accounts,
-      selectedAddress,
-      nativeCurrency,
-      nativeCurrencyImage,
-    } = this.props;
+    const { accounts, selectedAddress, nativeCurrency, nativeCurrencyImage } =
+      this.props;
     const address = accounts[selectedAddress];
     const balanceValue = address ? address.balance : '';
     let misesBalance = null;

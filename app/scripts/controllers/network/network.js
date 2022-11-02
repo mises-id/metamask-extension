@@ -13,17 +13,13 @@ import SafeEventEmitter from 'safe-event-emitter';
 import browser from 'webextension-polyfill';
 import {
   INFURA_PROVIDER_TYPES,
-  NETWORK_TYPE_RPC,
-  NETWORK_TYPE_TO_ID_MAP,
+  BUILT_IN_NETWORKS,
   INFURA_BLOCKED_KEY,
-  MISESNETWORK,
-  MISES_DISPLAY_NAME,
+  TEST_NETWORK_TICKER_MAP,
+  CHAIN_IDS,
+  NETWORK_TYPES,
   MISES_RPC_URL,
-  ETH_SYMBOL,
-  MAINNET,
-  MAINNET_CHAIN_ID,
 } from '../../../../shared/constants/network';
-import { SECOND } from '../../../../shared/constants/time';
 import {
   isPrefixedFormattedHexString,
   isSafeChainId,
@@ -34,20 +30,29 @@ import createMetamaskMiddleware from './createMetamaskMiddleware';
 import createInfuraClient from './createInfuraClient';
 import createJsonRpcClient from './createJsonRpcClient';
 
-// const env = process.env.METAMASK_ENV;
-const fetchWithTimeout = getFetchWithTimeout(SECOND * 30);
-let globalOptions = {};
+const env = process.env.METAMASK_ENV;
+const fetchWithTimeout = getFetchWithTimeout();
+
 let defaultProviderConfigOpts;
 if (process.env.IN_TEST) {
   defaultProviderConfigOpts = {
-    type: NETWORK_TYPE_RPC,
+    type: NETWORK_TYPES.RPC,
     rpcUrl: 'http://localhost:8545',
     chainId: '0x539',
     nickname: 'Localhost 8545',
-    ticker: ETH_SYMBOL,
+    ticker: 'ETH',
+  };
+} else if (process.env.METAMASK_DEBUG || env === 'test') {
+  defaultProviderConfigOpts = {
+    type: NETWORK_TYPES.GOERLI,
+    chainId: CHAIN_IDS.GOERLI,
+    ticker: TEST_NETWORK_TICKER_MAP.GOERLI,
   };
 } else {
-  defaultProviderConfigOpts = { type: MAINNET, chainId: MAINNET_CHAIN_ID };
+  defaultProviderConfigOpts = {
+    type: NETWORK_TYPES.MAINNET,
+    chainId: CHAIN_IDS.MAINNET,
+  };
 }
 
 const defaultProviderConfig = {
@@ -160,7 +165,6 @@ export default class NetworkController extends EventEmitter {
     // provider and block tracker proxies - because the network changes
     this._providerProxy = null;
     this._blockTrackerProxy = null;
-    globalOptions = opts;
     this.on(NETWORK_EVENTS.NETWORK_DID_CHANGE, this.lookupNetwork);
     this.isUnlocked = opts.isUnlocked;
   }
@@ -230,7 +234,7 @@ export default class NetworkController extends EventEmitter {
   /**
    * Method to return the latest block for the current network
    *
-   * @returns {Object} Block header
+   * @returns {object} Block header
    */
   getLatestBlock() {
     return new Promise((resolve, reject) => {
@@ -357,7 +361,12 @@ export default class NetworkController extends EventEmitter {
 
   getCurrentChainId() {
     const { type, chainId: configChainId } = this.getProviderConfig();
-    return NETWORK_TYPE_TO_ID_MAP[type]?.chainId || configChainId;
+    return BUILT_IN_NETWORKS[type]?.chainId || configChainId;
+  }
+
+  getCurrentRpcUrl() {
+    const { rpcUrl } = this.getProviderConfig();
+    return rpcUrl;
   }
 
   setRpcTarget(rpcUrl, chainId, ticker = 'ETH', nickname = '', rpcPrefs) {
@@ -370,7 +379,7 @@ export default class NetworkController extends EventEmitter {
       `Invalid chain ID "${chainId}": numerical value greater than max safe value.`,
     );
     this.setProviderConfig({
-      type: NETWORK_TYPE_RPC,
+      type: NETWORK_TYPES.RPC,
       rpcUrl,
       chainId,
       ticker,
@@ -381,25 +390,25 @@ export default class NetworkController extends EventEmitter {
 
   async setProviderType(type) {
     // console.log(type);
-    const mises = type === 'MisesTestNet';
+    const mises = type === NETWORK_TYPES.MISES;
     if (!mises) {
       assert.notStrictEqual(
         type,
-        NETWORK_TYPE_RPC,
-        `NetworkController - cannot call "setProviderType" with type "${NETWORK_TYPE_RPC}". Use "setRpcTarget"`,
+        NETWORK_TYPES.RPC,
+        `NetworkController - cannot call "setProviderType" with type "${NETWORK_TYPES.RPC}". Use "setRpcTarget"`,
       );
       assert.ok(
         INFURA_PROVIDER_TYPES.includes(type),
         `Unknown Infura provider type "${type}".`,
       );
     }
-    const { chainId } = NETWORK_TYPE_TO_ID_MAP[type];
+    const { chainId, ticker } = BUILT_IN_NETWORKS[type];
     this.setProviderConfig({
       type,
       rpcUrl: mises ? MISES_RPC_URL : '',
       chainId,
-      ticker: mises ? 'MIS' : 'ETH',
-      nickname: mises ? MISES_DISPLAY_NAME : '',
+      ticker: ticker ?? 'ETH',
+      nickname: '',
     });
   }
 
@@ -430,7 +439,9 @@ export default class NetworkController extends EventEmitter {
 
   getNetworkIdentifier() {
     const provider = this.providerStore.getState();
-    return provider.type === NETWORK_TYPE_RPC ? provider.rpcUrl : provider.type;
+    return provider.type === NETWORK_TYPES.RPC
+      ? provider.rpcUrl
+      : provider.type;
   }
 
   //
@@ -495,9 +506,9 @@ export default class NetworkController extends EventEmitter {
     if (isInfura) {
       this._configureInfuraProvider(type, this._infuraProjectId);
       // url-based rpc endpoints
-    } else if (type === NETWORK_TYPE_RPC) {
+    } else if (type === NETWORK_TYPES.RPC) {
       this._configureStandardProvider(rpcUrl, chainId);
-    } else if (type === MISESNETWORK) {
+    } else if (type === NETWORK_TYPES.MISES) {
       const blockTracker = new DummyBlockTracker();
       const networkMiddleware = createMisesMiddleware();
       this._setNetworkClient({ networkMiddleware, blockTracker });
@@ -553,9 +564,5 @@ export default class NetworkController extends EventEmitter {
     // set new provider and blockTracker
     this._provider = provider;
     this._blockTracker = blockTracker;
-  }
-
-  mergeNetworkOpts(options) {
-    globalOptions = { ...globalOptions, ...options };
   }
 }

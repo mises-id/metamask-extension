@@ -6,7 +6,11 @@ import {
   INITIALIZE_END_OF_FLOW_ROUTE,
   INITIALIZE_SEED_PHRASE_ROUTE,
 } from '../../../../helpers/constants/routes';
-import { exportAsFile } from '../../../../helpers/utils/util';
+import {
+  EVENT,
+  EVENT_NAMES,
+} from '../../../../../shared/constants/metametrics';
+import { exportAsFile } from '../../../../helpers/utils/export-utils';
 import MetafoxLogo from '../../../../components/ui/metafox-logo';
 import DraggableSeed from './draggable-seed.component';
 
@@ -97,16 +101,16 @@ export default class ConfirmSeedPhrase extends PureComponent {
     }
 
     try {
-      this.context.trackEvent({
-        category: 'Onboarding',
-        event: 'Verify Complete',
-        properties: {
-          action: 'Seed Phrase Setup',
-          legacy_event: true,
-        },
-      });
-
       setSeedPhraseBackedUp(true).then(async () => {
+        this.context.trackEvent({
+          category: EVENT.CATEGORIES.ONBOARDING,
+          event: EVENT_NAMES.WALLET_CREATED,
+          properties: {
+            account_type: EVENT.ACCOUNT_TYPES.DEFAULT,
+            is_backup_skipped: false,
+          },
+        });
+
         initializeThreeBox();
         await setMisesAccountUserInfo();
         setCompletedOnboarding();
@@ -114,6 +118,16 @@ export default class ConfirmSeedPhrase extends PureComponent {
       });
     } catch (error) {
       console.error(error.message);
+      this.context.trackEvent({
+        category: EVENT.CATEGORIES.ONBOARDING,
+        event: EVENT_NAMES.WALLET_SETUP_FAILED,
+        properties: {
+          account_type: EVENT.ACCOUNT_TYPES.DEFAULT,
+          is_backup_skipped: false,
+          reason: 'Seed Phrase Creation Error',
+          error: error.message,
+        },
+      });
     }
   };
 
@@ -147,15 +161,12 @@ export default class ConfirmSeedPhrase extends PureComponent {
   render() {
     const { t } = this.context;
     const { history } = this.props;
-    const {
-      selectedSeedIndices,
-      sortedSeedWords,
-      draggingSeedIndex,
-    } = this.state;
+    const { selectedSeedIndices, sortedSeedWords, draggingSeedIndex } =
+      this.state;
 
     return (
-      <div className="confirm-seed-phrase">
-        <div className="first-time-flow__create-back">
+      <div className="confirm-seed-phrase" data-testid="confirm-seed-phrase">
+        <div className="confirm-seed-phrase__back-button">
           <a
             className="first-time-flow__back"
             onClick={(e) => {
@@ -232,11 +243,8 @@ export default class ConfirmSeedPhrase extends PureComponent {
   }
 
   renderSelectedSeeds() {
-    const {
-      sortedSeedWords,
-      selectedSeedIndices,
-      draggingSeedIndex,
-    } = this.state;
+    const { sortedSeedWords, selectedSeedIndices, draggingSeedIndex } =
+      this.state;
     return EMPTY_SEEDS.map((_, index) => {
       const seedIndex = selectedSeedIndices[index];
       const word = sortedSeedWords[seedIndex];

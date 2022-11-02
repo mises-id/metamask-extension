@@ -9,6 +9,7 @@ import Identicon from '../../components/ui/identicon';
 import Tooltip from '../../components/ui/tooltip';
 import Copy from '../../components/ui/icon/copy-icon.component';
 
+import { EVENT } from '../../../shared/constants/metametrics';
 import { SECOND } from '../../../shared/constants/time';
 import { conversionUtil } from '../../../shared/modules/conversion.utils';
 
@@ -34,6 +35,7 @@ export default class ConfirmDecryptMessage extends Component {
     requesterAddress: PropTypes.string,
     txData: PropTypes.object,
     subjectMetadata: PropTypes.object,
+    nativeCurrency: PropTypes.string.isRequired,
   };
 
   state = {
@@ -45,7 +47,7 @@ export default class ConfirmDecryptMessage extends Component {
   copyMessage = () => {
     copyToClipboard(this.state.rawMessage);
     this.context.trackEvent({
-      category: 'Messages',
+      category: EVENT.CATEGORIES.MESSAGES,
       event: 'Copy',
       properties: {
         action: 'Decrypt Message Copy',
@@ -90,13 +92,13 @@ export default class ConfirmDecryptMessage extends Component {
   };
 
   renderBalance = () => {
-    const { conversionRate } = this.props;
+    const { conversionRate, nativeCurrency } = this.props;
     const {
       fromAccount: { balance },
     } = this.state;
     const { t } = this.context;
 
-    const balanceInEther = conversionUtil(balance, {
+    const nativeCurrencyBalance = conversionUtil(balance, {
       fromNumericBase: 'hex',
       toNumericBase: 'dec',
       fromDenomination: 'WEI',
@@ -110,7 +112,7 @@ export default class ConfirmDecryptMessage extends Component {
           {`${t('balance')}:`}
         </div>
         <div className="request-decrypt-message__balance-value">
-          {`${balanceInEther} ETH`}
+          {`${nativeCurrencyBalance} ${nativeCurrency}`}
         </div>
       </div>
     );
@@ -218,7 +220,8 @@ export default class ConfirmDecryptMessage extends Component {
           <div
             className={classnames({
               'request-decrypt-message__message-copy': true,
-              'request-decrypt-message__message-copy--pressed': copyToClipboardPressed,
+              'request-decrypt-message__message-copy--pressed':
+                copyToClipboardPressed,
             })}
             onClick={() => this.copyMessage()}
             onMouseDown={() => this.setState({ copyToClipboardPressed: true })}
@@ -263,7 +266,7 @@ export default class ConfirmDecryptMessage extends Component {
           onClick={async (event) => {
             await cancelDecryptMessage(txData, event);
             trackEvent({
-              category: 'Messages',
+              category: EVENT.CATEGORIES.MESSAGES,
               event: 'Cancel',
               properties: {
                 action: 'Decrypt Message Request',
@@ -283,7 +286,7 @@ export default class ConfirmDecryptMessage extends Component {
           onClick={async (event) => {
             await decryptMessage(txData, event);
             trackEvent({
-              category: 'Messages',
+              category: EVENT.CATEGORIES.MESSAGES,
               event: 'Confirm',
               properties: {
                 action: 'Decrypt Message Request',

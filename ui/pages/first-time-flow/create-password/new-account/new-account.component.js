@@ -7,6 +7,10 @@ import {
 } from '../../../../helpers/constants/routes';
 import TextField from '../../../../components/ui/text-field';
 import MetaFoxLogo from '../../../../components/ui/metafox-logo';
+import {
+  EVENT,
+  EVENT_NAMES,
+} from '../../../../../shared/constants/metametrics';
 
 export default class NewAccount extends PureComponent {
   static contextTypes = {
@@ -28,12 +32,8 @@ export default class NewAccount extends PureComponent {
   };
 
   isValid() {
-    const {
-      password,
-      confirmPassword,
-      passwordError,
-      confirmPasswordError,
-    } = this.state;
+    const { password, confirmPassword, passwordError, confirmPasswordError } =
+      this.state;
 
     if (!password || !confirmPassword || password !== confirmPassword) {
       return false;
@@ -102,12 +102,9 @@ export default class NewAccount extends PureComponent {
       await onSubmit(password);
 
       this.context.trackEvent({
-        category: 'Onboarding',
-        event: 'Submit Password',
-        properties: {
-          action: 'Create Password',
-          legacy_event: true,
-        },
+        category: EVENT.CATEGORIES.ONBOARDING,
+        event: EVENT_NAMES.ACCOUNT_PASSWORD_CREATED,
+        properties: {},
       });
 
       history.push(INITIALIZE_SEED_PHRASE_ROUTE);
@@ -117,15 +114,6 @@ export default class NewAccount extends PureComponent {
   };
 
   toggleTermsCheck = () => {
-    this.context.trackEvent({
-      category: 'Onboarding',
-      event: 'Check ToS',
-      properties: {
-        action: 'Create Password',
-        legacy_event: true,
-      },
-    });
-
     this.setState((prevState) => ({
       termsChecked: !prevState.termsChecked,
     }));
@@ -152,16 +140,9 @@ export default class NewAccount extends PureComponent {
         <div className="first-time-flow__create-back">
           <a
             className="first-time-flow__back"
+            data-testid="onboarding-back-button"
             onClick={(e) => {
               e.preventDefault();
-              this.context.trackEvent({
-                category: 'Onboarding',
-                event: 'Go Back from Onboarding Create',
-                properties: {
-                  action: 'Create Password',
-                  legacy_event: true,
-                },
-              });
               this.props.history.push(INITIALIZE_SELECT_ACTION_ROUTE);
             }}
             href="#"
@@ -177,40 +158,43 @@ export default class NewAccount extends PureComponent {
           </a>
           <MetaFoxLogo />
         </div>
-        <div className="first-time-flow__form-box">
-          <div className="first-time-flow__header">{t('createPassword')}</div>
-          <form className="first-time-flow__form" onSubmit={this.handleCreate}>
-            <TextField
-              id="create-password"
-              label={t('newPassword')}
-              type="password"
-              className="first-time-flow__input"
-              value={password}
-              onChange={(event) =>
-                this.handlePasswordChange(event.target.value)
-              }
-              error={passwordError}
-              autoFocus
-              autoComplete="new-password"
-              margin="normal"
-              fullWidth
-              largeLabel
-            />
-            <TextField
-              id="confirm-password"
-              label={t('confirmPassword')}
-              type="password"
-              className="first-time-flow__input"
-              value={confirmPassword}
-              onChange={(event) =>
-                this.handleConfirmPasswordChange(event.target.value)
-              }
-              error={confirmPasswordError}
-              autoComplete="confirm-password"
-              margin="normal"
-              fullWidth
-              largeLabel
-            />
+        <div className="first-time-flow__header">{t('createPassword')}</div>
+        <form className="first-time-flow__form" onSubmit={this.handleCreate}>
+          <TextField
+            data-testid="create-password"
+            id="create-password"
+            label={t('newPassword')}
+            type="password"
+            className="first-time-flow__input"
+            value={password}
+            onChange={(event) => this.handlePasswordChange(event.target.value)}
+            error={passwordError}
+            autoFocus
+            autoComplete="new-password"
+            margin="normal"
+            fullWidth
+            largeLabel
+          />
+          <TextField
+            data-testid="confirm-password"
+            id="confirm-password"
+            label={t('confirmPassword')}
+            type="password"
+            className="first-time-flow__input"
+            value={confirmPassword}
+            onChange={(event) =>
+              this.handleConfirmPasswordChange(event.target.value)
+            }
+            error={confirmPasswordError}
+            autoComplete="confirm-password"
+            margin="normal"
+            fullWidth
+            largeLabel
+          />
+          <div
+            className="first-time-flow__checkbox-container"
+            onClick={this.toggleTermsCheck}
+          >
             <div
               className="first-time-flow__checkbox-container"
               onClick={this.toggleTermsCheck}
@@ -254,8 +238,8 @@ export default class NewAccount extends PureComponent {
             >
               {t('create')}
             </Button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     );
   }

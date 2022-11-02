@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import Identicon from '../../../ui/identicon';
 import { ellipsify } from '../../../../pages/send/send.utils';
 import { getProvider } from '../../../../selectors';
-import { MISESNETWORK } from '../../../../../shared/constants/network';
+import { NETWORK_TYPES } from '../../../../../shared/constants/network';
 import { shortenAddress } from '../../../../helpers/utils/util';
 import { MISES_TRUNCATED_ADDRESS_START_CHARS } from '../../../../../shared/constants/labels';
 
@@ -20,7 +20,7 @@ export default function RecipientGroup({
   selectedAddress,
 }) {
   const provider = useSelector(getProvider);
-  const isMises = provider.type === MISESNETWORK;
+  const isMises = provider.type === NETWORK_TYPES.MISES;
   if (!items || !items.length) {
     return null;
   }
@@ -44,10 +44,8 @@ export default function RecipientGroup({
               address,
               selectedAddress,
             ),
-            'send__select-recipient-wrapper__group-item--selected': addressesEqual(
-              address,
-              selectedAddress,
-            ),
+            'send__select-recipient-wrapper__group-item--selected':
+              addressesEqual(address, selectedAddress),
           })}
         >
           <Identicon address={address} diameter={28} />

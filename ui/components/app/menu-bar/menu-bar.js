@@ -6,6 +6,7 @@ import SelectedAccount from '../selected-account';
 import ConnectedStatusIndicator from '../connected-status-indicator';
 import { getEnvironmentType } from '../../../../app/scripts/lib/util';
 import { ENVIRONMENT_TYPE_POPUP } from '../../../../shared/constants/app';
+import { EVENT, EVENT_NAMES } from '../../../../shared/constants/metametrics';
 import { CONNECTED_ACCOUNTS_ROUTE } from '../../../helpers/constants/routes';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import { getOriginOfCurrentTab } from '../../../selectors';
@@ -16,10 +17,8 @@ export default function MenuBar() {
   const t = useI18nContext();
   const trackEvent = useContext(MetaMetricsContext);
   const history = useHistory();
-  const [
-    accountOptionsButtonElement,
-    setAccountOptionsButtonElement,
-  ] = useState(null);
+  const [accountOptionsButtonElement, setAccountOptionsButtonElement] =
+    useState(null);
   const [accountOptionsMenuOpen, setAccountOptionsMenuOpen] = useState(false);
   const origin = useSelector(getOriginOfCurrentTab);
 
@@ -45,11 +44,10 @@ export default function MenuBar() {
         title={t('accountOptions')}
         onClick={() => {
           trackEvent({
-            event: 'Opened Account Options',
-            category: 'Navigation',
+            event: EVENT_NAMES.NAV_ACCOUNT_MENU_OPENED,
+            category: EVENT.CATEGORIES.NAVIGATION,
             properties: {
-              action: 'Home',
-              legacy_event: true,
+              location: 'Home',
             },
           });
           setAccountOptionsMenuOpen(true);

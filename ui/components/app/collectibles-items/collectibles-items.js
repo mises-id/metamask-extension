@@ -12,11 +12,8 @@ import {
   FLEX_DIRECTION,
   ALIGN_ITEMS,
   DISPLAY,
-  BLOCK_SIZES,
   FLEX_WRAP,
 } from '../../../helpers/constants/design-system';
-import { ENVIRONMENT_TYPE_POPUP } from '../../../../shared/constants/app';
-import { getEnvironmentType } from '../../../../app/scripts/lib/util';
 import {
   getCurrentChainId,
   getIpfsGateway,
@@ -27,11 +24,8 @@ import { getAssetImageURL } from '../../../helpers/utils/util';
 import { updateCollectibleDropDownState } from '../../../store/actions';
 import { usePrevious } from '../../../hooks/usePrevious';
 import { getCollectiblesDropdownState } from '../../../ducks/metamask/metamask';
-
-const width =
-  getEnvironmentType() === ENVIRONMENT_TYPE_POPUP
-    ? BLOCK_SIZES.ONE_THIRD
-    : BLOCK_SIZES.ONE_SIXTH;
+import { useI18nContext } from '../../../hooks/useI18nContext';
+import CollectibleDefaultImage from '../collectible-default-image';
 
 const PREVIOUSLY_OWNED_KEY = 'previouslyOwned';
 
@@ -45,6 +39,7 @@ export default function CollectiblesItems({
   const previousCollectionKeys = usePrevious(collectionsKeys);
   const selectedAddress = useSelector(getSelectedAddress);
   const chainId = useSelector(getCurrentChainId);
+  const t = useI18nContext();
 
   useEffect(() => {
     if (
@@ -100,7 +95,7 @@ export default function CollectiblesItems({
     }
     return (
       <div className="collectibles-items__collection-image-alt">
-        {collectionName[0]}
+        {collectionName?.[0]?.toUpperCase() ?? null}
       </div>
     );
   };
@@ -114,9 +109,8 @@ export default function CollectiblesItems({
       [key]: !isExpanded,
     };
 
-    collectiblesDropdownState[selectedAddress][
-      chainId
-    ] = newCurrentAccountState;
+    collectiblesDropdownState[selectedAddress][chainId] =
+      newCurrentAccountState;
 
     dispatch(updateCollectibleDropDownState(collectiblesDropdownState));
   };
@@ -161,13 +155,20 @@ export default function CollectiblesItems({
               <Typography
                 color={COLORS.TEXT_DEFAULT}
                 variant={TYPOGRAPHY.H5}
-                margin={[0, 0, 0, 2]}
+                marginTop={0}
+                marginLeft={2}
               >
-                {`${collectionName} (${collectibles.length})`}
+                {`${collectionName ?? t('unknownCollection')} (${
+                  collectibles.length
+                })`}
               </Typography>
             </Box>
             <Box alignItems={ALIGN_ITEMS.FLEX_END}>
-              <i className={`fa fa-chevron-${isExpanded ? 'down' : 'right'}`} />
+              <i
+                className={`collectibles-items__collection__icon-chevron fa fa-chevron-${
+                  isExpanded ? 'down' : 'right'
+                }`}
+              />
             </Box>
           </Box>
         </button>
@@ -180,28 +181,38 @@ export default function CollectiblesItems({
             className="collectibles-items__collection-item-wrapper-grid"
           >
             {collectibles.map((collectible, i) => {
-              const { image, address, tokenId, backgroundColor } = collectible;
+              const { image, address, tokenId, backgroundColor, name } =
+                collectible;
               const collectibleImage = getAssetImageURL(image, ipfsGateway);
+              const handleImageClick = () =>
+                history.push(`${ASSET_ROUTE}/${address}/${tokenId}`);
+
               return (
-                <div
+                <Box
                   key={`collectible-${i}`}
                   className="collectibles-items__collection-item-wrapper"
                 >
-                  <div
-                    className="collectibles-items__collection-item"
-                    style={{
-                      backgroundColor,
-                    }}
-                  >
-                    <img
-                      onClick={() =>
-                        history.push(`${ASSET_ROUTE}/${address}/${tokenId}`)
-                      }
-                      className="collectibles-items__collection-item-image"
-                      src={collectibleImage}
+                  {collectibleImage ? (
+                    <div
+                      className="collectibles-items__collection__item"
+                      style={{
+                        backgroundColor,
+                      }}
+                    >
+                      <img
+                        onClick={handleImageClick}
+                        className="collectibles-items__collection-item-image"
+                        src={collectibleImage}
+                      />
+                    </div>
+                  ) : (
+                    <CollectibleDefaultImage
+                      name={name}
+                      tokenId={tokenId}
+                      handleImageClick={handleImageClick}
                     />
-                  </div>
-                </div>
+                  )}
+                </Box>
               );
             })}
           </Box>
@@ -212,14 +223,17 @@ export default function CollectiblesItems({
 
   return (
     <div className="collectibles-items">
-      <Box padding={[6, 4]} flexDirection={FLEX_DIRECTION.COLUMN}>
+      <Box
+        paddingTop={6}
+        paddingBottom={6}
+        paddingLeft={4}
+        paddingRight={4}
+        flexDirection={FLEX_DIRECTION.COLUMN}
+      >
         <>
           {collectionsKeys.map((key) => {
-            const {
-              collectibles,
-              collectionName,
-              collectionImage,
-            } = collections[key];
+            const { collectibles, collectionName, collectionImage } =
+              collections[key];
 
             return renderCollection({
               collectibles,

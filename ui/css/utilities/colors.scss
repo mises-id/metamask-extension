@@ -2,15 +2,15 @@
   // Accents
   // Everything below this line is part of the new color system
   --mainnet: #29b6af;
-  --MisesTestNet: #5c65f6;
-  --ropsten: #ff4a8d;
-  --kovan: #9064ff;
-  --rinkeby: #f6c343;
+  --mises: #5c65f6;
   --goerli: #3099f2;
-  --localhost: #29b6af;
+  --sepolia: #cfb5f0;
+  --localhost: #bbc0c5;
   --flask-purple: #8b45b6;
+  --inherit: inherit;
+  --transparent: transparent;
 
   // DO NOT CHANGE
   // Required for the QR reader to work properly
-  --qr-code-white-background: '#fff';
+  --qr-code-white-background: #fff;
 }
