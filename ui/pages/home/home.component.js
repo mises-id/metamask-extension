@@ -51,9 +51,9 @@ import {
 import ZENDESK_URLS from '../../helpers/constants/zendesk-url';
 import Tooltip from '../../components/ui/tooltip';
 import { NETWORK_TYPES } from '../../../shared/constants/network';
-///: BEGIN:ONLY_INCLUDE_IN(main)
-import { SUPPORT_LINK } from '../../../shared/lib/ui-utils';
-///: END:ONLY_INCLUDE_IN
+// ///: BEGIN:ONLY_INCLUDE_IN(main)
+// import { SUPPORT_LINK } from '../../../shared/lib/ui-utils';
+// ///: END:ONLY_INCLUDE_IN
 ///: BEGIN:ONLY_INCLUDE_IN(beta)
 import BetaHomeFooter from './beta/beta-home-footer.component';
 ///: END:ONLY_INCLUDE_IN
@@ -801,7 +801,7 @@ export default class Home extends PureComponent {
               </Tab>
             </Tabs>
             <div className="home__support">
-              {
+              {/* {
                 ///: BEGIN:ONLY_INCLUDE_IN(main)
                 t('needHelp', [
                   <a
@@ -830,7 +830,7 @@ export default class Home extends PureComponent {
                   </a>,
                 ])
                 ///: END:ONLY_INCLUDE_IN
-              }
+              } */}
               {
                 ///: BEGIN:ONLY_INCLUDE_IN(beta)
                 <BetaHomeFooter />

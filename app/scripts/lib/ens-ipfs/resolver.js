@@ -21,6 +21,7 @@ export default async function resolveEnsToIpfsContentId({ provider, name }) {
   // lookup resolver
   const resolverLookupResult = await Registry.resolver(hash);
   const resolverAddress = resolverLookupResult[0];
+  console.log(resolverLookupResult, resolverAddress);
   if (hexValueIsEmpty(resolverAddress)) {
     throw new Error(`EnsIpfsResolver - no resolver found for name "${name}"`);
   }

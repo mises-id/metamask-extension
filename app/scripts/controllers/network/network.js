@@ -15,7 +15,7 @@ import {
   INFURA_PROVIDER_TYPES,
   BUILT_IN_NETWORKS,
   INFURA_BLOCKED_KEY,
-  TEST_NETWORK_TICKER_MAP,
+  // TEST_NETWORK_TICKER_MAP,
   CHAIN_IDS,
   NETWORK_TYPES,
   MISES_RPC_URL,
@@ -30,7 +30,7 @@ import createMetamaskMiddleware from './createMetamaskMiddleware';
 import createInfuraClient from './createInfuraClient';
 import createJsonRpcClient from './createJsonRpcClient';
 
-const env = process.env.METAMASK_ENV;
+// const env = process.env.METAMASK_ENV;
 const fetchWithTimeout = getFetchWithTimeout();
 
 let defaultProviderConfigOpts;
@@ -41,12 +41,6 @@ if (process.env.IN_TEST) {
     chainId: '0x539',
     nickname: 'Localhost 8545',
     ticker: 'ETH',
-  };
-} else if (process.env.METAMASK_DEBUG || env === 'test') {
-  defaultProviderConfigOpts = {
-    type: NETWORK_TYPES.GOERLI,
-    chainId: CHAIN_IDS.GOERLI,
-    ticker: TEST_NETWORK_TICKER_MAP.GOERLI,
   };
 } else {
   defaultProviderConfigOpts = {

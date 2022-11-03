@@ -158,8 +158,12 @@ export default class NewAccount extends PureComponent {
           </a>
           <MetaFoxLogo />
         </div>
-        <div className="first-time-flow__header">{t('createPassword')}</div>
-        <form className="first-time-flow__form" onSubmit={this.handleCreate}>
+        <form
+          className="first-time-flow__form"
+          onSubmit={this.handleCreate}
+          style={{ padding: 20 }}
+        >
+          <div className="first-time-flow__header">{t('createPassword')}</div>
           <TextField
             data-testid="create-password"
             id="create-password"
@@ -196,49 +200,44 @@ export default class NewAccount extends PureComponent {
             onClick={this.toggleTermsCheck}
           >
             <div
-              className="first-time-flow__checkbox-container"
-              onClick={this.toggleTermsCheck}
+              className={`first-time-flow__checkbox ${
+                termsChecked ? 'first-time-flow__checked' : ''
+              }`}
+              tabIndex="0"
+              role="checkbox"
+              onKeyPress={this.onTermsKeyPress}
+              aria-checked={termsChecked}
+              aria-labelledby="ftf-chk1-label"
             >
-              <div
-                className={`first-time-flow__checkbox ${
-                  termsChecked ? 'first-time-flow__checked' : ''
-                }`}
-                tabIndex="0"
-                role="checkbox"
-                onKeyPress={this.onTermsKeyPress}
-                aria-checked={termsChecked}
-                aria-labelledby="ftf-chk1-label"
-              >
-                {termsChecked ? <i className="fa fa-check" /> : null}
-              </div>
-              <span
-                id="ftf-chk1-label"
-                className="first-time-flow__checkbox-label"
-              >
-                {t('acceptTermsOfUse', [
-                  <a
-                    onClick={(e) => e.stopPropagation()}
-                    key="first-time-flow__link-text"
-                    href="https://www.mises.site/termsofuse"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="first-time-flow__link-text">
-                      {t('terms')}
-                    </span>
-                  </a>,
-                ])}
-              </span>
+              {termsChecked ? <i className="fa fa-check" /> : null}
             </div>
-            <Button
-              type="primary"
-              className="first-time-flow__button"
-              disabled={!this.isValid() || !termsChecked}
-              onClick={this.handleCreate}
+            <span
+              id="ftf-chk1-label"
+              className="first-time-flow__checkbox-label"
             >
-              {t('create')}
-            </Button>
+              {t('acceptTermsOfUse', [
+                <a
+                  onClick={(e) => e.stopPropagation()}
+                  key="first-time-flow__link-text"
+                  href="https://www.mises.site/termsofuse"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="first-time-flow__link-text">
+                    {t('terms')}
+                  </span>
+                </a>,
+              ])}
+            </span>
           </div>
+          <Button
+            type="primary"
+            className="first-time-flow__button"
+            disabled={!this.isValid() || !termsChecked}
+            onClick={this.handleCreate}
+          >
+            {t('create')}
+          </Button>
         </form>
       </div>
     );

@@ -16,21 +16,32 @@ export default function setupEnsIpfsResolver({
 }) {
   // install listener
   const urlPatterns = supportedTopLevelDomains.map((tld) => `*://*.${tld}/*`);
-  browser.webRequest.onErrorOccurred.addListener(webRequestDidFail, {
-    urls: urlPatterns,
-    types: ['main_frame'],
-  });
+  console.log(provider, getCurrentChainId, getIpfsGateway);
+  browser.webRequest.onErrorOccurred.addListener(
+    (e) => {
+      webRequestDidFail(e);
+      console.log('addListener');
+    },
+    {
+      urls: urlPatterns,
+      types: ['main_frame'],
+    },
+  );
 
   // return api object
   return {
     // uninstall listener
     remove() {
-      browser.webRequest.onErrorOccurred.removeListener(webRequestDidFail);
+      browser.webRequest.onErrorOccurred.removeListener((e) => {
+        webRequestDidFail(e);
+        console.log('removeListener');
+      });
     },
   };
 
   async function webRequestDidFail(details) {
     const { tabId, url } = details;
+    console.log(details, '111');
     // ignore requests that are not associated with tabs
     // only attempt ENS resolution on mainnet
     if (tabId === -1 || getCurrentChainId() !== '0x1') {
