@@ -168,30 +168,34 @@ export default class NetworkController extends EventEmitter {
    *
    * @returns {Error} app is active.
    */
+  async isActiveTab() {
+    const [tab] = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    if (tab) {
+      return tab.url.indexOf(`chrome-extension://${browser.runtime.id}`) > -1;
+    }
+    return false;
+  }
+
   isBackground() {
     return new Promise((resolve) => {
       if (!browser.misesPrivate) {
-        browser.tabs
-          .query({ active: true, currentWindow: true })
-          .then((res) => {
-            if (Array.isArray(res) && res.length > 0) {
-              const [tab] = res;
-              resolve(
-                tab.url.indexOf(
-                  'chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn',
-                ) === -1,
-              );
-            } else {
-              resolve(false);
-            }
-            console.log(res);
-          });
+        const isActiveTabState = this.isActiveTab();
+        resolve(isActiveTabState);
       }
       isMobile()
         ? browser.misesPrivate &&
-          browser.misesPrivate.getAppState((res) => {
-            console.log(res, 'getAppState');
-            resolve(res !== browser.misesPrivate.AppState.RUNNING);
+          browser.misesPrivate.getAppState(async (res) => {
+            const isActiveTabState = await this.isActiveTab();
+            console.log(res, 'getAppState', isActiveTabState);
+            resolve(
+              !(
+                res === browser.misesPrivate.AppState.RUNNING &&
+                isActiveTabState
+              ),
+            );
           })
         : resolve(false);
     });

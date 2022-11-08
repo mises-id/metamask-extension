@@ -4427,6 +4427,7 @@ export default class MetamaskController extends EventEmitter {
     if (trezorKeyring) {
       trezorKeyring.dispose();
     }
+    return this.keyringController.setLocked();
   }
 
   /**

@@ -1562,10 +1562,6 @@ export function updateMetamaskState(newState) {
     ) {
       newState.nativeCurrency = newState.provider.ticker;
     }
-    dispatch({
-      type: actionConstants.UPDATE_METAMASK_STATE,
-      value: newState,
-    });
   };
 }
 
@@ -1597,7 +1593,7 @@ export function lockMetamask() {
         dispatch(updateMetamaskState(newState));
         dispatch(hideLoadingIndication());
         dispatch({ type: actionConstants.LOCK_METAMASK });
-        submitRequestToBackground('lockAll');
+        // submitRequestToBackground('lockAll');
       })
       .catch(() => {
         dispatch(hideLoadingIndication());
