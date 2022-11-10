@@ -41,7 +41,7 @@ export default class SendAmountRow extends Component {
     } = this.props;
     if (provider.type === MISESNETWORK) {
       const { gasWanted } = misesGas;
-      const { misesBalance = { amount: 0 } } = accounts[selectedAddress];
+      const { misesBalance = { amount: 0 } } = accounts[selectedAddress] || {};
       updateMisesSendAmount({
         amount: newAmount,
         gasWanted,

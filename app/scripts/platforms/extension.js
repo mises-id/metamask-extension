@@ -130,16 +130,13 @@ export default class ExtensionPlatform {
       return this.getActiveTabs().then((windowDetails) => {
         console.log(windowDetails, id, 'closeCurrentWindow');
         if (windowDetails.length && id) {
-          const closeId = windowDetails[0].id;
-          browser.tabs.get(closeId).then((e) => {
-            if (e && closeId === id) {
-              try {
-                browser.tabs.remove(id);
-              } catch (error) {
-                console.log(error);
-              }
-            }
-          });
+          try {
+            const [windowDetail] = windowDetails;
+            browser.tabs.remove(windowDetail.id);
+            console.log('close success', windowDetail.id);
+          } catch (error) {
+            console.log(error);
+          }
         }
       });
     }

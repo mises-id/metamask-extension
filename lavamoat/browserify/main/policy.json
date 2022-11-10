@@ -72,6 +72,73 @@
         "document.createElement": true
       }
     },
+    "@emotion/cache": {
+      "globals": {
+        "console.error": true,
+        "document.head": true,
+        "document.querySelectorAll": true
+      },
+      "packages": {
+        "@emotion/memoize": true,
+        "@emotion/sheet": true,
+        "@emotion/weak-memoize": true,
+        "stylis": true
+      }
+    },
+    "@emotion/is-prop-valid": {
+      "packages": {
+        "@emotion/memoize": true
+      }
+    },
+    "@emotion/react": {
+      "globals": {
+        "HTMLElement": true,
+        "console.error": true,
+        "console.warn": true,
+        "document.querySelector": true,
+        "jest": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "@emotion/cache": true,
+        "@emotion/serialize": true,
+        "@emotion/utils": true,
+        "@emotion/weak-memoize": true,
+        "hoist-non-react-statics": true,
+        "react": true
+      }
+    },
+    "@emotion/serialize": {
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "@emotion/hash": true,
+        "@emotion/memoize": true,
+        "@emotion/unitless": true
+      }
+    },
+    "@emotion/sheet": {
+      "globals": {
+        "console.error": true,
+        "document.createElement": true,
+        "document.createTextNode": true,
+        "document.styleSheets": true
+      }
+    },
+    "@emotion/styled": {
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "@emotion/is-prop-valid": true,
+        "@emotion/react": true,
+        "@emotion/serialize": true,
+        "@emotion/utils": true,
+        "react": true
+      }
+    },
     "@ensdomains/content-hash": {
       "globals": {
         "console.warn": true
@@ -682,6 +749,7 @@
     },
     "@metamask/post-message-stream": {
       "globals": {
+        "WorkerGlobalScope": true,
         "addEventListener": true,
         "location.origin": true,
         "onmessage": "write",
@@ -689,6 +757,7 @@
         "removeEventListener": true
       },
       "packages": {
+        "@metamask/utils": true,
         "readable-stream": true
       }
     },
@@ -759,6 +828,116 @@
         "readable-web-to-node-stream": true,
         "semver": true,
         "tar-stream": true
+      }
+    },
+    "@metamask/utils": {
+      "packages": {
+        "fast-deep-equal": true
+      }
+    },
+    "@mui/base": {
+      "globals": {
+        "CSS": true,
+        "ResizeObserver": true,
+        "clearInterval": true,
+        "console.error": true,
+        "console.warn": true,
+        "document.activeElement": true,
+        "document.body": true,
+        "performance.now": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "@mui/utils": true,
+        "@popperjs/core": true,
+        "clsx": true,
+        "prop-types": true,
+        "react": true,
+        "react-dom": true,
+        "react-is": true
+      }
+    },
+    "@mui/icons-material": {
+      "packages": {
+        "@babel/runtime": true,
+        "@mui/material": true,
+        "react": true
+      }
+    },
+    "@mui/material": {
+      "globals": {
+        "console.error": true,
+        "console.warn": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "@mui/base": true,
+        "@mui/system": true,
+        "@mui/utils": true,
+        "clsx": true,
+        "prop-types": true,
+        "react": true
+      }
+    },
+    "@mui/private-theming": {
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "@mui/utils": true,
+        "prop-types": true,
+        "react": true
+      }
+    },
+    "@mui/styled-engine": {
+      "globals": {
+        "console.error": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "@emotion/cache": true,
+        "@emotion/react": true,
+        "@emotion/styled": true,
+        "prop-types": true,
+        "react": true
+      }
+    },
+    "@mui/system": {
+      "globals": {
+        "clearTimeout": true,
+        "console.error": true,
+        "document": true,
+        "getComputedStyle": true,
+        "localStorage": true,
+        "matchMedia": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "@mui/private-theming": true,
+        "@mui/styled-engine": true,
+        "@mui/utils": true,
+        "clsx": true,
+        "prop-types": true,
+        "react": true
+      }
+    },
+    "@mui/utils": {
+      "globals": {
+        "clearTimeout": true,
+        "console.error": true,
+        "document": true,
+        "innerWidth": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@babel/runtime": true,
+        "prop-types": true,
+        "react": true,
+        "react-is": true
       }
     },
     "@ngraveio/bc-ur": {
@@ -1321,8 +1500,8 @@
         "buffer": true,
         "pako": true,
         "process": true,
-        "stream-browserify": true,
         "readable-stream": true,
+        "stream-browserify": true,
         "util": true
       }
     },
@@ -1658,6 +1837,12 @@
         "err-code": true,
         "interface-datastore": true,
         "multibase": true
+      }
+    },
+    "date-fns": {
+      "globals": {
+        "Intl.DateTimeFormat": true,
+        "console": true
       }
     },
     "debounce": {
@@ -3829,6 +4014,11 @@
         "process": true
       }
     },
+    "node-interval-tree": {
+      "packages": {
+        "shallowequal": true
+      }
+    },
     "nodeify": {
       "globals": {
         "setTimeout": true
@@ -4949,6 +5139,11 @@
     "strip-hex-prefix": {
       "packages": {
         "is-hex-prefixed": true
+      }
+    },
+    "stylis": {
+      "globals": {
+        "define": true
       }
     },
     "superagent": {

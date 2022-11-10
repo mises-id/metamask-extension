@@ -113,10 +113,10 @@ function TransactionListItemInner({
   const shouldShowSpeedUp = mises ? false : shouldShow;
   const group = useTransactionDisplayData(transactionGroup);
   if (mises) {
-    if (transactionGroup.title == '') {
+    if (transactionGroup.title === '') {
       transactionGroup.title = t(transactionGroup.category);
     }
-    if (transactionGroup.subtitle == '') {
+    if (transactionGroup.subtitle === '') {
       transactionGroup.subtitle = t(misesIn ? 'fromAddress' : 'toAddress', [
         shortenAddress(
           misesIn
@@ -126,7 +126,6 @@ function TransactionListItemInner({
         ),
       ]);
     }
-
   }
   const {
     title,
