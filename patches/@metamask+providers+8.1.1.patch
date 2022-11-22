@@ -1,12 +1,21 @@
 diff --git a/node_modules/@metamask/providers/dist/initializeInpageProvider.js b/node_modules/@metamask/providers/dist/initializeInpageProvider.js
-index abee97b..56d60f2 100644
+index abee97b..11d4e66 100644
 --- a/node_modules/@metamask/providers/dist/initializeInpageProvider.js
 +++ b/node_modules/@metamask/providers/dist/initializeInpageProvider.js
-@@ -46,6 +46,7 @@ exports.initializeProvider = initializeProvider;
+@@ -45,8 +45,13 @@ exports.initializeProvider = initializeProvider;
+  * @param providerInstance - The provider instance.
   */
  function setGlobalProvider(providerInstance) {
-     window.ethereum = providerInstance;
+-    window.ethereum = providerInstance;
+-    window.dispatchEvent(new Event('ethereum#initialized'));
 +    window.misesEthereum = providerInstance;
-     window.dispatchEvent(new Event('ethereum#initialized'));
++    try {
++        window.ethereum = providerInstance;
++        window.dispatchEvent(new Event('ethereum#initialized'));
++    } catch (error) {
++        console.log(error)
++    }
  }
  exports.setGlobalProvider = setGlobalProvider;
+ //# sourceMappingURL=initializeInpageProvider.js.map
+\ No newline at end of file
