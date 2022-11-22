@@ -142,7 +142,10 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  closeNotificationPopup: () => closeNotificationPopup(),
+  closeNotificationPopup: async () => {
+    const _popupId = await getPopupId();
+    closeNotificationPopup(_popupId);
+  },
   turnThreeBoxSyncingOn: () => dispatch(turnThreeBoxSyncingOn()),
   setupThreeBox: () => {
     dispatch(getThreeBoxLastUpdated()).then((lastUpdated) => {

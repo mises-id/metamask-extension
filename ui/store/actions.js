@@ -3377,9 +3377,9 @@ export function getGasFeeTimeEstimate(maxPriorityFeePerGas, maxFeePerGas) {
   );
 }
 
-export async function closeNotificationPopup() {
+export async function closeNotificationPopup(popid) {
   await promisifiedBackground.markNotificationPopupAsAutomaticallyClosed();
-  global.platform.closeCurrentWindow();
+  global.platform.closeCurrentWindow(popid);
 }
 
 // MetaMetrics

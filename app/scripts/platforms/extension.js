@@ -15,7 +15,6 @@ export default class ExtensionPlatform {
   }
 
   openTab(options) {
-    console.log('openTab', browser.tabs);
     return new Promise((resolve, reject) => {
       browser.tabs.create(options).then((newTab) => {
         const error = checkForError();
@@ -127,18 +126,11 @@ export default class ExtensionPlatform {
 
   closeCurrentWindow(id) {
     if (isMobile()) {
-      return this.getActiveTabs().then((windowDetails) => {
-        console.log(windowDetails, id, 'closeCurrentWindow');
-        if (windowDetails.length && id) {
-          try {
-            const [windowDetail] = windowDetails;
-            browser.tabs.remove(windowDetail.id);
-            console.log('close success', windowDetail.id);
-          } catch (error) {
-            console.log(error);
-          }
-        }
-      });
+      console.log('closeCurrentWindow====', id);
+      if (id) {
+        return browser.tabs.remove(id);
+      }
+      return Promise.resolve();
     }
     return browser.windows.getCurrent().then((windowDetails) => {
       return browser.windows.remove(windowDetails.id);

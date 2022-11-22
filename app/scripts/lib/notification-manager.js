@@ -90,14 +90,6 @@ export default class NotificationManager extends EventEmitter {
     if (this._popupId) {
       await this.platform.closeCurrentWindow(this._popupId);
     }
-    if (this._openerTab) {
-      console.log('closePopup');
-      const hasTab = await this.platform.getTab(this._openerTab.id);
-      if (hasTab) {
-        await this.platform.switchToTab(this._openerTab.id);
-        this._openerTab = undefined;
-      }
-    }
   }
 
   _onWindowClosed(windowId) {
@@ -109,6 +101,11 @@ export default class NotificationManager extends EventEmitter {
         automaticallyClosed: this._popupAutomaticallyClosed,
       });
       this._popupAutomaticallyClosed = undefined;
+
+      if (this._openerTab) {
+        this.platform.switchToTab(this._openerTab.id);
+        this._openerTab = undefined;
+      }
     }
   }
 

@@ -2003,6 +2003,7 @@ export default class MetamaskController extends EventEmitter {
       // clear unapproved transactions
       this.txController.txStateManager.clearUnapprovedTxs();
       // // reset mises account and set password
+
       this.lockAll();
       // create new vault
       const vault = await keyringController.createNewVaultAndRestore(
@@ -2012,13 +2013,12 @@ export default class MetamaskController extends EventEmitter {
 
       const ethQuery = new EthQuery(this.provider);
       accounts = await keyringController.getAccounts();
-      console.log(accounts, 'accounts');
-      // lastBalance = await this.getBalance(
-      //   accounts[accounts.length - 1],
-      //   ethQuery,
-      // );
-      lastBalance = '0x0';
-      console.log(lastBalance, 'const ethQuery = new EthQuery(this.provider);');
+
+      lastBalance = await this.getBalance(
+        accounts[accounts.length - 1],
+        ethQuery,
+      );
+
       const primaryKeyring = keyringController.getKeyringsByType(
         'HD Key Tree',
       )[0];
@@ -2032,10 +2032,6 @@ export default class MetamaskController extends EventEmitter {
         lastBalance = await this.getBalance(
           accounts[accounts.length - 1],
           ethQuery,
-        );
-        console.log(
-          lastBalance,
-          'await keyringController.addNewAccount(primaryKeyring)',
         );
       }
 
@@ -4320,7 +4316,7 @@ export default class MetamaskController extends EventEmitter {
   }
 
   getPopupId() {
-    return this.opts.notificationManager.setExtensionTab;
+    return this.opts.notificationManager._popupId;
   }
 
   // get selectAddress Collectibles

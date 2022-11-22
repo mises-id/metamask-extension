@@ -199,10 +199,10 @@ export default class Home extends PureComponent {
     } = this.props;
     const _popupId = await getPopupId();
     if (
-      (isNotification &&
-        totalUnapprovedCount === 0 &&
-        !isSigningQRHardwareTransaction) ||
-      (!isNotification && isPopup && totalUnapprovedCount === 0 && _popupId)
+      isPopup &&
+      totalUnapprovedCount === 0 &&
+      !isSigningQRHardwareTransaction &&
+      _popupId
     ) {
       closePopUp('home');
     } else if (!isNotification && showAwaitingSwapScreen) {
