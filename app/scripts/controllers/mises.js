@@ -127,7 +127,6 @@ export default class MisesController {
   async getMisesUserInfo(address) {
     const { accountList } = this.store.getState();
     const activeUser = this.getActive();
-    console.log(activeUser, 'activeUser');
     const misesId = activeUser ? activeUser.address() : '';
     let account = accountList.find((val) => val.address === address) || null;
     const nonce = new Date().getTime();
@@ -189,7 +188,6 @@ export default class MisesController {
       misesBalance: account.misesBalance,
       token: account.token,
     };
-    console.log(userinfo, 'method:getMisesUserInfo');
     return userinfo;
   }
 

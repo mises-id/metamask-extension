@@ -27,15 +27,7 @@ export default class FirstTimeFlowSwitch extends PureComponent {
       seedPhraseBackedUp,
       clearKeyrings,
     } = this.props;
-    console.log(
-      {
-        completedOnboarding,
-        isInitialized,
-        isUnlocked,
-        seedPhraseBackedUp,
-      },
-      'wewe',
-    );
+
     if (completedOnboarding) {
       return <Redirect to={{ pathname: DEFAULT_ROUTE }} />;
     }

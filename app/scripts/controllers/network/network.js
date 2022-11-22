@@ -71,7 +71,7 @@ export const NETWORK_EVENTS = {
 
 function createMisesMiddleware() {
   return (req, res, next, end) => {
-    console.log('MisesMiddleware', 'req', req);
+    // console.log('MisesMiddleware', 'req', req);
     if (req.method === 'eth_chainId') {
       res.result = -1;
       return end();
@@ -186,7 +186,6 @@ export default class NetworkController extends EventEmitter {
             } else {
               resolve(false);
             }
-            console.log(res);
           });
       }
       isMobile()
